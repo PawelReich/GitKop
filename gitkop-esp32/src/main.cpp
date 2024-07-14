@@ -2,16 +2,38 @@
 
 const int PULSE = 21;
 
-void setup() {
-  pinMode(PULSE, OUTPUT);
+hw_timer_t* pulseTimer = NULL;
+
+uint pulseTickCtr = 0;
+void IRAM_ATTR pulseTimerFired()
+{
+  if (pulseTickCtr == 0)
+  {
+    digitalWrite(PULSE, HIGH);
+  }
+  else
+  {
+    digitalWrite(PULSE, LOW);
+  }
+  
+  pulseTickCtr++;
+  
+  if (pulseTickCtr == 2 * 10)
+    pulseTickCtr = 0;
 }
 
-void loop() {
-  digitalWrite(PULSE, LOW);
-  // delayMicroseconds(400);
-  delay(10);
-  // delayMicroseconds(500);
-  digitalWrite(PULSE, HIGH);
-  delayMicroseconds(300);
-  // delay(5);
+
+void setup()
+{
+  pinMode(PULSE, OUTPUT);
+
+  pulseTimer = timerBegin(0, 40000, true);
+  timerAttachInterrupt(pulseTimer, &pulseTimerFired, true);
+  timerAlarmWrite(pulseTimer, 1, true);
+  timerAlarmEnable(pulseTimer);
+}
+
+void loop()
+{
+
 }
