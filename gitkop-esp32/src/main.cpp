@@ -1,11 +1,9 @@
 #include <Arduino.h>
-#include "driver/adc.h"
+#include "esp_adc/adc_continuous.h"
 
-const int PULSE_OUT = 21;
+const int PULSE_OUT = 1;
 
-const int PULSE_IN = 1;
-
-hw_timer_t* pulseTimer = NULL;
+const int PULSE_IN = 2;
 
 uint pulseTickCtr = 0;
 unsigned long usc = 0;
@@ -36,29 +34,31 @@ void setup()
     // Pulse generator setup
     pinMode(PULSE_OUT, OUTPUT);
 
-    pulseTimer = timerBegin(0, 40000, true);
-    timerAttachInterrupt(pulseTimer, &pulseTimerFired, true);
-    timerAlarmWrite(pulseTimer, 1, true);
-    timerAlarmEnable(pulseTimer);
+    // pulseTimer = timerBegin(2000);
+
+    // timerAlarm(pulseTimer, 1, true, 0);
+
+    // timerAttachInterrupt(pulseTimer, &pulseTimerFired);
+    // timerStart(pulseTimer);
 
     // Pulse input setup
-    Serial.begin(250000);
 
-    analogContinuousSetWidth(12);
-    analogContinuousSetAtten(ADC_11db);
-    analogContinuous({PULSE_IN}, adc_pins_count, CONVERSIONS_PER_PIN, 20000, &adcComplete);
+    // analogContinuousSetWidth(12);
+    // analogContinuousSetAtten(ADC_11db);
+    // analogContinuous({PULSE_IN}, adc_pins_count, CONVERSIONS_PER_PIN, 20000, &adcComplete);
 
     // Start ADC Continuous conversions
-    analogContinuousStart();
+    // analogContinuousStart();
 
 }
 
 void loop()
 {
-    if (usc + 10 > micros()) {
-        ulong microsbefore = micros();
-        float volt = analogRead(PULSE_IN);
-        ulong microsafter = micros();
-        Serial.println(volt + String(" ") +  " " + (microsafter - microsbefore));
-    }
+  digitalWrite(PULSE_OUT, LOW);
+  // delayMicroseconds(400);
+  delay(10);
+  // delayMicroseconds(500);
+  digitalWrite(PULSE_OUT, HIGH);
+  delayMicroseconds(300);
+  // delay(5);
 }
