@@ -7,8 +7,9 @@
 \linespread{1.3} %interlinia 1.5
 \setlength{\parindent}{1.25cm}
 
+\RequirePackage[T1]{fontenc}
 \RequirePackage[utf8]{inputenc}
-\RequirePackage[main=polish,english]{babel}
+\RequirePackage[main=polish,english, provide=*]{babel}
 \RequirePackage{pdfpages}
 
 \RequirePackage[titletoc,title]{appendix}
