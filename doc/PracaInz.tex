@@ -1,0 +1,51 @@
+\documentclass{pginz}
+
+%%%%%%%%%Miejsce na dodatkowe pakiety%%%%%%%%%%%%%
+\usepackage{subcaption}
+
+\begin{document}
+
+%\includepdf[page={1}]{StronaTytulowa.pdf}
+%\includepdf[page={1}]{Oswiadczenie.pdf}
+\setcounter{page}{3}
+
+\include{Abstrakt_pl}
+\include{Abstrakt_en}
+
+\tableofcontents
+\addcontentsline{toc}{chapter}{Spis treści}
+
+\include{Symbole}
+\include{Oznaczenia}
+
+\include{Rozdzial1}
+\include{Rozdzial2}
+% tu będą kolejne rozdziały
+
+\listoffigures
+\addcontentsline{toc}{chapter}{Spis rysunków}
+\listoftables
+\addcontentsline{toc}{chapter}{Spis tabel}
+
+
+%alternatywa - bibtex
+\begin{thebibliography}{20}
+\bibitem{Kow02} Kowalski J., Kabacki J.: Simulation of Network Systems in Education, Proceedings of the XXIV Autumn International Colloquium Advanced Simulation of Systems. ASIS 2002, 9-11 września 2002, Ostrava, Czechy, s. 213-218.
+\bibitem{Nat12}	National Center of Biotechnology Information, http://www.ncbi.nlm.nih.gov (data dostępu 20.12.2012 r.).
+\bibitem{Now02}	Nowak K.: Dydaktyczny model łączenia sieci LAN za pomocą sieci rozległych. Projekt dyplomowy inżynierski. WETI PG, 2002.
+\bibitem{Bar04}	Barzykowski J. i inni: Współczesna metrologia – zagadnienia wybrane. WNT, Warszawa 2004, s. 575.
+\end{thebibliography}
+
+%*****************
+%wymagane dodatki:
+% Opis dyplomu
+% Zawartość płyty CD
+% Instrukcja dla projektanta
+% Instrukcja dla użytkownika
+\begin{appendices}
+%\include{AppA}
+%\include{AppB}
+\end{appendices}
+%*****************
+
+\end{document}
