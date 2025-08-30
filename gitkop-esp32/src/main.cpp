@@ -1,12 +1,10 @@
 #include <Arduino.h>
-#include "esp_adc/adc_continuous.h"
 
 const int PULSE_OUT = 1;
 
-const int PULSE_IN = 2;
+hw_timer_t* pulseTimer = NULL;
 
 uint pulseTickCtr = 0;
-unsigned long usc = 0;
 
 void IRAM_ATTR pulseTimerFired()
 {
@@ -14,51 +12,37 @@ void IRAM_ATTR pulseTimerFired()
     {
         digitalWrite(PULSE_OUT, HIGH);
     }
-    else
+
+    if (pulseTickCtr == 10 * 2)
     {
         digitalWrite(PULSE_OUT, LOW);
     }
 
     pulseTickCtr++;
 
-    if (pulseTickCtr == 2 * 10)
+    if (pulseTickCtr == 1 * 100)
     {
         pulseTickCtr = 0;
-        usc = micros();
     }
 
 }
 
+void timer_setup() {
+    pulseTimer = timerBegin(20000);
+    timerAlarm(pulseTimer, 1, true, 0);
+    timerAttachInterrupt(pulseTimer, &pulseTimerFired);
+    timerStart(pulseTimer);
+}
+
 void setup()
 {
+    Serial.begin(250000);
+
     // Pulse generator setup
     pinMode(PULSE_OUT, OUTPUT);
-
-    // pulseTimer = timerBegin(2000);
-
-    // timerAlarm(pulseTimer, 1, true, 0);
-
-    // timerAttachInterrupt(pulseTimer, &pulseTimerFired);
-    // timerStart(pulseTimer);
-
-    // Pulse input setup
-
-    // analogContinuousSetWidth(12);
-    // analogContinuousSetAtten(ADC_11db);
-    // analogContinuous({PULSE_IN}, adc_pins_count, CONVERSIONS_PER_PIN, 20000, &adcComplete);
-
-    // Start ADC Continuous conversions
-    // analogContinuousStart();
-
+    timer_setup();
 }
 
 void loop()
 {
-  digitalWrite(PULSE_OUT, LOW);
-  // delayMicroseconds(400);
-  delay(10);
-  // delayMicroseconds(500);
-  digitalWrite(PULSE_OUT, HIGH);
-  delayMicroseconds(300);
-  // delay(5);
 }
