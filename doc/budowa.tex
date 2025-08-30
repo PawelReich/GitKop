@@ -1,10 +1,89 @@
 \chapter{Budowa wykrywacza}
 
+\section{Zasilanie układu}
+Wykrywacz jest zasilany za pomocą napięcia +9V, otrzymywanego za pomocą urządzenia Powerbank posiadającego port USB-C wspierający protokół \textit{Power Delivery}. 
+
 \section{Generowanie sygnału}
 
 Wykrywacz generuje sygnał za pomocą układu ESP32, który za pomocą sprzętowego licznika wyzwala sygnał trwający $300 \mu s$  co $10 ms$.
 
-\begin{lstlisting}[lang=cpp]
+\subsection{Konfiguracja licznika sprzętowego}
 
+Licznik sprzętowy ESP32 skonfigurowany jest do generowania przerwania w częstotliwości $20 MHz$, co pozwala uzyskać dokładność tworzenia sygnału do $50\mu s$.
+
+\begin{lstlisting}[language=c++, caption={Fragment kodu odpowiedzialny za konfigurację licznika sprzętowego}]
+hw_timer* pulseTimer = NULL;
+void timer_setup() {
+    pulseTimer = timerBegin(2000);
+    timerAlarm(pulseTimer, 1, true, 0);
+    timerAttachInterrupt(pulseTimer, &pulseTimerFired);
+    timerStart(pulseTimer);
+}
 \end{lstlisting}
+
+\subsection{Zarządzanie stanem sygnału wyjściowego}
+Podczas pracy układu cyfrowego w funkcji przerwania sprawdzana jest wartość zmiennej inkrementowanej co każde wywołanie przerwania. Jeżeli licznik jest równy 0, wystawiany jest sygnał +3.3V na pin 1 (PULSE\_OUT) układu. Następnie w pożądanym momencie sygnał wyjściowy jest wygaszony, co pozwala na dynamiczną konfigurację długości impulsu wysyłanego do cewki.
+
+\begin{lstlisting}[language=c++, caption={Funkcja zarządzająca stanem sygnału wyjściowego}]
+void IRAM_ATTR pulseTimerFired()
+{
+    if (pulseTickCtr == 0)
+    {
+        digitalWrite(PULSE_OUT, HIGH);
+    }
+    else if (pulseTickCtr == 10)
+    {
+        digitalWrite(PULSE_OUT, LOW);
+    }
+
+    pulseTickCtr++;
+
+    if (pulseTickCtr == 2 * 100)
+    {
+        pulseTickCtr = 0;
+    }
+}
+\end{lstlisting}
+
+\section{Sekcja wzmocnienia sygnału cyfrowego i załączenia cewki}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width = 12cm]{tranzystory2.png}
+    \caption{Schemat sekcji}
+\end{figure}
+
+Generowany sygnał pulsu (\textit{PULSE\_IN}) jest wzmacniany przez dwa tranzystory bipolarne połączone szeregowo pozwalające na uzyskanie wystarczającego napięcia do wysterowania tranzystora MOSFET IRF740 $Q_3$.
+    
+\begin{figure}[H]
+    \centering
+    \includegraphics[width = 7.5cm, height = 7.5cm]{output_characteristics.png}
+    \caption{Charakterystyka wyjściowa tranzystora IRF740}
+\end{figure}
+
+\section{Układ cewki}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width = 7.5cm]{cewka_sch.png}
+    \caption{sch cewki}
+\end{figure}
+
+Cewka sterowana jest 
+
+\section{Wirtualna masa}
+
+W celu uzyskania pełnej odpowiedzi cewki zastosowana jest sztuczna masa wynosząca $\frac{1}{2}$ napięcia zasilania. Dzięki niej wzmacniacze operacyjne w sekcji wzmocnienia odpowiedzi mogą wzmocnić odpowiedź pracując wyłącznie z dodatnim napięciem, co omija konieczność generowania ujemnego napięcia upraszczając finalny schemat wykrywacza metalu.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width = 7.5cm]{vgnd.png}
+    \caption{Konfiguracja wzmacniacza operacyjnego generującego napięcie $VGND$}
+\end{figure}
+
+\section{Sekcja wzmocnienia sygnału odpowiedzi}
+
+Uzyskana odpowiedź z cewki po przejściu przez kondensator usuwający DC offset podciągana jest do napięcia $VGND$ za pomocą rezystora. Następnie odpowiedź jest mnożona x1000 w celu powiększenia ostatniej 
+
+\section{Część cyfrowa}
+
 
