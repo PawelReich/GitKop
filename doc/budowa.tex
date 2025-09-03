@@ -3,47 +3,12 @@
 \section{Zasilanie układu}
 Wykrywacz jest zasilany za pomocą napięcia +9V, otrzymywanego za pomocą urządzenia Powerbank posiadającego port USB-C wspierający protokół \textit{Power Delivery}. 
 
-\section{Generowanie sygnału}
-
-Wykrywacz generuje sygnał za pomocą układu ESP32, który za pomocą sprzętowego licznika wyzwala sygnał trwający $300 \mu s$  co $10 ms$.
-
-\subsection{Konfiguracja licznika sprzętowego}
-
-Licznik sprzętowy ESP32 skonfigurowany jest do generowania przerwania w częstotliwości $20 MHz$, co pozwala uzyskać dokładność tworzenia sygnału do $50\mu s$.
-
-\begin{lstlisting}[language=c++, caption={Fragment kodu odpowiedzialny za konfigurację licznika sprzętowego}]
-hw_timer* pulseTimer = NULL;
-void timer_setup() {
-    pulseTimer = timerBegin(2000);
-    timerAlarm(pulseTimer, 1, true, 0);
-    timerAttachInterrupt(pulseTimer, &pulseTimerFired);
-    timerStart(pulseTimer);
-}
-\end{lstlisting}
 
 \subsection{Zarządzanie stanem sygnału wyjściowego}
-Podczas pracy układu cyfrowego w funkcji przerwania sprawdzana jest wartość zmiennej inkrementowanej co każde wywołanie przerwania. Jeżeli licznik jest równy 0, wystawiany jest sygnał +3.3V na pin 1 (PULSE\_OUT) układu. Następnie w pożądanym momencie sygnał wyjściowy jest wygaszony, co pozwala na dynamiczną konfigurację długości impulsu wysyłanego do cewki.
 
-\begin{lstlisting}[language=c++, caption={Funkcja zarządzająca stanem sygnału wyjściowego}]
-void IRAM_ATTR pulseTimerFired()
-{
-    if (pulseTickCtr == 0)
-    {
-        digitalWrite(PULSE_OUT, HIGH);
-    }
-    else if (pulseTickCtr == 10)
-    {
-        digitalWrite(PULSE_OUT, LOW);
-    }
+\section{Generowanie sygnału}
 
-    pulseTickCtr++;
-
-    if (pulseTickCtr == 2 * 100)
-    {
-        pulseTickCtr = 0;
-    }
-}
-\end{lstlisting}
+Wykrywacz generuje sygnał za pomocą układu STM32F411RE, który za pomocą sprzętowego licznika wyzwala sygnał trwający $300 \mu s$  co $10 ms$, patrz \cref{subsec:timery}
 
 \section{Sekcja wzmocnienia sygnału cyfrowego i załączenia cewki}
 
@@ -79,11 +44,101 @@ W celu uzyskania pełnej odpowiedzi cewki zastosowana jest sztuczna masa wynosz�
     \includegraphics[width = 7.5cm]{vgnd.png}
     \caption{Konfiguracja wzmacniacza operacyjnego generującego napięcie $VGND$}
 \end{figure}
-
+-
 \section{Sekcja wzmocnienia sygnału odpowiedzi}
 
 Uzyskana odpowiedź z cewki po przejściu przez kondensator usuwający DC offset podciągana jest do napięcia $VGND$ za pomocą rezystora. Następnie odpowiedź jest mnożona x1000 w celu powiększenia ostatniej 
 
+
 \section{Część cyfrowa}
+
+\begin{figure}[H]
+    \begin{center}
+        \includegraphics[width=7.5cm]{stm32.png}
+    \end{center}
+    \caption{Cyfrowe przedstawienie układu STM32F411RE wraz z użytymi pinami}\label{fig:}
+\end{figure}
+
+
+Część cyfrowa wykrywacza metalu oparta jest o układ \textbf{STM32F411RE}. Ten produkowany przez ST Microelectronics mikrokontroler posiada jeden rdzeń oparty na architekturze ARM\textregistered{} Cortex-M4\textregistered{} oraz m.in wykorzystane w projekcie układy peryferyjne:
+
+\subsection{Liczniki sprzętowe}
+\label{subsec:timery}
+Wykorzystywane są dwa 16-bitowe liczniki sprz1ętowe napędzane za pomocą zegara \textit{APB2} skonfigurowanego na taktowanie z częstotliwością $F_{timer}=72Mhz$. Częstotliwość przepełnienia licznika sprzętowego można wyznaczyć za pomocą poniższego równania: 
+
+\begin{equation}
+F_{output}=\frac{F_{timer}}{(PSC+1)(ARR+1)}
+
+\end{equation}
+
+gdzie PSC oznacza Prescaler, natomiast ARR oznacza Auto Reload Register
+
+
+Licznik \textit{TIM10} pełni funkcję maszyny stanów zarządzając aktualnym stanem sygnału \textit{PULSE\_OUT}.
+W celu zachowania dokładności przy jednoczesnym jak najmniejszym obciążeniu MCU licznik wywołuje przerwania w częstotliwości $F_{output}=1\mu s$ poprzez konfigurację $PSC=0, ARR=71$.
+
+Podczas pracy układu cyfrowego w funkcji przerwania sprawdzana jest wartość zmiennej inkrementowanej co każde wywołanie przerwania. Jeżeli licznik jest równy 0, wystawiany jest sygnał +3.3V na pin 1 (PULSE\_OUT) układu. Następnie w pożądanym momencie sygnał wyjściowy jest wygaszony, co pozwala na dynamiczną konfigurację długości impulsu wysyłanego do cewki.
+
+\begin{lstlisting}[language=c++, caption={Funkcja zarządzająca stanem sygnału wyjściowego}]
+void PulseOut_Handler() {
+ 
+    if (pulseTickCtr == 0)
+    {
+        HAL_GPIO_WritePin(PULSE_OUT_GPIO_Port, PULSE_OUT_Pin, 1);
+    }
+
+    if (pulseTickCtr == 251)
+    {
+        HAL_GPIO_WritePin(PULSE_OUT_GPIO_Port, PULSE_OUT_Pin, 0);
+    }
+
+    pulseTickCtr++;
+
+    /* ... */
+
+    if (pulseTickCtr == 2500)
+    {
+        pulseTickCtr = 0;
+    }3
+}
+\end{lstlisting}
+
+Drugi licznik \textit{TIM2} wykorzystany jest do generowania sygnału PWM o wypełnieniu 50\% i dynamicznie wyznaczanej częstotliwości do brzęczyka wskazującego o wykryciu anomalii w pomierzonym sygnale \textit{PULSE\_IN}. Preskaler jest skonfigurowany na wartość 71, co daje przerwanie co mikrosekundę.
+
+\begin{lstlisting}[language=c++,caption={Funkcja generująca dzwięk o zadanej częstotliwości}]
+void Buzz(uint16_t freq) {
+    if (freq == 0)
+    {
+        __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, 0);
+        return;
+    }
+
+    uint16_t autoreload = (1000000UL / freq) - 1;
+
+    __HAL_TIM_SET_AUTORELOAD(&htim2, autoreload);
+    __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, autoreload / 2);
+}
+\end{lstlisting}
+
+\subsection{Konwerter cyfrowo-analogowy}
+
+ADC napędzany jest sygnałem zegarowym \textit{PCLK2} o częstotliwości $72Mhz$, z preskalerem o wartości $2$, co daje końcową częstotliwość podukładu wynoszącą $36Mhz$.
+Maksymalna rozdzielczość pomiaru wynosi 12 bitów, co daje dokładność na poziomie 8 mV.
+
+\todo{tutaj potencjalnie porownanie rozdzielczosc vs dokladnosc wykrywania metalu, w gre wchodzi tez fakt, ze ADC dla 12-bit zajmuje 15 cykli, 10-bit 13, 8-bit 11, 6-bit 9)}
+
+\begin{equation}
+    
+R= \frac{Vref}{2^N - 1} =\frac{3.3V}{4096}\approx 8mV
+
+\end{equation}
+
+gdzie $V_{ref}$  to napięcie referencyjne (tutaj $V_{in}=3.3V$), N = ilość bitów
+
+
+W celu osiągnięcia jak największego zasięgu wykrywacza wymagana jest jednocześnie jak największa dokładność układu ADC oraz jego szybkość działania. Dla trybu 12-bitowego każdy pomiar zajmuje 15 cykli zegarowych dających teorytyczny limit $2.4 MSPS$, co daje jedną próbkę napięcia co $~0.41\mu s$.
+
+Dla maksymalnego odciążenia mikrokontrolera wykorzystany został tryb DMA z wyłączonym generowaniem przerwań sprzętowych. Każda nowa próbka zmierzona przez konwerter zapisywana jest w docelowym miejscu pamięci skazanym podczas konfiguracji bez dodatkowego udziału MCU.
+Podczas wykonywania kodu maszyny stanów w pożądanym momencie kopiowana jest aktualna wartość próbki i dokonywany jest proces analizy sygnału.
 
 
