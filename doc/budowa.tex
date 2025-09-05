@@ -68,7 +68,6 @@ Wykorzystywane są dwa 16-bitowe liczniki sprz1ętowe napędzane za pomocą zega
 
 \begin{equation}
 F_{output}=\frac{F_{timer}}{(PSC+1)(ARR+1)}
-
 \end{equation}
 
 gdzie PSC oznacza Prescaler, natomiast ARR oznacza Auto Reload Register
@@ -125,12 +124,11 @@ void Buzz(uint16_t freq) {
 ADC napędzany jest sygnałem zegarowym \textit{PCLK2} o częstotliwości $72Mhz$, z preskalerem o wartości $2$, co daje końcową częstotliwość podukładu wynoszącą $36Mhz$.
 Maksymalna rozdzielczość pomiaru wynosi 12 bitów, co daje dokładność na poziomie 8 mV.
 
-\todo{tutaj potencjalnie porownanie rozdzielczosc vs dokladnosc wykrywania metalu, w gre wchodzi tez fakt, ze ADC dla 12-bit zajmuje 15 cykli, 10-bit 13, 8-bit 11, 6-bit 9)}
+\todo[inline]{tutaj potencjalnie porownanie rozdzielczosc vs dokladnosc wykrywania metalu, 
+w gre wchodzi tez fakt, ze ADC dla 12-bit zajmuje 15 cykli, 10-bit 13, 8-bit 11, 6-bit 9)}
 
 \begin{equation}
-    
 R= \frac{Vref}{2^N - 1} =\frac{3.3V}{4096}\approx 8mV
-
 \end{equation}
 
 gdzie $V_{ref}$  to napięcie referencyjne (tutaj $V_{in}=3.3V$), N = ilość bitów

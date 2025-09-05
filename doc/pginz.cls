@@ -30,6 +30,7 @@
 \captionsetup[table]{justification=justified,singlelinecheck=false, format=hang} %ustawienie podpisów tabel 
 \RequirePackage{enumitem} %to, czego brakowało przy symbolach
 \RequirePackage[normalem]{ulem}
+\RequirePackage{todonotes}
 %*************
 
 \titleformat{\chapter}[hang]
