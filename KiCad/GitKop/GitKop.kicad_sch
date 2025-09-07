@@ -4116,7 +4116,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "2000"
+		(property "Value" "1000"
 			(at 219.71 113.0299 0)
 			(effects
 				(font
@@ -4404,15 +4404,15 @@
 		(fields_autoplaced yes)
 		(uuid "611862fa-41db-4ab9-8347-98fa5026abd2")
 		(property "Reference" "U3"
-			(at 130.81 57.1814 0)
+			(at 130.81 57.0798 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
 			)
 		)
-		(property "Value" "LF356"
-			(at 130.81 59.7214 0)
+		(property "Value" "TL071"
+			(at 130.81 59.6198 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4563,7 +4563,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "1000"
+		(property "Value" "2000"
 			(at 219.71 100.3299 0)
 			(effects
 				(font
@@ -4757,15 +4757,15 @@
 		(fields_autoplaced yes)
 		(uuid "8779e153-12aa-43ca-9073-d9b15a9aec03")
 		(property "Reference" "U1"
-			(at 246.38 101.6314 0)
+			(at 248.92 101.5298 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
 			)
 		)
-		(property "Value" "TL071"
-			(at 246.38 104.1714 0)
+		(property "Value" "MCP6281"
+			(at 248.92 104.0698 0)
 			(effects
 				(font
 					(size 1.27 1.27)
