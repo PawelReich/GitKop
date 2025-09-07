@@ -1,16 +1,11 @@
 \chapter{Budowa wykrywacza}
 
 \section{Zasilanie układu}
-Wykrywacz jest zasilany za pomocą napięcia +9V, otrzymywanego za pomocą urządzenia Powerbank posiadającego port USB-C wspierający protokół \textit{Power Delivery}. 
+Wykrywacz jest zasilany za pomocą napięcia +9V, otrzymywanego za pomocą urządzenia Powerbank posiadającego port USB-C wspierający protokół \textit{Power Delivery}. W celu tłumienia zakłóceń spowodowanych przez nagłe skoki przepływu prądu w momencie sterowania sondą detekcyjną zastosowano kondensatory o pojemności $1500\mu F$ i maksymalnemu napięciu $16V$. Do zasilania mikrokontrolera STM32F411RE zastosowano konwerter obniżający napięcie do $3.3V$ rodzaju buck.
 
 
-\subsection{Zarządzanie stanem sygnału wyjściowego}
-
-\section{Generowanie sygnału}
-
-Wykrywacz generuje sygnał za pomocą układu STM32F411RE, który za pomocą sprzętowego licznika wyzwala sygnał trwający $300 \mu s$  co $10 ms$, patrz \cref{subsec:timery}
-
-\section{Sekcja wzmocnienia sygnału cyfrowego i załączenia cewki}
+\section{Generowanie sygnału sterującego cewką}
+Wykrywacz generuje sygnał za pomocą układu STM32F411RE, który za pomocą sprzętowego licznika wyzwala sygnał \textit{PULSE\_IN} trwający $300 \mu s$  co $10 ms$, (patrz \cref{subsec:timery}).
 
 \begin{figure}[H]
     \centering
@@ -18,7 +13,7 @@ Wykrywacz generuje sygnał za pomocą układu STM32F411RE, który za pomocą spr
     \caption{Schemat sekcji}
 \end{figure}
 
-Generowany sygnał pulsu (\textit{PULSE\_IN}) jest wzmacniany przez dwa tranzystory bipolarne połączone szeregowo pozwalające na uzyskanie wystarczającego napięcia do wysterowania tranzystora MOSFET IRF740 $Q_3$.
+Generowany sygnał pulsu o napięciu $3.3V$ jest wzmacniany przez dwa tranzystory bipolarne $Q_2$, a następnie $Q_1$ połączone szeregowo pozwalające na uzyskanie wystarczającego napięcia do wysterowania tranzystora MOSFET IRF740 $Q_3$.
     
 \begin{figure}[H]
     \centering
@@ -33,22 +28,45 @@ Generowany sygnał pulsu (\textit{PULSE\_IN}) jest wzmacniany przez dwa tranzyst
     \caption{sch cewki}
 \end{figure}
 
-Cewka sterowana jest 
-
-\section{Wirtualna masa}
-
-W celu uzyskania pełnej odpowiedzi cewki zastosowana jest sztuczna masa wynosząca $\frac{1}{2}$ napięcia zasilania. Dzięki niej wzmacniacze operacyjne w sekcji wzmocnienia odpowiedzi mogą wzmocnić odpowiedź pracując wyłącznie z dodatnim napięciem, co omija konieczność generowania ujemnego napięcia upraszczając finalny schemat wykrywacza metalu.
+Tranzystor $Q_3$ zwiera sondę do masy powodując przepływ prądu przez cewkę podłączoną do \textit{COIL1} i \textit{COIL2}. Po otwarciu tranzystora $Q_3$ na cewce indukowane jest napięcie, którego górnym limitem jest przez napięcie break-down $V_{brk}$ tranzystora. W celu umożliwienia rozładowania napięcia w cewce zastosowano dwie szybkie diody typu \textit{BAV19} połączone równolegle odwrotnie do siebie pozwalające na przepływ prądu dla napięcia powyżej $0.7V$. Efekt jest opóźniony prez zastosowanie rezystora $R_6$. Dla końcowego etapu rozładowywania cewki, czyli kiedy napięcie jest poniżej progu przewodzenia diody rezystor $R5$ wraz z potencjometrem $XX$\todo{brak na 2.3} umożliwia przepływ prądu. Potencjometr zastosowany jest, aby łatwo dostroić tłumienie cewki. Pożądane jest krytyczne tłumienie odpowiedzi sondy pozwalające na najdokładniejsze pomiary zmian. Na rysunku 2.4 narysowano porównanie odpowiedzi sondy nietłumionej, versus krytycznie tłumionej. Zademonstrowana odpowiedź jest mierzona za kondensatorem $C_1$.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width = 7.5cm]{vgnd.png}
+    \includegraphics[width=0.95\textwidth]{../meas/undamped.png}
+    \caption{Odpowiedź nietłumionej cewki}
+\end{figure}
+\todo[inline]{tutaj ch2 jest inverted vs drugi wykres}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{../meas/good.png}
+    \caption{Odpowiedź krytycznie tłumionej cewki}
+\end{figure}
+\todo[inline]{zamiast .png wygenerowac wykresy z .edf i skleic}
+
+
+\section{Sonda detekcyjna}
+Sonda detekcyjna wykonana została z miedzianego przewodu o przekroju 0.4mm. Cewka została nawinięta 31 razy w przekrój 15cm
+
+\section{Sygnał odpowiedzi}
+\subsection{Wirtualna masa}
+W celu uzyskania pełnej odpowiedzi cewki zastosowana jest sztuczna masa wynosząca $\frac{1}{2}$ napięcia zasilania. Dzięki niej wzmacniacze operacyjne w sekcji wzmocnienia odpowiedzi mogą wzmocnić odpowiedź pracując wyłącznie z dodatnim napięciem, co omija konieczność generowania ujemnego napięcia upraszczając finalny schemat wykrywacza metalu. Wykonana jest za pomocą dzielnika napięcia wykonującego działanie $U_{VGND}=Vcc\cdot\frac{R9}{R8+R9}=Vcc\cdot\frac{1}{2}$, którego wynikowe napięcie przechodzi przez wzmacniacz operacyjny $U3$ kopiujący napięcie wejściowe wzmacniając sygnał, jednocześnie odciążając zastosowane w dzielniku rezystory.
+
+\begin{figure}[H]
+    \begin{center}
+    \includegraphics[width=7.5cm]{vgnd.png}
+    \end{center}
     \caption{Konfiguracja wzmacniacza operacyjnego generującego napięcie $VGND$}
 \end{figure}
--
-\section{Sekcja wzmocnienia sygnału odpowiedzi}
 
-Uzyskana odpowiedź z cewki po przejściu przez kondensator usuwający DC offset podciągana jest do napięcia $VGND$ za pomocą rezystora. Następnie odpowiedź jest mnożona x1000 w celu powiększenia ostatniej 
-
+\subsection{Wzmocnienie sygnału}
+\begin{figure}[H]
+    \begin{center}
+        \includegraphics[width=0.95\textwidth]{wzmocnienie.png}
+    \end{center}
+    \caption{sch}\label{fig:}
+\end{figure}
+Uzyskana odpowiedź z cewki po przejściu przez kondensator usuwający offset DC podciągana jest do napięcia $VGND$ za pomocą rezystora $R_7$. Następnie odpowiedź jest mnożona 1000-krotnie w celu uwydatnienia ostatniej części odpowiedzi sygnału najbardziej podatnej na działanie powstałego pola magnetycznego. Uzyskane napięcie jest może być w okolicach napięcia zasilania $V_{cc}$, dlatego w celu dostosowania go do poziomu pozwalającego obsłużyć go przez zastosowany w wykrywaczu MCU zastosowano dzielnik napięcia wykonujący $\frac{1}{3}\cdot{}U_{8o}$. Tak wyznaczony sygnał nie jest wystarczająco silny, dlatego przechodzi on przez kopiujący wzmacniacz $U_1$. Warto zaznaczyć, że wzmacniacz MCP6281 jest typu rail-to-rail, pozwalający na operowanie na sygnałach bliskich napięciom zasilania $V_+$, jak i $V_-$ wzmacniacza. Poprzednie sekcje nie wymagały tej specjalnej właściwości. Tak przygotowany sygnał jest gotowy do analizy przez mikrokontroler. Dla dodatkowego bezpieczeństwa zastosowano diodę zenera $3.3V$ gwarantującą, że zakres napięć \textit{SIGNAL\_OUT} należy do zakresu obsługiwanego przez układ STM32F411RE.
 
 \section{Część cyfrowa}
 
@@ -138,5 +156,7 @@ W celu osiągnięcia jak największego zasięgu wykrywacza wymagana jest jednocz
 
 Dla maksymalnego odciążenia mikrokontrolera wykorzystany został tryb DMA z wyłączonym generowaniem przerwań sprzętowych. Każda nowa próbka zmierzona przez konwerter zapisywana jest w docelowym miejscu pamięci skazanym podczas konfiguracji bez dodatkowego udziału MCU.
 Podczas wykonywania kodu maszyny stanów w pożądanym momencie kopiowana jest aktualna wartość próbki i dokonywany jest proces analizy sygnału.
+
+\section{Algorytm}
 
 

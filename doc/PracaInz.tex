@@ -1,11 +1,29 @@
 \documentclass{pginz}
 
+% Zadania do wykonania:	
+% Analiza zasad działania wykrywaczy metalu (indukcja elektromagnetyczna, impulsowe systemy detekcji).
+%
+% Opracowanie układu elektronicznego odpowiedzialnego za generowanie pola magnetycznego i odbiór sygnałów zwrotnych.
+%
+% Implementacja algorytmu analizy sygnałów detekcyjnych (np. filtrowanie szumów, identyfikacja rodzaju metalu).
+%
+% Projekt i wykonanie prototypu urządzenia, w tym obudowy oraz sondy detekcyjnej.
+%
+% Testy działania wykrywacza w różnych środowiskach oraz analiza jego skuteczności.
+%
+% Literatura:	
+% "Metal Detector Studies: Research Materials", James Baker-Jarvis
+%
+% "Electromagnetics Explained: A Handbook for Wireless/RF, EMC, and High-Speed Electronics", Ron Schmitt
+%
+% Dokumentacja techniczna czujników elektromagnetycznych i mikroprocesorów użytych w projekcie (np. Arduino, ESP32).
+
 %%%%%%%%%Miejsce na dodatkowe pakiety%%%%%%%%%%%%%
 \usepackage{subcaption}
 
 \begin{document}
 
-%\includepdf[page={1}]{StronaTytulowa.pdf}
+\includepdf[page={1}]{StronaTytulowa_193682.pdf}
 %\includepdf[page={1}]{Oswiadczenie.pdf}
 \setcounter{page}{3}
 
@@ -18,10 +36,8 @@
 \include{Symbole}
 \include{Oznaczenia}
 
+\include{przeglad}
 \include{budowa}
-\include{Rozdzial1}
-\include{Rozdzial2}
-% tu będą kolejne rozdziały
 
 \listoffigures
 \addcontentsline{toc}{chapter}{Spis rysunków}
@@ -31,10 +47,8 @@
 
 %alternatywa - bibtex
 \begin{thebibliography}{20}
-\bibitem{Kow02} Kowalski J., Kabacki J.: Simulation of Network Systems in Education, Proceedings of the XXIV Autumn International Colloquium Advanced Simulation of Systems. ASIS 2002, 9-11 września 2002, Ostrava, Czechy, s. 213-218.
-\bibitem{Nat12}	National Center of Biotechnology Information, http://www.ncbi.nlm.nih.gov (data dostępu 20.12.2012 r.).
-\bibitem{Now02}	Nowak K.: Dydaktyczny model łączenia sieci LAN za pomocą sieci rozległych. Projekt dyplomowy inżynierski. WETI PG, 2002.
-\bibitem{Bar04}	Barzykowski J. i inni: Współczesna metrologia – zagadnienia wybrane. WNT, Warszawa 2004, s. 575.
+    \bibitem{MetDet} Overton G., Moreland C.: Inside the Metal Detector, Second Edition. Geotech Press, 2015
+    \bibitem{Corbyn} Corbyn J. A.: Pulse Induction Metal Detector. Wireless World, 1980.
 \end{thebibliography}
 
 %*****************
@@ -44,6 +58,14 @@
 % Instrukcja dla projektanta
 % Instrukcja dla użytkownika
 \begin{appendices}
+
+% \afterpage{%
+%     \clearpage
+%     \begin{figure}
+    \includepdf[fitpaper=true,angle=90,pagecommand={}]{Schematic.pdf}
+%     \end{figure}
+%     \clearpage
+% }
 %\include{AppA}
 %\include{AppB}
 \end{appendices}
