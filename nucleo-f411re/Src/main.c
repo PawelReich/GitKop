@@ -87,14 +87,14 @@ void PulseOut_Handler() {
         HAL_GPIO_WritePin(PULSE_OUT_GPIO_Port, PULSE_OUT_Pin, 1);
     }
 
-    if (pulseTickCtr == 251)
+    if (pulseTickCtr == 251/5)
     {
         HAL_GPIO_WritePin(PULSE_OUT_GPIO_Port, PULSE_OUT_Pin, 0);
     }
 
     pulseTickCtr++;
 
-    if (pulseTickCtr == 251+4)
+    if (pulseTickCtr == 251/5+4)
     {
         stage0_val += value[0];
         stage0_ctr++;
@@ -133,7 +133,7 @@ void PulseOut_Handler() {
         }
     }
 
-    if (pulseTickCtr == 2500)
+    if (pulseTickCtr == 2500/5)
     {
         pulseTickCtr = 0;
     }
