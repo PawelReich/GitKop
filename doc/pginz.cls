@@ -31,6 +31,7 @@
 \RequirePackage{enumitem} %to, czego brakowało przy symbolach
 \RequirePackage[normalem]{ulem}
 \RequirePackage{todonotes}
+\RequirePackage{smartdiagram}
 %*************
 
 \titleformat{\chapter}[hang]
