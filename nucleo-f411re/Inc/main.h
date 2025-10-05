@@ -61,6 +61,12 @@ void PulseOut_Handler();
 /* Private defines -----------------------------------------------------------*/
 #define B1_Pin GPIO_PIN_13
 #define B1_GPIO_Port GPIOC
+#define LCD_DC_Pin GPIO_PIN_0
+#define LCD_DC_GPIO_Port GPIOC
+#define LCD_RESET_Pin GPIO_PIN_1
+#define LCD_RESET_GPIO_Port GPIOC
+#define LCD_CS_Pin GPIO_PIN_3
+#define LCD_CS_GPIO_Port GPIOC
 #define PULSE_IN_Pin GPIO_PIN_0
 #define PULSE_IN_GPIO_Port GPIOA
 #define USART_TX_Pin GPIO_PIN_2
