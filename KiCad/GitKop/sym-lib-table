@@ -1,0 +1,5 @@
+(sym_lib_table
+  (version 7)
+  (lib (name "STM32F4x1CxU6 CoreBoard WeActStudio")(type "KiCad")(uri "${KIPRJMOD}/../../WeActStudio.MiniSTM32F4x1/HDK/STM32F4x1CxU6 CoreBoard WeActStudio.kicad_sym")(options "")(descr ""))
+  (lib (name "MTJ-881X1")(type "KiCad")(uri "${KIPRJMOD}/../MTJ-881X1/MTJ-881X1.kicad_sym")(options "")(descr ""))
+)

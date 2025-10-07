@@ -111,7 +111,7 @@ void GitKop_Init()
 
     HAL_ADC_Start_DMA(&hadc1, (uint32_t*)value, 1);
     
-    ILI934l1_HandleTypeDef ili9341 = ILI9341_Init(
+    ILI9341_HandleTypeDef ili9341 = ILI9341_Init(
         &hspi5,
         LCD_CS_GPIO_Port,
         LCD_CS_Pin,

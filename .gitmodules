@@ -1,0 +1,6 @@
+[submodule "nucleo-f411re/STM32-ILI9341"]
+	path = nucleo-f411re/STM32-ILI9341
+	url = https://github.com/Nat-thapas/STM32-ILI9341
+[submodule "WeActStudio.MiniSTM32F4x1"]
+	path = WeActStudio.MiniSTM32F4x1
+	url = https://github.com/WeActStudio/WeActStudio.MiniSTM32F4x1

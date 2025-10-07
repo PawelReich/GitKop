@@ -1,0 +1,5 @@
+(fp_lib_table
+  (version 7)
+  (lib (name "STM32F4x1CxU6 CoreBoard WeActStudio")(type "KiCad")(uri "${KIPRJMOD}/../../WeActStudio.MiniSTM32F4x1/HDK/STM32F4x1CxU6 CoreBoard WeActStudio.pretty/")(options "")(descr ""))
+  (lib (name "MTJ-881X1")(type "Legacy")(uri "/home/gitmanik/code/GitKop/KiCad/MTJ-881X1/MTJ-881X1.mod")(options "")(descr ""))
+)
