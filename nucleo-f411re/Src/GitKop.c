@@ -119,7 +119,7 @@ void GitKop_Init()
         LCD_DC_Pin,
         LCD_RESET_GPIO_Port,
         LCD_RESET_Pin,
-        ILI9341_ROTATION_VERTICAL_2,
+        ILI9341_ROTATION_HORIZONTAL_2,
         240,
         320
     );

@@ -264,7 +264,7 @@ ILI9341_HandleTypeDef ILI9341_Init(
             break;
         }
         case ILI9341_ROTATION_HORIZONTAL_2: {
-            uint8_t rotation = ILI9341_MADCTL_MV | ILI9341_MADCTL_BGR;
+            uint8_t rotation = ILI9341_MADCTL_MV | ILI9341_MADCTL_RGB;
             uint8_t data[] = {rotation};
             ILI9341_WriteData(ili9341, data, sizeof(data));
             break;
