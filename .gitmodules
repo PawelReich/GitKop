@@ -4,3 +4,6 @@
 [submodule "WeActStudio.MiniSTM32F4x1"]
 	path = WeActStudio.MiniSTM32F4x1
 	url = https://github.com/WeActStudio/WeActStudio.MiniSTM32F4x1
+[submodule "gitkop001/Lib/STM32-ILI9341"]
+	path = gitkop001/Lib/STM32-ILI9341
+	url = https://github.com/Nat-thapas/STM32-ILI9341.git
