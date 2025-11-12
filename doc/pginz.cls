@@ -104,3 +104,7 @@
   }%
 }
 \makeatother
+
+
+\usepackage{biblatex}
+\addbibresource[glob=true]{bib/*}
