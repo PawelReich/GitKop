@@ -106,5 +106,5 @@
 \makeatother
 
 
-\usepackage{biblatex}
+\usepackage[sorting=none]{biblatex}
 \addbibresource[glob=true]{bib/*}
