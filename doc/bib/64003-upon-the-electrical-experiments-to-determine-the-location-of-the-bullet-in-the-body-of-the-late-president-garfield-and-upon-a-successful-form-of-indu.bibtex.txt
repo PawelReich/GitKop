@@ -1,0 +1,13 @@
+@article{Bell1883Upon,
+	author = {Bell, Alexander Graham},
+	journal = {American Journal of Science},
+	doi = {10.2475/ajs.s3-25.145.22},
+	number = {145},
+	year = {1883},
+	month = {jan 1},
+	pages = {22--61},
+	publisher = {American Journal of Science},
+	title = {Upon the electrical experiments to determine the location of the bullet in the body of the late {President} {Garfield}; and upon a successful form of induction balance for the painless detection of metallic masses in the human body},
+	volume = {s3-25},
+}
+
