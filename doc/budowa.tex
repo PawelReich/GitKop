@@ -5,7 +5,7 @@ Wykrywacz jest zasilany za pomocą napięcia +9V, otrzymywanego za pomocą urzą
 
 
 \section{Generowanie sygnału sterującego cewką}
-Wykrywacz generuje sygnał za pomocą układu STM32F411RE, który za pomocą sprzętowego licznika wyzwala sygnał \textit{PULSE\_IN} trwający $300 \mu s$  co $10 ms$, (patrz \cref{subsec:timery}).
+Wykrywacz generuje sygnał za pomocą układu STM32F411RE, który za pomocą sprzętowego licznika wyzwala sygnał \textit{PULSE\_IN} trwający $300 \mu s$  co $10 ms$.
 
 \begin{figure}[H]
     \centering
@@ -66,7 +66,7 @@ W celu uzyskania pełnej odpowiedzi cewki zastosowana jest sztuczna masa wynosz�
     \begin{center}
         \includegraphics[width=0.95\textwidth]{img/wzmocnienie.png}
     \end{center}
-    \caption{sch}\label{fig:}
+    \caption{sch}\label{fig:wzmocnienie}
 \end{figure}
 Uzyskana odpowiedź z cewki po przejściu przez kondensator usuwający offset DC podciągana jest do napięcia $VGND$ za pomocą rezystora $R_7$. Następnie odpowiedź jest mnożona 1000-krotnie w celu uwydatnienia ostatniej części odpowiedzi sygnału najbardziej podatnej na działanie powstałego pola magnetycznego. Uzyskane napięcie jest może być w okolicach napięcia zasilania $V_{cc}$, dlatego w celu dostosowania go do poziomu pozwalającego obsłużyć go przez zastosowany w wykrywaczu MCU zastosowano dzielnik napięcia wykonujący $\frac{1}{3}\cdot{}U_{8o}$. Tak wyznaczony sygnał nie jest wystarczająco silny, dlatego przechodzi on przez kopiujący wzmacniacz $U_1$. Warto zaznaczyć, że wzmacniacz MCP6281 jest typu rail-to-rail, pozwalający na operowanie na sygnałach bliskich napięciom zasilania $V_+$, jak i $V_-$ wzmacniacza. Poprzednie sekcje nie wymagały tej specjalnej właściwości. Tak przygotowany sygnał jest gotowy do analizy przez mikrokontroler. Dla dodatkowego bezpieczeństwa zastosowano diodę zenera $3.3V$ gwarantującą, że zakres napięć \textit{SIGNAL\_OUT} należy do zakresu obsługiwanego przez układ STM32F411RE.
 
@@ -76,11 +76,11 @@ Uzyskana odpowiedź z cewki po przejściu przez kondensator usuwający offset DC
     \begin{center}
         \includegraphics[width=7.5cm]{img/stm32.png}
     \end{center}
-    \caption{Cyfrowe przedstawienie układu STM32F411RE wraz z użytymi pinami}\label{fig:}
+    \caption{Cyfrowe przedstawienie układu STM32F411RE wraz z użytymi pinami}\label{fig:stm32}
 \end{figure}
 
 
-Część cyfrowa wykrywacza metalu oparta jest o układ \textbf{STM32F411RE}. Ten produkowany przez ST Microelectronics mikrokontroler posiada jeden rdzeń oparty na architekturze ARM\textregistered{} Cortex-M4\textregistered{} oraz m.in wykorzystane w projekcie układy peryferyjne:
+Część cyfrowa wykrywacza metalu oparta jest o układ \textbf{STM32H523CE}. Ten produkowany przez ST Microelectronics mikrokontroler posiada jeden rdzeń oparty na architekturze ARM\textregistered{} Cortex-M33\textregistered{} \cite{st_stm32h5_web} \cite{st_stm32h533_ds} oraz m.in wykorzystane w projekcie układy peryferyjne:
 
 \subsection{Liczniki sprzętowe}
 \label{subsec:timery}
@@ -165,20 +165,23 @@ Podczas wykonywania kodu maszyny stanów w pożądanym momencie kopiowana jest a
     \centering
     \smartdiagramset{back arrow disabled}
     \smartdiagram[flow diagram:horizontal]{Pobranie próbki sygnału \textit{PULSE\_OUT}, Suma czterech próbek, Suma 32 próbek, -background, sprawdzenie anomalii, buzzer}
-    \caption{Schemat blokowy działania algorytmu}\label{fig:}
+    \caption{Schemat blokowy działania algorytmu}\label{fig:diagram}
 \end{figure}
 \todo[inline]{napisac na porzadnie, wyczyscic, zrobic czytelniejsze}
 
 Algorytm wykrywania metalu oparty jest o próbkowanie sygnału \textit{PULSE\_OUT} w stałym odstępie czasowym. Zbierana jest suma czterech następnych próbek, która zapisywana jest do bufora cyklicznego przechowującego 32 pozycje (Stage 1). Średnia obliczona ze wszystkich wartości znajdujących się w buforze etatu 1 umieszczana jest w drugim buforze cyklicznym, mający pojemność 64 próbki. Ten bufor służy do eliminacji tła. Średnia wartości etapu pierwszego porównywana jest ze średnią wartości znajdujących się w buforze tła, każda różnica co najmniej 5 jednostek traktowana jest jako anomalia i oznacza wykrycie metalu.
 
-
 \begin{figure}[H]
     \begin{center}
         \includegraphics[width=0.95\textwidth]{../meas/pulse_out.png}
     \end{center}
-    \caption{Wykres sygnału \textit{PULSE\_OUT} używany w algorytmie}\label{fig:}
+    \caption{Wykres sygnału \textit{PULSE\_OUT} używany w algorytmie}\label{fig:meas}
 
 \end{figure}
+
+\section{Płytka drukowana}
+Płytka drukowana do projektu została wykonana w otwartoźródłowym programie typu CAD (projektowanie wspomagane komputerowo, ang. \textit{Computer Aided Design}) KiCad\cite{kicad}. 
+\cite{WeActStudio_STM32H523CoreBoard}
 
 \section{Obudowa}
 Obudowa wykrywacza metalu została wykonana w technologii druku 3D z wykorzystaniem plastiku PLA.
