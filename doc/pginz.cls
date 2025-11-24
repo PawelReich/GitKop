@@ -34,7 +34,9 @@
 \RequirePackage{smartdiagram}
 %*************
 
+\usepackage{booktabs} % Zalecany pakiet do ładniejszych linii w tabelach
 \usepackage{svg}
+
 \titleformat{\chapter}[hang]
 {\normalfont\fontsize{12}{15}\bfseries\MakeUppercase}{\thechapter.}{1em}{}
 \titlespacing*{\chapter}{0pt}{12pt}{6pt}

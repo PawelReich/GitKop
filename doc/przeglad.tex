@@ -1,9 +1,103 @@
-\chapter{Przegląd popularnych typów wykrywaczy metali}
+\chapter{Przegląd literatury}
+\section{Elektrodynamika systemów wykrywania metali}
+Podstawą funkcjonowania wszystkich indukcyjnych wykrywaczy metali jest prawo indukcji Faradaya.
+Zjawisko to wiąże w czasie pole magnetyczne z indukowanym wirowym polem elektrycznym \cite[p.~302]{griffiths1999introduction}.
+Zgodnie z równaniem
+\begin{equation}
+\label{eq:prawo_faradaya}
+\nabla \times \mathbf{E} = - \frac{\partial \mathbf{B}}{\partial t}
+\end{equation}
+gdzie $\mathbf{E}$ oznacza wektor natężenia, a $\mathbf{B}$ oznacza wektor indukcji magnetycznej.
 
-\section{VLF - Very Low Frequency}
+W kontekście inżynierii systemów detekcji cewka nadawcza zasilana prądem zmiennym lub impulsowym generuje zmienny strumień magnetyczny. Strumień ten penetruje przestrzeń, w tym potencjalne obiekty przewodzące oraz grunt. Zgodnie z przytoczonym prawem, zmienność strumienia w czasie ($\partial \mathbf{B}/\partial t$) indukuje siłę elektromotoryczną w każdym przewodniku objętym polem.
 
-\section{BFO - Beat Frequency Oscillator}
+%%przeredagowac
+Kluczowym mechanizmem, na którym opiera się detekcja, jest powstawanie prądów wirowych (ang. eddy currents). Prądy te, płynąc w zamkniętych pętlach wewnątrz materiału przewodzącego (w płaszczyznach prostopadłych do linii pola magnetycznego), generują własne, wtórne pole magnetyczne \cite{kriezis}. Istotę tego zjawiska wyjaśnia reguła Lenza, która stanowi, że kierunek indukowanego prądu jest taki, iż wytworzone przez niego pole magnetyczne przeciwdziała zmianie pola pierwotnego, które je wywołało \cite{kriezis}.
 
-Najprostszy typ wykrywacza metali.
+\begin{equation}
+    \label{eq:prawo_lenza}
+    \mathcal{E} = -\frac{d \Phi_\mathbf{B}}{d t}
+\end{equation}
 
-\section{PI - Pulse Induction}
+To wzajemne oddziaływanie pól – pierwotnego (wymuszającego) i wtórnego (reakcyjnego) – prowadzi do mierzalnych zmian impedancji wzajemnej układu cewek lub zmian napięcia indukowanego w cewce odbiorczej, co stanowi sygnał użyteczny dla wykrywacza metalu. Literatura naukowa podkreśla, że pełny opis tego zjawiska wymaga uwzględnienia dyfuzji pola magnetycznego w głąb przewodnika. Zjawisko to jest opisane równaniem dyfuzji, wyprowadzanym z równań Maxwella przy pominięciu prądów przesunięcia (co jest uzasadnione dla niskich częstotliwości) \cite{kriezis}:
+
+\begin{equation}
+    \label{eq:diffused}
+    \nabla^2 \mathbf{B} = \mu \sigma \frac{\partial \mathbf{B}}{\partial t}
+\end{equation}
+gdzie $\mu$ to absolutna przenikalność magnetyczna materiału, a $\sigma$ to jego konduktywność (przewodność właściwa). Równanie to wskazuje, że interakcja pola z metalem nie jest natychmiastowa, lecz podlega procesom relaksacyjnym zależnym od właściwości materiałowych obiektu oraz częstotliwości fali pobudzającej. Prowadzi to do zjawiska naskórkowości (ang. skin effect), które ogranicza penetrację prądów wirowych do warstw powierzchniowych przy wyższych częstotliwościach, co ma fundamentalne znaczenie dla identyfikacji obiektów.
+%%
+
+\begin{table}[H]
+    \centering
+    \caption{Rezystywność wybranych materiałów dla 1 atm w 20$^\circ$C.}
+    \begin{tabular}{llll}
+        \toprule
+        \textbf{Materiał} & \textbf{Rezystywność ($\Omega \cdot m$)} & \textbf{Materiał} & \textbf{Rezystywność ($\Omega \cdot m$)} \\
+    \midrule
+        \textit{Przewodniki:} & & \textit{Półprzewodniki:} & \\
+        Srebro & $1,59 \times 10^{-8}$ & Woda morska & $0,2$ \\
+        Miedź & $1,68 \times 10^{-8}$ & German & $0,46$ \\
+        Złoto & $2,21 \times 10^{-8}$ & Diament & $2,7$ \\
+        Aluminium & $2,65 \times 10^{-8}$ & Krzem & $2500$ \\
+        Żelazo & $9,61 \times 10^{-8}$ & \textit{Izolatory:} & \\
+        Rtęć & $9,61 \times 10^{-7}$ & Woda (czysta) & $8,3 \times 10^3$ \\
+        Nichrom & $1,08 \times 10^{-6}$ & Szkło & $10^9 - 10^{14}$ \\
+        Mangan & $1,44 \times 10^{-6}$ & Guma & $10^{13} - 10^{15}$ \\
+        Grafit & $1,6 \times 10^{-5}$ & Teflon & $10^{22} - 10^{24}$ \\
+    \bottomrule
+    \end{tabular}
+    \vspace{0.2cm} \\
+    \hfill\small źródło: Handbook of Chemistry and Physics \cite{haynes2010crc} 
+\end{table}
+\begin{table}[H]
+    \centering
+    \caption{Maksymalna przenikalność magnetyczna wybranych materiałów dla niskich częstotliwości}
+    \begin{tabular}{l l l}
+        \toprule
+        \textbf{Substancja} & \textbf{Typ grupy} & \textbf{Względna przenikalność } $\mu_r$ \\
+        \midrule
+        Bizmut & Diamagnetyk & 0,99983 \\
+        Srebro & Diamagnetyk & 0,99998 \\
+        Ołów & Diamagnetyk & 0,99983 \\
+        Miedź & Diamagnetyk & 0,99991 \\
+        Woda & Diamagnetyk & 0,99991 \\
+        \addlinespace
+        Próżnia & Niemagnetyczny & 1 \\
+        \addlinespace
+        Powietrze & Paramagnetyk & 1,0000004 \\
+        Aluminium & Paramagnetyk & 1,00002 \\
+        Pallad & Paramagnetyk & 1,0008 \\
+        \addlinespace
+        Kobalt & Ferromagnetyk & 250 \\
+        Nikiel & Ferromagnetyk & 600 \\
+        Ferroxcube 3 (proszek ferrytowy Mn-Zn) & Ferromagnetyk & 1 500 \\
+        Stal miękka (0,2\% C) & Ferromagnetyk & 2 000 \\
+        Żelazo (0,2\% zanieczyszczeń) & Ferromagnetyk & 5 000 \\
+        \addlinespace
+        Żelazo krzemowe (4\% Si) & Ferromagnetyk & 7 000 \\
+        Permalloy 78 (78,5\% Ni) & Ferromagnetyk & 100 000 \\
+        Mumetal (75\% Ni, 5\% Cu, 2\% Cr) & Ferromagnetyk & 100 000 \\
+        Oczyszczone żelazo (0,05\% zanieczyszczeń) & Ferromagnetyk & 200 000 \\
+        Supermaloj (5\% Mo, 79\% Ni) & Ferromagnetyk & 1 000 000 \\
+        \bottomrule
+    \end{tabular}
+
+    \vspace{0.2cm}
+    \hfill\small źródło: Electromagnetics Explained, \cite{schmitt2002electromagnetics}, Electromagnetics with Applications \cite[p.~201]{kraus1999electromagnetics} 
+\end{table}
+
+\section{Analiza porównawcza architektur detektorów}
+
+
+\subsection{BFO - Beat Frequency Oscillator}
+
+Technologia wykrywaczy metali oparta o generator zdudnieniowy (ang. \textit{Beat Frequency Oscillator}). Podstawowy system BFO opiera się \cite{moreland_bfo_theory}
+
+\subsection{IB}
+
+Przedstawiona przed doktora  \cite{doi:10.1098/rspl.1879.0012}.
+
+\subsection{PI - Pulse Induction}
+\cite{moreland2024inside}   
+
