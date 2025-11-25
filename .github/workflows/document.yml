@@ -1,23 +1,20 @@
-name: Build LaTeX
-on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
-
-  workflow_dispatch:
-
+name: Build LaTeX document
+on: [push]
 jobs:
-  build:
+  build_latex:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: docker-practice/actions-setup-docker@master
-      - name: Run latexmk
-        run: |
-          sudo docker run -v $PWD:/files -w /files texlive/texlive "cd doc && latexmk -pdf PracaInz.tex"
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v4
-        with: 
-          name: document
-          path: PracaInz.pdf
+      - name: Set up Git repository
+        uses: actions/checkout@v6
+      - name: Compile LaTeX document
+        uses: xu-cheng/latex-action@v4
+        with:
+          working_directory: doc
+          latexmk_shell_escape: true
+          extra_system_packages: "inkscape"
+          root_file: PracaInz.tex
+      - name: Upload PDF file
+        uses: actions/upload-artifact@v5
+        with:
+          name: PDF
+          path: doc/PracaInz.pdf
