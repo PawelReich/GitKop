@@ -5,8 +5,7 @@
 
 #include "gpio.h"
 #include "tim.h"
-// #include "usart.h"
-// #include "dma.h"
+#include "usart.h"
 #include "adc.h"
 #include "spi.h"
 

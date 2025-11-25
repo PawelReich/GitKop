@@ -6,15 +6,16 @@
 
 #define BUZZ_TIMER htim12
 #define PULSE_TIMER htim2
+#define UART huart1
 
 volatile uint16_t pulseTickCtr = 0;
 
 volatile static uint16_t value[1];
 volatile static uint8_t rdy = 0;
 
-#define STAGE0_SAMPLES 4
-#define STAGE1_SAMPLES 16
-#define STAGE2_SAMPLES 48
+#define STAGE0_SAMPLES 8
+#define STAGE1_SAMPLES 32
+#define STAGE2_SAMPLES 64
 
 volatile static uint16_t stage0_ctr = 0;
 volatile static uint16_t stage1_ctr = 0;
@@ -40,9 +41,9 @@ void PulseOut_Handler() {
         HAL_GPIO_WritePin(PULSE_OUT_GPIO_Port, PULSE_OUT_Pin, 0);
     }
 
-    pulseTickCtr++;
-    if (pulseTickCtr == 251/5+4)
+    if (pulseTickCtr == 25+9)
     {
+        // printf("%d\r\n", value[0]);
         stage0_val += value[0];
         stage0_ctr++;
 
@@ -75,50 +76,50 @@ void PulseOut_Handler() {
                 val = stage1_avg - stage2_avg;
             else
                 val = stage2_avg - stage1_avg;
-            
+           
+            printf("%d %d %d\r\n", stage1_avg, stage2_avg, val);
             rdy = 1;
         }
     }
 
-    if (pulseTickCtr == 2500/5)
+    pulseTickCtr++;
+    if (pulseTickCtr == 200)
     {
         pulseTickCtr = 0;
     }
 }
 
 int _write(int file, char* ptr, int len) {
-    // HAL_UART_Transmit(&huart2, (uint8_t*) ptr, len, HAL_MAX_DELAY);
+    HAL_UART_Transmit(&UART, (uint8_t*) ptr, len, HAL_MAX_DELAY);
     return len;
 }
 
 void buzz(uint16_t freq) {
-    // if (freq == 0)
-    // {
-    //     __HAL_TIM_SET_COMPARE(&BUZZ_TIMER, TIM_CHANNEL_1, 0);
-    //     return;
-    // }
-    //
-    // uint16_t autoreload = (1000000UL / freq) - 1;
-    //
-    // __HAL_TIM_SET_AUTORELOAD(&BUZZ_TIMER, autoreload);
-    //
-    // __HAL_TIM_SET_COMPARE(&BUZZ_TIMER, TIM_CHANNEL_1, autoreload / 2);
+    if (freq == 0)
+    {
+        __HAL_TIM_SET_COMPARE(&BUZZ_TIMER, TIM_CHANNEL_1, 0);
+        return;
+    }
+
+    uint16_t autoreload = (1000000UL / freq) - 1;
+
+    __HAL_TIM_SET_AUTORELOAD(&BUZZ_TIMER, autoreload);
+
+    __HAL_TIM_SET_COMPARE(&BUZZ_TIMER, TIM_CHANNEL_1, autoreload / 2);
 }
 
 void GitKop_Init()
 {
-    // printf("GitKop build %s %s\n", __TIME__, __DATE__);
+    printf("GitKop build %s %s\r\n", __TIME__, __DATE__);
     HAL_TIM_Base_Start_IT(&PULSE_TIMER); 
     // HAL_TIM_Base_Start_IT(&BUZZ_TIMER);
-    //
+
     // HAL_TIM_PWM_Start(&BUZZ_TIMER, TIM_CHANNEL_1);
     // buzz(0);
-    //
-    // HAL_ADC_Start_DMA(&hadc1, (uint32_t*)value, 1);
-    // 
-    HAL_GPIO_WritePin(USER_LED_GPIO_Port, USER_LED_Pin, 0);
 
-    // while(1);
+    HAL_ADC_Start_DMA(&hadc1, (uint32_t*)value, 1);
+
+    HAL_GPIO_WritePin(USER_LED_GPIO_Port, USER_LED_Pin, 0);
 
     // ILI9341_HandleTypeDef ili9341 = ILI9341_Init(
     //     &hspi3,
@@ -154,21 +155,20 @@ void GitKop_Loop()
     // HAL_Delay(500);
     // HAL_GPIO_WritePin(USER_LED_GPIO_Port, USER_LED_Pin, 0);
     // HAL_Delay(500);
-    // if (rdy)
-    // {
-    //     // HAL_UART_Transmit(&huart2, ":)\n", 3, HAL_MAX_DELAY);
-    //     if (val > 2)
-    //     {
-    //         printf("[%lu] %u\n", HAL_GetTick(), val);
-    //         buzz(10+val*3);
-    //         // __HAL_TIM_SET_AUTORELOAD(&BUZZ_TIMER, 500+val*100);
-    //         // __HAL_TIM_SET_COMPARE(&BUZZ_TIMER, TIM_CHANNEL_1, 5000);
-    //     }
-    //     else
-    //     {
-    //         buzz(0);
-    //         // __HAL_TIM_SET_COMPARE(&BUZZ_TIMER, TIM_CHANNEL_1, 0);
-    //     }
-    //     rdy = 0;
-    // }
+    if (rdy)
+    {
+        if (val > 5)
+        {
+            printf("[%lu] %u\r\n", HAL_GetTick(), val);
+            buzz(10+val*3);
+            __HAL_TIM_SET_AUTORELOAD(&BUZZ_TIMER, 500+val*100);
+            __HAL_TIM_SET_COMPARE(&BUZZ_TIMER, TIM_CHANNEL_1, 5000);
+        }
+        else
+        {
+            buzz(0);
+            __HAL_TIM_SET_COMPARE(&BUZZ_TIMER, TIM_CHANNEL_1, 0);
+        }
+        rdy = 0;
+    }
 }
