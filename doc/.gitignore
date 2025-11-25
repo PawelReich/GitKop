@@ -1,2 +1,4 @@
 *.pdf
 *.gz
+*.log
+svg-inkscape
