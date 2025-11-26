@@ -149,12 +149,56 @@ gdzie $\mu$ to absolutna przenikalność magnetyczna materiału, a $\sigma$ to j
     \hfill\small źródło: Electromagnetics Explained, \cite{schmitt2002electromagnetics}, Electromagnetics with Applications \cite[p.~201]{kraus1999electromagnetics} 
 \end{table}
 
+\section{Sonda}
+
+Podstawowy wzór na indukcyjność cewki soleidalnej:
+
+\begin{equation}
+    L = \frac{\mu N^2 A}{l}
+    \label{eq:indukcyjnosc_cewki}
+\end{equation}
+gdzie $\mu$ oznacza przenikalność materiału użytego do wykonania cewki, N oznacza ilość wykonanych zwojów, A oznacza pole przekroju poprzecznego, l długość
+
+Wykrywacze metalu z reguły nie korzystają z tego rodzaju sondy.
+
+\begin{figure}[H]
+    \begin{center}
+        \includegraphics[width=0.95\textwidth]{./img/multiturn_cewka.png}
+    \end{center}
+    \caption{Przekrój poprzeczny cewki}\label{fig:poprz}
+\end{figure}
+
+
+\begin{equation}
+    L = \frac{0,8 (N A^2)}{6a + 9b + 10c}
+    \label{eq:indukcyjnosc_dobra}
+\end{equation}
+
+
+
 \section{Analiza porównawcza architektur detektorów}
 
 
 \subsection{BFO - Beat Frequency Oscillator}
 
-Technologia wykrywaczy metali oparta o generator zdudnieniowy (ang. \textit{Beat Frequency Oscillator}). Podstawowy system BFO opiera się \cite{moreland_bfo_theory}
+
+Technologia wykrywaczy metali oparta o generator zdudnieniowy (ang. \textit{Beat Frequency Oscillator}).
+Podstawowy system BFO opiera się o dwa oscylatory, będące dostrojone do jak najbliższej wspólnej częstotliwości.
+Do generowania żądanej częstotliwości wykorzystywane są przeważnie obwody rezonansowe LC.
+Pierwszy z oscylatorów, referencyjny, korzysta z cewki o zadanej indukcyjności.
+Oscylator szukający, używa sondy wykrywacza metali jako swoje źródło indukcyjności. \cite{moreland_bfo_theory}
+
+\begin{figure}[H]
+    \begin{center}
+        \includegraphics[width=0.7\textwidth]{./img/bfo_uklad.png}
+    \end{center}
+    \caption{Schemat podstawowego systemu BFO}\label{fig:bfo}
+\end{figure}
+\todo[inline]{przerysowac i przetlumaczyc na polski}
+
+Generowane przez układy rezonansowe sygnały wprowadzane są do mieszacza częstotliwości, który wyznacza sumę oraz różnicę obu częstotliwości.
+Wymieszany sygnał jest następnie traktowany filtrem dolnoprzepustowym, usuwającym wysokie składowe częstotliwości.
+Wyjście filtru
 
 \subsection{IB}
 
