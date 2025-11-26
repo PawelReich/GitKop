@@ -1,0 +1,30 @@
+\section{Analiza porównawcza architektur detektorów}
+
+\subsection{BFO - Beat Frequency Oscillator}
+
+
+Technologia wykrywaczy metali oparta o generator zdudnieniowy (ang. \textit{Beat Frequency Oscillator}).
+Podstawowy system BFO opiera się o dwa oscylatory, będące dostrojone do jak najbliższej wspólnej częstotliwości.
+Do generowania żądanej częstotliwości wykorzystywane są przeważnie obwody rezonansowe LC.
+Pierwszy z oscylatorów, referencyjny, korzysta z cewki o zadanej indukcyjności.
+Oscylator szukający, używa sondy wykrywacza metali jako swoje źródło indukcyjności. \cite{moreland_bfo_theory}
+
+\begin{figure}[H]
+    \begin{center}
+        \includegraphics[width=0.7\textwidth]{./img/bfo_uklad.png}
+    \end{center}
+    \caption{Schemat podstawowego systemu BFO}\label{fig:bfo}
+\end{figure}
+\todo[inline]{przerysowac i przetlumaczyc na polski}
+
+Generowane przez układy rezonansowe sygnały wprowadzane są do mieszacza częstotliwości, który wyznacza sumę oraz różnicę obu częstotliwości.
+Wymieszany sygnał jest następnie traktowany filtrem dolnoprzepustowym, usuwającym wysokie składowe częstotliwości.
+Wyjście filtru
+
+\subsection{IB}
+
+Przedstawiona przed doktora  \cite{doi:10.1098/rspl.1879.0012}.
+
+\subsection{PI - Pulse Induction}
+\cite{moreland2024inside}   
+

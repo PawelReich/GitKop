@@ -1,0 +1,29 @@
+\section{Elektrodynamika systemów wykrywania metali}
+
+Podstawą funkcjonowania wszystkich indukcyjnych wykrywaczy metali jest prawo indukcji Faradaya.
+Zjawisko to wiąże w czasie pole magnetyczne z indukowanym wirowym polem elektrycznym \cite[p.~302]{griffiths1999introduction}.
+Zgodnie z równaniem
+\begin{equation}
+\label{eq:prawo_faradaya}
+\nabla \times \mathbf{E} = - \frac{\partial \mathbf{B}}{\partial t}
+\end{equation}
+gdzie $\mathbf{E}$ oznacza wektor natężenia, a $\mathbf{B}$ oznacza wektor indukcji magnetycznej.
+
+\begin{figure}[htbp]
+  \centering
+  \includesvg[width=0.3\textwidth]{./img/Alternator_1.svg}
+  \caption{Schemat alternatora przedstawiający obracający się magnes (wirnik) i nieruchome uzwojenie drutu (stator) oraz napięcie wytwarzane, gdy obracające się pole magnetyczne indukuje prąd w przewodzie.}
+    \hfill\small źródło: wikipedia.org \cite{alternator_svg} 
+\end{figure}
+
+W kontekście inżynierii systemów detekcji cewka nadawcza zasilana prądem zmiennym lub impulsowym generuje zmienny strumień magnetyczny. Strumień ten penetruje przestrzeń, w tym potencjalne obiekty przewodzące oraz grunt. Zgodnie z przytoczonym prawem, zmienność strumienia w czasie ($\partial \mathbf{B}/\partial t$) indukuje siłę elektromotoryczną w każdym przewodniku objętym polem.
+
+Kluczowym mechanizmem, na którym opiera się detekcja, jest powstawanie prądów wirowych (ang. eddy currents). Prądy te, płynąc w zamkniętych pętlach wewnątrz materiału przewodzącego (w płaszczyznach prostopadłych do linii pola magnetycznego), generują własne, wtórne pole magnetyczne \cite{kriezis}. Istotę tego zjawiska wyjaśnia reguła Lenza, która stanowi, że kierunek indukowanego prądu jest taki, iż wytworzone przez niego pole magnetyczne przeciwdziała zmianie pola pierwotnego, które je wywołało \cite{kriezis}.
+
+\begin{equation}
+    \label{eq:prawo_lenza}
+    \mathcal{E} = -\frac{d \Phi_\mathbf{B}}{d t}
+\end{equation}
+
+To wzajemne oddziaływanie pól – pierwotnego (wymuszającego) i wtórnego (reakcyjnego) – prowadzi do mierzalnych zmian impedancji wzajemnej układu cewek lub zmian napięcia indukowanego w cewce odbiorczej, co stanowi sygnał użyteczny dla wykrywacza metalu.
+
