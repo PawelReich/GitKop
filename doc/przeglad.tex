@@ -2,8 +2,9 @@
 W niniejszym przeglądzie przyjęto założenia upraszczające szeroko stosowane w literaturze naukowej dotyczącej podstaw detekcji metali, pozwalających jednocześnie na uzyskanie rozwiązań o wysokiej wartości podczas rozważań inżynierskich:
 
 \begin{itemize}
-    \item Quasi-statyczna aproksymacja
-    \item Badany obiekt jest traktowany jako jednorodna sfera o zadanej konduktywności $\sigma$, przenikalności magnetycznej $\mu$ i promieniu $R$
+    \item Quasi-statyczna aproksymacja,
+    \item Badany obiekt jest traktowany jako jednorodna sfera o zadanej konduktywności $\sigma$, przenikalności magnetycznej $\mu$ i promieniu $R$,
+    \item Badany obiekt nie porusza się ($\mathbf{v}=0$).
 \end{itemize}
 
 \section{Elektrodynamika systemów wykrywania metali}
@@ -35,12 +36,57 @@ Kluczowym mechanizmem, na którym opiera się detekcja, jest powstawanie prądó
 
 To wzajemne oddziaływanie pól – pierwotnego (wymuszającego) i wtórnego (reakcyjnego) – prowadzi do mierzalnych zmian impedancji wzajemnej układu cewek lub zmian napięcia indukowanego w cewce odbiorczej, co stanowi sygnał użyteczny dla wykrywacza metalu.
 
+\section{Dyfuzja magnetyczna}
+
+\todo[inline]{wprowadzenie do dyfuzji magnetycznej}
+
+\subsection{Wyprowadzenie wzoru}
+
+Wyprowadzenie wzoru na dyfuzję magnetyczną przy założeniach określonych na wstępie do rozdziału można rozpocząć od wyznaczenia wzoru na gęstość prądu z prawa Ampère’a:
+\todo[inline]{opisać składowe równań}
+\begin{equation}
+    \label{eq:ampere}
+    \nabla \times \mathbf{B} = \mu \mathbf{J}
+\end{equation}
+\begin{equation}
+    \label{eq:gestosc_pradu}
+    \mathbf{J} = \frac{1}{\mu} (\nabla \times \mathbf{B})
+\end{equation}
+2. Prawo Ohma:
+\begin{equation}    
+    \label{eq:ohma}
+    \mathbf{J} = \sigma \mathbf{E}
+\end{equation}
+Łącząc wzór \ref{eq:gestosc_pradu} ze wzorem na gęstość prądu wynikającą z prawa Ohma, otrzymano wzór na pole elektryczne wyrażone przez pole magnetyczne
+\begin{equation}
+     \mathbf{E} = \frac{1}{\mu \sigma} (\nabla \times \mathbf{B})
+     \label{eq:elektryczne_przez_magnetyczne}
+\end{equation}
+Wiedząc, że gradient pola elektycznego jest równy ujemnej zmianie pola magnetycznego (równanie Maxwella-Faradaya, \ref{eq:prawo_faradaya})
+\begin{equation}
+\nabla \times \mathbf{E} = - \frac{\partial \mathbf{B}}{\partial t}
+      \tag{\ref{eq:prawo_faradaya}}
+\end{equation}
+podstawiono $\mathbf{E}$ ze wzoru \ref{eq:elektryczne_przez_magnetyczne}:
+\begin{equation}
+    \nabla \times \left( \frac{1}{\mu \sigma} (\nabla \times \mathbf{B}) \right) = - \frac{\partial \mathbf{B}}{\partial t}
+    \label{eq:test}
+\end{equation}
+Korzystając z tożsamości wektorowej
+
+$$\nabla \times (\nabla \times \mathbf{B}) = \nabla(\nabla \cdot \mathbf{B}) - \nabla^2 \mathbf{B}$$
+otrzymano:
+\begin{equation}
+    - \frac{1}{\mu \sigma} \nabla^2 \mathbf{B} = - \frac{\partial \mathbf{B}}{\partial t}
+    \label{eq:diffused_dirty}
+\end{equation}
+Po uporządkowaniu otrzymano równanie dyfuzji:
 \begin{equation}
     \label{eq:diffused}
     \nabla^2 \mathbf{B} = \mu \sigma \frac{\partial \mathbf{B}}{\partial t}
 \end{equation}
+
 gdzie $\mu$ to absolutna przenikalność magnetyczna materiału, a $\sigma$ to jego konduktywność (przewodność właściwa). Równanie to wskazuje, że interakcja pola z metalem nie jest natychmiastowa, lecz podlega procesom relaksacyjnym zależnym od właściwości materiałowych obiektu oraz częstotliwości fali pobudzającej. Prowadzi to do zjawiska naskórkowości (ang. skin effect), które ogranicza penetrację prądów wirowych do warstw powierzchniowych przy wyższych częstotliwościach, co ma fundamentalne znaczenie dla identyfikacji obiektów.
-%%
 
 \subsection{Zjawisko naskórkowości}
 
