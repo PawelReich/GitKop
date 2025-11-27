@@ -1,4 +1,6 @@
 \section{Sondy}
+\todo[inline]{dokładniej opisać teorię}
+Sonda to fundamentalna część wykrywacza metalu odpowiedzialna za interakcję z otoczeniem.
 
 Podstawowy wzór na indukcyjność cewki soleidalnej:
 
@@ -8,17 +10,63 @@ Podstawowy wzór na indukcyjność cewki soleidalnej:
 \end{equation}
 gdzie $\mu$ oznacza przenikalność materiału użytego do wykonania cewki, N oznacza ilość wykonanych zwojów, A oznacza pole przekroju poprzecznego, l długość
 
-Wykrywacze metalu z reguły nie korzystają z tego rodzaju sondy.
+
+\subsection{Przegląd wykorzystywanych typów cewek w wykrywaczach metali}
+
+\todo[inline]{tutaj podeprzeć źródłami}
+
+\subsubsection{Cewki koncentryczne}
+\begin{figure}[H]
+    \begin{center}
+        \includegraphics[width=0.6\textwidth]{img/minelab_concentric_coil.png}
+    \end{center}
+    \caption{Schemat działania cewki koncentrycznej}\label{fig:minelab_concentric_coil}
+    \hfill\small źródło: Minelab Electronics \cite{minelab_coils} 
+\end{figure}
+Cewki koncentryczne złożone są z dwóch uzwojeń: zewnętrznego, pełniącego funkcję nadawczą, oraz wewnętrzengo, odbierającą sygnał powrotny.
+Dzięki wąskiemu stożkowemu kształtowi generowanego pola elektromagnetycznego, cewka koncentryczna dobrze spełnia się podczas próby dokłądnego określenia położenia szukanego obiektu.
+
+\subsubsection{Cewki typu DD}
+\begin{figure}[H]
+    \begin{center}
+        \includegraphics[width=0.6\textwidth]{img/minelab_double_d_coil.png}
+    \end{center}
+    \caption{Schemat działania cewki typu DD}\label{fig:minelab_double_d_coil}
+    \hfill\small źródło: Minelab Electronics \cite{minelab_coils} 
+\end{figure}
+Cewki typu DD (Podwójne-D, ang. \textit{Double-D}). Składa się z dwóch częściowo nachodzących na siebie uzwojeń, jeden będący uzwojeniem nadawczym,
+drugi odbiorczym. Dzięki częściowemu nałożeniu na siebie, problem balansu gruntowego jest częściowo zniwelowany poprzez przesunięcie fazowe powstałe
+na skutek fizycznego przesunięcia uzwojeń. \todo[inline]{zweryfikować, podeprzeć}
+
+\subsubsection{Cewka typu \textit{monoloop}}
+\begin{figure}[H]
+    \begin{center}
+        \includegraphics[width=0.6\textwidth]{img/minelab_monoloop_coil.png}
+    \end{center}
+    \caption{Schemat działania cewki \textit{monoloop}}\label{fig:minelab_monoloop_coil}
+    \hfill\small źródło: Minelab Electronics \cite{minelab_coils} 
+\end{figure}
+
+Cewki \textit{monoloop} najczęściej stosowane są w urządzeniach wykorzystujących technikę wykrywania impulsowego.
+Składają się z jednego uzwojenia, pełniącego jednocześnie rolę nadawczą oraz odbiorczą.
+Produkuje pole elektromagnetyczne w kształcie stożka.
+
+\subsection{Analiza cewki typu \textit{monoloop}}
+
+% Jak wspomniano wcześniej, cewka typu \textit{monoloop} stosowana jest w wykrywaczach impulsowych.
+% W związku z budową prototypu wykrywacza metalu typu PI w niniejszym podroździale przybliżono teorię stojącą za tym rodzajem
 
 \begin{figure}[H]
     \begin{center}
         \includegraphics[width=0.95\textwidth]{./img/multiturn_cewka.png}
     \end{center}
-    \caption{Przekrój poprzeczny cewki}\label{fig:poprz}
+    \caption{Przekrój poprzeczny cewki monoloop}\label{fig:poprz}
+    \hfill\small źródło: C. Moreland \cite{moreland_bfo_theory} 
 \end{figure}
 
-
+Wzór na przybliżoną indukcyjność cewki:
 \begin{equation}
     L = \frac{0,8 (N A^2)}{6a + 9b + 10c}
-    \label{eq:indukcyjnosc_dobra}
+    \label{eq:indukcyjnosc_monoloop}
 \end{equation}
+
