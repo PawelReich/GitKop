@@ -28,7 +28,7 @@ Generowany sygnał pulsu o napięciu $3.3V$ jest wzmacniany przez dwa tranzystor
     \caption{sch cewki}
 \end{figure}
 
-Tranzystor $Q_3$ zwiera sondę do masy powodując przepływ prądu przez cewkę podłączoną do \textit{COIL1} i \textit{COIL2}. Po otwarciu tranzystora $Q_3$ na cewce indukowane jest napięcie, którego górnym limitem jest przez napięcie break-down $V_{brk}$ tranzystora. W celu umożliwienia rozładowania napięcia w cewce zastosowano dwie szybkie diody typu \textit{BAV19} połączone równolegle odwrotnie do siebie pozwalające na przepływ prądu dla napięcia powyżej $0.7V$. Efekt jest opóźniony prez zastosowanie rezystora $R_6$. Dla końcowego etapu rozładowywania cewki, czyli kiedy napięcie jest poniżej progu przewodzenia diody rezystor $R5$ wraz z potencjometrem $XX$\todo{brak na 3.3} umożliwia przepływ prądu. Potencjometr zastosowany jest, aby łatwo dostroić tłumienie cewki. Pożądane jest krytyczne tłumienie odpowiedzi sondy pozwalające na najdokładniejsze pomiary zmian. Na rysunku 2.4 narysowano porównanie odpowiedzi sondy nietłumionej, versus krytycznie tłumionej. Zademonstrowana odpowiedź jest mierzona za kondensatorem $C_1$.
+Tranzystor $Q_3$ zwiera sondę do masy powodując przepływ prądu przez cewkę podłączoną do \textit{COIL1} i \textit{COIL2}. Po otwarciu tranzystora $Q_3$ na cewce indukowane jest napięcie, którego górnym limitem jest przez napięcie break-down $V_{brk}$ tranzystora. W celu umożliwienia rozładowania napięcia w cewce zastosowano dwie szybkie diody typu \textit{BAV19} połączone równolegle odwrotnie do siebie pozwalające na przepływ prądu dla napięcia powyżej $0.7V$. Efekt jest opóźniony prez zastosowanie rezystora $R_6$. Dla końcowego etapu rozładowywania cewki, czyli kiedy napięcie jest poniżej progu przewodzenia diody rezystor $R5$ wraz z potencjometrem $XX$\todo{brak na 3.3} umożliwia przepływ prądu. Potencjometr zastosowany jest, aby łatwo dostroić tłumienie cewki. Pożądane jest krytyczne tłumienie odpowiedzi sondy pozwalające na najdokładniejsze pomiary zmian. Na rysunku 2.4 narysowano porównanie odpowiedzi sondy nietłumionej oraz krytycznie tłumionej. Zademonstrowana odpowiedź jest mierzona za kondensatorem $C_1$.
 
 \begin{figure}[H]
     \centering
@@ -46,8 +46,7 @@ Tranzystor $Q_3$ zwiera sondę do masy powodując przepływ prądu przez cewkę 
 
 
 \section{Sonda detekcyjna}
-Sonda detekcyjna wykonana została z miedzianego przewodu o przekroju 0.4mm. Cewka została nawinięta 31 razy w przekrój 15cm
-
+Sonda detekcyjna wykonana została z miedzianego przewodu o przekroju 0.4mm. Nawinięto 31 zwojów o średnicy 15cm
 \todo[inline]{tutaj eksport modelu obudowy}
 
 \section{Sygnał odpowiedzi}
@@ -68,7 +67,7 @@ W celu uzyskania pełnej odpowiedzi cewki zastosowana jest sztuczna masa wynosz�
     \end{center}
     \caption{sch}\label{fig:wzmocnienie}
 \end{figure}
-Uzyskana odpowiedź z cewki po przejściu przez kondensator usuwający offset DC podciągana jest do napięcia $VGND$ za pomocą rezystora $R_7$. Następnie odpowiedź jest mnożona 1000-krotnie w celu uwydatnienia ostatniej części odpowiedzi sygnału najbardziej podatnej na działanie powstałego pola magnetycznego. Uzyskane napięcie jest może być w okolicach napięcia zasilania $V_{cc}$, dlatego w celu dostosowania go do poziomu pozwalającego obsłużyć go przez zastosowany w wykrywaczu MCU zastosowano dzielnik napięcia wykonujący $\frac{1}{3}\cdot{}U_{8o}$. Tak wyznaczony sygnał nie jest wystarczająco silny, dlatego przechodzi on przez kopiujący wzmacniacz $U_1$. Warto zaznaczyć, że wzmacniacz MCP6281 jest typu rail-to-rail, pozwalający na operowanie na sygnałach bliskich napięciom zasilania $V_+$, jak i $V_-$ wzmacniacza. Poprzednie sekcje nie wymagały tej specjalnej właściwości. Tak przygotowany sygnał jest gotowy do analizy przez mikrokontroler. Dla dodatkowego bezpieczeństwa zastosowano diodę zenera $3.3V$ gwarantującą, że zakres napięć \textit{SIGNAL\_OUT} należy do zakresu obsługiwanego przez układ STM32F411RE.
+Uzyskana odpowiedź z cewki po przejściu przez kondensator usuwający offset DC podciągana jest do napięcia $VGND$ za pomocą rezystora $R_7$. Następnie odpowiedź jest mnożona 1000-krotnie w celu uwydatnienia ostatniej części odpowiedzi sygnału najbardziej podatnej na działanie powstałego pola magnetycznego. Uzyskane napięcie może posiadać wartość zbliżoną do napięcia zasilania $V_{cc}$, dlatego w celu dostosowania go do poziomu pozwalającego obsłużyć go przez zastosowany w wykrywaczu MCU zastosowano dzielnik napięcia wykonujący $\frac{1}{3}\cdot{}U_{8o}$. Tak wyznaczony sygnał nie jest wystarczająco silny, dlatego przechodzi on przez kopiujący wzmacniacz $U_1$. Warto zaznaczyć, że wzmacniacz MCP6281 jest typu rail-to-rail, pozwalający na operowanie na sygnałach bliskich napięciom zasilania $V_+$, jak i $V_-$ wzmacniacza. Poprzednie sekcje nie wymagały tej specjalnej właściwości. Tak przygotowany sygnał jest gotowy do analizy przez mikrokontroler. Dla dodatkowego bezpieczeństwa zastosowano diodę zenera $3.3V$ gwarantującą, że zakres napięć \textit{SIGNAL\_OUT} należy do zakresu obsługiwanego przez układ STM32F411RE.
 
 \section{Część cyfrowa}
 
@@ -84,7 +83,7 @@ Część cyfrowa wykrywacza metalu oparta jest o układ \textbf{STM32H523CE}. Te
 
 \subsection{Liczniki sprzętowe}
 \label{subsec:timery}
-Wykorzystywane są dwa 16-bitowe liczniki sprz1ętowe napędzane za pomocą zegara \textit{APB2} skonfigurowanego na taktowanie z częstotliwością $F_{timer}=72Mhz$. Częstotliwość przepełnienia licznika sprzętowego można wyznaczyć za pomocą poniższego równania: 
+Wykorzystywane są dwa 16-bitowe liczniki sprzętowe napędzane za pomocą zegara \textit{APB2} skonfigurowanego na taktowanie z częstotliwością $F_{timer}=72Mhz$. Częstotliwość przepełnienia licznika sprzętowego można wyznaczyć za pomocą poniższego równania: 
 
 \begin{equation}
 F_{output}=\frac{F_{timer}}{(PSC+1)(ARR+1)}
@@ -96,7 +95,7 @@ gdzie PSC oznacza Prescaler, natomiast ARR oznacza Auto Reload Register
 Licznik \textit{TIM10} pełni funkcję maszyny stanów zarządzając aktualnym stanem sygnału \textit{PULSE\_OUT}.
 W celu zachowania dokładności przy jednoczesnym jak najmniejszym obciążeniu MCU licznik wywołuje przerwania w częstotliwości $F_{output}=1\mu s$ poprzez konfigurację $PSC=0, ARR=71$.
 
-Podczas pracy układu cyfrowego w funkcji przerwania sprawdzana jest wartość zmiennej inkrementowanej co każde wywołanie przerwania. Jeżeli licznik jest równy 0, wystawiany jest sygnał +3.3V na pin 1 (PULSE\_OUT) układu. Następnie w pożądanym momencie sygnał wyjściowy jest wygaszony, co pozwala na dynamiczną konfigurację długości impulsu wysyłanego do cewki.
+Podczas pracy układu cyfrowego w funkcji przerwania sprawdzana jest wartość zmiennej inkrementowanej co każde wywołanie przerwania. Jeżeli licznik jest równy 0, wystawiany jest sygnał +3.3V na pin 1 (PULSE\_OUT) układu, powodując otwarcie tranzystora MOSFET. Następnie w pożądanym momencie sygnał wyjściowy jest wygaszony, co pozwala na dynamiczną konfigurację długości impulsu wysyłanego do cewki.
 
 \begin{lstlisting}[language=c++, caption={Funkcja zarządzająca stanem sygnału wyjściowego}]
 void PulseOut_Handler() {
