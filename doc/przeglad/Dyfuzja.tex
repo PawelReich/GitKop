@@ -1,11 +1,17 @@
 \section{Dyfuzja magnetyczna}
 
-\todo[inline]{wprowadzenie do dyfuzji magnetycznej}
+Wykrywacze metalu z wbudowaną funkcjonalnością dyskryminacji metalu pozwalają na selektywne ofiltrowanie sygnałów od niepożądanych obiektów.
+Działają na podstawie właściwości materiału badanego:
+\begin{itemize}
+    \item przenikalność magnetyczna
+    \item przewodność właściwa
+\end{itemize}
+Umożliwia to użytkownikowi urządzenia natychmiastowe i nieinwazyjne ustalenie rodzaju wykrytego metalu.
+Zwiększa to efektywność poszukiwań, pozwalając na wczesne odrzucenie sygnału w przypadku podejrzenia wykrycia niepożądanego obiektu.
 
 \subsection{Wyprowadzenie wzoru}
 
-Wyprowadzenie wzoru na dyfuzję magnetyczną przy założeniach określonych na wstępie do rozdziału można rozpocząć od wyznaczenia wzoru na gęstość prądu z prawa Ampère’a:
-\todo[inline]{opisać składowe równań}
+Wyprowadzenie wzoru na dyfuzję magnetyczną przy założeniach określonych na wstępie do rozdziału można rozpocząć od wyznaczenia wzoru na gęstość prądu z równania Ampère'a-Maxwella:
 \begin{equation}
     \label{eq:ampere}
     \nabla \times \mathbf{B} = \mu \mathbf{J}
@@ -14,12 +20,15 @@ Wyprowadzenie wzoru na dyfuzję magnetyczną przy założeniach określonych na
     \label{eq:gestosc_pradu}
     \mathbf{J} = \frac{1}{\mu} (\nabla \times \mathbf{B})
 \end{equation}
-2. Prawo Ohma:
+gdzie $\mathbf{B}$ jest polem magnetycznym, $\mu$ jest przenikalnością magnetyczną materiału, $\mathbf{J}$ jest gęstością prądu elektrycznego.
+\\Wzór na gęstość prądu wynikający z prawa Ohma:
 \begin{equation}    
     \label{eq:ohma}
     \mathbf{J} = \sigma \mathbf{E}
 \end{equation}
-Łącząc wzór \ref{eq:gestosc_pradu} ze wzorem na gęstość prądu wynikającą z prawa Ohma, otrzymano wzór na pole elektryczne wyrażone przez pole magnetyczne
+gdzie $\sigma$ oznacza konduktywność prądu, $\mathbf{E}$ oznacza pole elektryczne
+
+Łącząc wzór \ref{eq:gestosc_pradu} ze wzorem na gęstość prądu wynikającą z prawa Ohma (\ref {eq:ohma}, otrzymano wzór na pole elektryczne wyrażone przez pole magnetyczne:
 \begin{equation}
      \mathbf{E} = \frac{1}{\mu \sigma} (\nabla \times \mathbf{B})
      \label{eq:elektryczne_przez_magnetyczne}
