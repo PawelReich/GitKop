@@ -491,7 +491,7 @@
       "plot": "gerber/",
       "pos_files": "",
       "specctra_dsn": "",
-      "step": "",
+      "step": "GitKop.step",
       "svg": "",
       "vrml": ""
     },
