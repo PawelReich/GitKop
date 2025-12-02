@@ -111,3 +111,5 @@
 
 \usepackage[sorting=none]{biblatex}
 \addbibresource[glob=true]{bib/*}
+
+\DeclareUnicodeCharacter{03B4}{\ensuremath{\delta}}

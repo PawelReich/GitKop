@@ -29,8 +29,43 @@ Oscylator szukający, używa sondy wykrywacza metali jako swoje źródło indukc
 \todo[inline]{przerysowac i przetlumaczyc na polski}
 
 Generowane przez układy rezonansowe sygnały wprowadzane są do mieszacza częstotliwości, który wyznacza sumę oraz różnicę obu częstotliwości.
-Wymieszany sygnał jest następnie traktowany filtrem dolnoprzepustowym, usuwającym wysokie składowe częstotliwości.
-Wyjście filtru
+
+Przy założeniu dwóch sygnałów sinusoidalnych:
+\begin{equation}
+    V_s(t) = A_s \cos(2\pi f_{search} t)
+    \label{eq:bfo_v_s_t}
+\end{equation}
+gdzie $V_s(t)$ jest sygnałem sterującym cewką szukającą, $A_s$ amplidudą napięcia, $f_{search}$ częstotliwością sygnału.
+
+oraz
+
+\begin{equation}
+    V_r(t) = A_r \cos(2\pi f_{ref} t)
+    \label{eq:bfo_v_r_t}
+\end{equation}
+gdzie $V_r(t)$ jest sygnałem referencyjnym, $A_r$ amplidudą napięcia, $f_{ref}$ częstotliwością sygnału referencyjnego.
+
+Wykonywane jest mieszanie sygnałów \ref{eq:bfo_v_s_t} oraz \ref{eq:bfo_v_r_t}, co idealnie oznacza ich mnożenie opisywanym przez tożsamość trygonometryczną:
+\begin{equation}
+    \cos(\alpha)\cos(\beta) = \frac{1}{2} [\cos(\alpha - \beta) + \cos(\alpha + \beta)]
+    \label{eq:mnozenie_cosinusow}
+\end{equation}
+Produkt sygnałów opisuje równanie:
+\begin{equation}
+    V_{mix}(t) \propto \frac{A_s A_r}{2} [\cos(2\pi(f_{search} - f_{ref})t) + \cos(2\pi(f_{search} + f_{ref})t)]
+    \label{eq:produkt_bfo}
+\end{equation}
+gdzie $V_{mix}(t)$ to sygnał wychodzący z mieszacza.
+
+Wymieszany sygnał zawiera dwie składowe:
+
+\begin{itemize}
+    \item sumę częstotliwości, którą należy odfiltrować (około kilkuset kHz)
+    \item różnicę częstotliwości, będącą słyszalnym dudnieniem (około kilku kHz)
+\end{itemize}
+Wymieszany sygnał jest następnie traktowany filtrem dolnoprzepustowym, usuwającym wysoką składową częstotliwości.
+Ze względu na prostotę 
+
 
 \subsection{IB - Induction Balance}
 
