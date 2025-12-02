@@ -3,8 +3,8 @@
 Wykrywacze metalu z wbudowaną funkcjonalnością dyskryminacji metalu pozwalają na selektywne ofiltrowanie sygnałów od niepożądanych obiektów.
 Działają na podstawie właściwości materiału badanego:
 \begin{itemize}
-    \item przenikalność magnetyczna
-    \item przewodność właściwa
+    \item przenikalność magnetyczna $\mu$
+    \item przewodność właściwa $\sigma$
 \end{itemize}
 Umożliwia to użytkownikowi urządzenia natychmiastowe i nieinwazyjne ustalenie rodzaju wykrytego metalu.
 Zwiększa to efektywność poszukiwań, pozwalając na wczesne odrzucenie sygnału w przypadku podejrzenia wykrycia niepożądanego obiektu.
@@ -21,18 +21,19 @@ Wyprowadzenie wzoru na dyfuzję magnetyczną przy założeniach określonych na
     \mathbf{J} = \frac{1}{\mu} (\nabla \times \mathbf{B})
 \end{equation}
 gdzie $\mathbf{B}$ jest polem magnetycznym, $\mu$ jest przenikalnością magnetyczną materiału, $\mathbf{J}$ jest gęstością prądu elektrycznego.
-\\Wzór na gęstość prądu wynikający z prawa Ohma:
+
+Wzór na gęstość prądu wynikający z prawa Ohma:
 \begin{equation}    
     \label{eq:ohma}
     \mathbf{J} = \sigma \mathbf{E}
 \end{equation}
-gdzie $\sigma$ oznacza konduktywność prądu, $\mathbf{E}$ oznacza pole elektryczne
-
-Łącząc wzór \ref{eq:gestosc_pradu} ze wzorem na gęstość prądu wynikającą z prawa Ohma (\ref {eq:ohma}, otrzymano wzór na pole elektryczne wyrażone przez pole magnetyczne:
+gdzie $\sigma$ oznacza konduktywność (przewodność właściwa) materiału, $\mathbf{E}$ oznacza pole elektryczne.
+Łącząc wzór \ref{eq:gestosc_pradu} ze wzorem na gęstość prądu wynikającą z prawa Ohma (\ref{eq:ohma}), otrzymano wzór na pole elektryczne wyrażone przez pole magnetyczne:
 \begin{equation}
      \mathbf{E} = \frac{1}{\mu \sigma} (\nabla \times \mathbf{B})
      \label{eq:elektryczne_przez_magnetyczne}
 \end{equation}
+
 Wiedząc, że gradient pola elektycznego jest równy ujemnej zmianie pola magnetycznego (równanie Maxwella-Faradaya, \ref{eq:prawo_faradaya})
 \begin{equation}
 \nabla \times \mathbf{E} = - \frac{\partial \mathbf{B}}{\partial t}
@@ -57,9 +58,29 @@ Po uporządkowaniu otrzymano równanie dyfuzji:
     \nabla^2 \mathbf{B} = \mu \sigma \frac{\partial \mathbf{B}}{\partial t}
 \end{equation}
 
-gdzie $\mu$ to absolutna przenikalność magnetyczna materiału, a $\sigma$ to jego konduktywność (przewodność właściwa). Równanie to wskazuje, że interakcja pola z metalem nie jest natychmiastowa, lecz podlega procesom relaksacyjnym zależnym od właściwości materiałowych obiektu oraz częstotliwości fali pobudzającej. Prowadzi to do zjawiska naskórkowości (ang. skin effect), które ogranicza penetrację prądów wirowych do warstw powierzchniowych przy wyższych częstotliwościach, co ma fundamentalne znaczenie dla identyfikacji obiektów.
+Równanie to wskazuje, że interakcja pola z metalem nie jest natychmiastowa, lecz podlega procesom relaksacyjnym zależnym od właściwości materiałowych obiektu oraz częstotliwości fali pobudzającej. Prowadzi to do zjawiska naskórkowości (ang. skin effect), które ogranicza penetrację prądów wirowych do warstw powierzchniowych przy wyższych częstotliwościach, co ma fundamentalne znaczenie dla identyfikacji obiektów \cite{moreland2024inside}.
 
 \subsection{Zjawisko naskórkowości}
+
+Gdy w przewodniku płynie prąd o dużej częstotliwości ma on tendencję do poruszania się po jego powierzchni zewnętrzenej. Jest to zjawisko naskórkowości, wyraźny przy większych częstotliwościach.
+Ma ono wpływ na głębokość penetracji fal elektromagnetycznych w głąb badanego obiektu. Zjawisko naskórkowości zaczyna być zauważalne przy częstotliwościach powyżej 100kHz. Jeżeli fala elektromagnetyczna generowana przez wykrywacz metalu sięga badany obiekt tylko na niewielką głębkokość, może zostać błędnie zinterpretowany \cite{moreland2024inside}.
+
+Wzór na głębokość naskórkowości definiuje głębokość, w której amplituda fali maleje do $e^{-1} \approx 36,9\% $ \cite{schmitt2002electromagnetics}: 
+
+\begin{equation}
+    \delta = \frac{1}{\sqrt{\pi f \mu \sigma}}
+    \label{eq:skin_effect}
+\end{equation}
+gdzie $f$ to częstotliwość fali elektromagnetycznej, $\mu$ to przenikalność magnetyczna przewodnika, $\sigma$ to konduktywność przewodnika.
+
+\begin{figure}[H]
+    \begin{center}
+        \includesvg[width=0.4\textwidth]{./img/Skin_depth.svg}
+    \end{center}
+    \caption{Rozkład przepływu prądu w przewodniku cylindrycznym, pokazany na przekroju poprzecznym.}
+    \label{fig:skin_effect}
+    \hfill\small źródło: wikipedia.org \cite{skin_effect_svg} 
+\end{figure}
 
 \begin{table}[H]
     \centering
