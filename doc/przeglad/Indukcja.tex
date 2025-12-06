@@ -1,0 +1,52 @@
+\section{Zasada indukcji i konstrukcja cewki}
+
+Sonda to część wykrywacza metalu odpowiedzialna za interakcję z otoczeniem.
+Stanowi interfejs fizyczny pomiędzy układem elektronicznym wykrywacza a badanym ośrodkiem.
+Jej rolą jest generacja strumienia magnetycznego penetrującego grunt, ale również odbiór sygnałów wtórnych,
+w których zaszyte informacje na temat obiektów są często wiele rzędów słabsze od wszechobecnego tła.
+
+Podstawą działania sondy wykrywacza metali jest zjawisko indukcji elektromagnetycznej, polegające na sprzęganiu dwóch obwodów poprzez zmienne pole magnetyczne. Aby wzmocnić pole magnetyczne, przewód formowany jest w cewkę o wielu zwojach, co pozwala na "skupienie" strumienia magnetycznego w jej centrum. Siła generowanego pola magnetycznego zależy od natężenia prądu, wymiarów cewki oraz liczby zwojów \cite{moreland_induction}.
+
+
+Dla cewki solenoidalnej maksymalne natężenie pola magnetycznego $\mathbf{B}$ w jej centrum można wyrazić wzorem:
+
+\begin{equation}
+    \mathbf{B}=\frac{\mu NI}{2R}
+    \label{eq:coil_field}
+\end{equation}
+gdzie $\mu$ - przenikalność magnetyczna rdzenia (dla cewek powietrznych $\mu \approx 4\pi\times10^{-7}$ H/m), $N$ - liczba zwojów cewki, $I$ - natężenie prądu płynącego przez cewkę, $R$ - promień cewki.
+
+Podstawowy wzór na indukcyjność cewki soleidalnej:
+
+\begin{equation}
+    L = \frac{\mu N^2 A}{l}
+    \label{eq:indukcyjnosc_cewki}
+\end{equation}
+gdzie $\mu$ oznacza przenikalność materiału użytego do wykonania cewki, $N$ oznacza ilość wykonanych zwojów, $A$ oznacza pole przekroju poprzecznego, $l$ długość cewki
+
+\subsection{Sprzężenie zwrotne i przesunięcia fazowe}
+
+Zgodnie z przetoczonym we wcześniejszej sekcji prawem Faradaya (\ref{eq:prawo_faradaya}), zmienne pole magnetyczne cewki nadawczej indukuje prądy wirowe w przewodzącym obiekcie znajdującym się w zasięgu pola. Prądy te krążą w materiale, wytwarzając własne, wtórne pole elektromagnetyczne, skierowane przeciwnie do pola pierwotnego.
+
+Istotnym aspektem detekcji jest analiza przesunięcia fazowego. W procesie indukcji występuje przesunięcie o 90 stopni między polem elektromagnetycznym a indukowanym napięciem. W rezultacie, pole wtórne wytworzone przez prądy wirowe jest przesunięte w fazie względem pola nadawczego.
+
+Wykrywacze dyskryminujące wykorzystują ten fakt, analizując powstałe przesunięcie fazowe w celu odróżnienia wykrytego rodzaju przewodnika. Metale o wysokiej przewodności (np. srebro) wykazują przesunięcie fazowe zbliżone do $180^{\circ}$ względem sygnału nadawczego \cite{moreland_induction}.
+
+
+\subsection{Balans gruntowy}
+
+\begin{figure}[H]
+    \begin{center}
+        \includegraphics[width=0.3\textwidth]{img/efekt_gruntu.png}
+    \end{center}
+    \caption{Wpływ gruntu na tworzone pole magnetyczne}\label{fig:efekt_gruntu}
+    \hfill\small źródło: C. Moreland \cite{moreland_coils} 
+\end{figure}
+\todo[inline]{przetlumaczyc}
+
+Ziemia nie jest ośrodkiem neutralnym elektromagnetycznie. Zawiera tlenki żelaza (magnetyt, maghemit) o właściwościach ferromagnetycznych oraz sole przewodzące prąd (woda morska) \cite{soil_properties}.
+Elementy te zaburzają pole magnetyczne, co wpływa na sygnał powracający do wykrywacza oraz głębokość penetracji fali w kierunku gruntu \cite{moreland_coils}.
+Wykrywacze metalu posiadają mechanizm niwelowania wpływu gruntu na końcową informację o wykrytym obiekcie przedstawianą użytkownikowi.
+W prostszych urządzeniach jest on realizowany za pomocą pokrętła umożliwającego wprowadzenie oraz konfigurację balansu gruntowego usuwającego efekt tła (ang. \textit{ground balance}).
+
+

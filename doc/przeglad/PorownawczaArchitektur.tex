@@ -1,7 +1,9 @@
 \section{Analiza porównawcza architektur detektorów}
 
 \subsection{Problemy różnych rodzajów wykrywaczy}
-\todo[inline]{napisać}
+Różne technologie wykrywaczy metali posiadają swoje mocne, jak i słabe strony.
+W niniejszym rozdziale zostanie przeprowadzona analiza porównawcza popularnych architektur detektorów oraz omówione ich własności takie jak:
+
 \begin{itemize}
     \item Balans gruntowy
     \item Głębokość penetracji
@@ -20,30 +22,114 @@ Do generowania żądanej częstotliwości wykorzystywane są przeważnie obwody 
 Pierwszy z oscylatorów, referencyjny, korzysta z cewki o zadanej indukcyjności.
 Oscylator szukający, używa sondy wykrywacza metali jako swoje źródło indukcyjności. \cite{moreland_bfo_theory}
 
+% \begin{figue}[H]
+%     \begin{center}
+%         \includegraphics[width=0.7\textwidth]{./img/bfo_uklad.png}
+%     \end{center}
+%     \caption{Schemat podstawowego systemu BFO}\label{fig:bfo}
+% \end{figure}
+% \todo[inline]{przerysowac i przetlumaczyc na polski}
 \begin{figure}[H]
     \begin{center}
-        \includegraphics[width=0.7\textwidth]{./img/bfo_uklad.png}
+\begin{tikzpicture}[
+    % Styl dla bloków prostokątnych
+    block/.style={
+        draw, 
+        rectangle, 
+        minimum width=2.5cm, 
+        minimum height=1.2cm, 
+        align=center, 
+        font=\sffamily
+    },
+    % Styl dla miksera (koło)
+    mixer/.style={
+        draw, 
+        circle, 
+        minimum size=1.5cm, 
+        align=center, 
+        font=\sffamily
+    },
+    % Styl dla strzałek
+    arrow/.style={
+        -{Latex[length=3mm]}, 
+        thick
+    },
+    % Styl dla etykiet tekstowych (częstotliwości)
+    label_text/.style={
+        font=\large\itshape
+    }
+]
+
+    % --- Rozmieszczenie węzłów (Nodes) ---
+
+    % Oscylator sondujący (górny)
+    \node[block] (search_osc) at (0, 2.5) {Oscylator\\szukający};
+
+    % Oscylator odniesienia (dolny)
+    \node[block] (ref_osc) at (0, -2.5) {Oscylator\\referencyjny};
+
+    % Mikser (po prawej, wyśrodkowany w pionie)
+    \node[mixer] (mixer) at (4, 0) {Mieszacz};
+
+    % Filtr dolnoprzepustowy
+    \node[block] (lpf) at (8, 0) {Filtr\\dolnoprzepustowy};
+
+    \coordinate (output) at (11, 0);
+
+
+    \draw[thick] ($(search_osc.west) + (-1.2, 0)$) coordinate (coil_center) circle (0.5cm);
+    \draw[thick] (coil_center) circle (0.35cm);
+    \draw[thick] ($(coil_center) + (0.35, 0.1)$) -- ($(search_osc.west) + (0, 0.1)$);
+    \draw[thick] ($(coil_center) + (0.35, -0.1)$) -- ($(search_osc.west) + (0, -0.1)$);
+    \draw[thick, decoration={coil, aspect=0.4, segment length=2mm, amplitude=2mm, pre length=1mm, post length=1mm}, decorate] 
+        ($(ref_osc.west) + (-1.5, 0.4)$) -- ($(ref_osc.west) + (-1.5, -0.4)$);
+    \draw[thick] ($(ref_osc.west) + (-1.5, 0.4)$) -- ($(ref_osc.west) + (0, 0.4)$);
+    \draw[thick] ($(ref_osc.west) + (-1.5, -0.4)$) -- ($(ref_osc.west) + (0, -0.4)$);
+
+
+    \draw[arrow] (search_osc.east) -| (mixer.north) 
+        node[midway, left, yshift=10pt, label_text] {$f_{search}$};
+    \draw[arrow] (ref_osc.east) -| (mixer.south) 
+        node[midway, left, yshift=-10pt, label_text] {$f_{ref}$};
+    \draw[arrow] (mixer.east) -- (lpf.west) 
+        node[midway, above, label_text] {$f_s+f_r$}
+        node[midway, below, label_text] {$f_s-f_r$};
+    \draw[arrow] (lpf.east) -- (output) 
+        node[right, label_text] {$f_s-f_r$};
+
+\end{tikzpicture}
     \end{center}
     \caption{Schemat podstawowego systemu BFO}\label{fig:bfo}
 \end{figure}
-\todo[inline]{przerysowac i przetlumaczyc na polski}
 
+Kluczowym procesem zachodzącym w wykrywaczach wykorzystujących BFO jest mieszanie sygnałów. 
 Generowane przez układy rezonansowe sygnały wprowadzane są do mieszacza częstotliwości, który wyznacza sumę oraz różnicę obu częstotliwości.
+
+Przy założeniu częstotliwości generowanych przez oscylatory opisanych wzorami Thomsona:
+\begin{equation}
+    f_{ref} = \frac{1}{2\pi\sqrt{LC}}  
+    \label{eq:bfo_f_ref}
+\end{equation}
+gdzie $L$ oraz $C$ to parametry odpowiednio indukcyjności oraz pojemności oscylatorów
+
+\begin{equation}
+    f_{search} = \frac{1}{2\pi\sqrt{(L_0 \pm \Delta L)C}}
+    \label{eq:bfo_f_search}
+\end{equation}
+gdzie $L_0$ to indukcyjność własna cewki (idealnie $L$), $\Delta L$ to jej zmiana wywołanej przez obiekt
 
 Przy założeniu dwóch sygnałów sinusoidalnych:
 \begin{equation}
     V_s(t) = A_s \cos(2\pi f_{search} t)
     \label{eq:bfo_v_s_t}
 \end{equation}
-gdzie $V_s(t)$ jest sygnałem sterującym cewką szukającą, $A_s$ amplidudą napięcia, $f_{search}$ częstotliwością sygnału.
-
-oraz
+gdzie $V_s(t)$ jest sygnałem sterującym cewką szukającą, $A_s$ amplidudą napięcia.
 
 \begin{equation}
     V_r(t) = A_r \cos(2\pi f_{ref} t)
     \label{eq:bfo_v_r_t}
 \end{equation}
-gdzie $V_r(t)$ jest sygnałem referencyjnym, $A_r$ amplidudą napięcia, $f_{ref}$ częstotliwością sygnału referencyjnego.
+gdzie $V_r(t)$ jest sygnałem referencyjnym, $A_r$ amplidudą napięcia.
 
 Wykonywane jest mieszanie sygnałów \ref{eq:bfo_v_s_t} oraz \ref{eq:bfo_v_r_t}, co idealnie oznacza ich mnożenie opisywanym przez tożsamość trygonometryczną:
 \begin{equation}
@@ -64,13 +150,90 @@ Wymieszany sygnał zawiera dwie składowe:
     \item różnicę częstotliwości, będącą słyszalnym dudnieniem (około kilku kHz)
 \end{itemize}
 Wymieszany sygnał jest następnie traktowany filtrem dolnoprzepustowym, usuwającym wysoką składową częstotliwości.
-Ze względu na prostotę 
+
+
+Ze względu na prostotę wykrywacze stosujące technologię BFO rzadko są stosowane w warunkach profesjonalnych.
+Urządzenia oparte o generator zdudnieniowy wymagają częstej rekalibracji, szczególnie w wysokozmineralizowanych glebach \cite{moreland_bfo_theory}.
 
 
 \subsection{IB - Induction Balance}
 
-Oryginalnie przedstawiona przed doktora  \cite{doi:10.1098/rspl.1879.0012}.
+\begin{figure}[H]
+    \begin{center}
+\begin{tikzpicture}[
+    % Styl dla bloków
+    block/.style={
+        draw,
+        rectangle,
+        minimum width=3cm,
+        minimum height=1.5cm,
+        align=center,
+        font=\sffamily,
+        line width=1pt
+    },
+    % Styl dla linii połączeniowych (grubsze, jak na rysunku)
+    connector/.style={
+        line width=2pt
+    }
+]
+
+    % --- Umieszczenie bloków ---
+    % Blok lewy
+    \node[block] (nadawczy) at (0,0) {układ\\nadawczy};
+
+    % Blok prawy (odsunięty w prawo)
+    \node[block] (odbiorczy) at (7,0) {układ\\odbiorczy};
+
+
+    % --- Rysowanie pętli sprzęgających ---
+    % Definiujemy środek obszaru między blokami
+    \coordinate (middle) at ($(nadawczy.east)!0.5!(odbiorczy.west)$);
+
+    % Rysujemy dwie przecinające się elipsy (pętle)
+    % Lewa pętla (przesunięta nieco w lewo od środka)
+    \draw[connector] ($(middle)+(-0.6,0)$) ellipse (0.8cm and 0.6cm);
+
+    % Prawa pętla (przesunięta nieco w prawo od środka)
+    % Rysujemy ją po lewej, aby nałożyć się na nią
+    \draw[connector] ($(middle)+(0.6,0)$) ellipse (0.8cm and 0.6cm);
+
+
+    % --- Linie łączące bloki z pętlami ---
+    % Linia od układu nadawczego do lewej krawędzi lewej pętli
+    % (Obliczamy punkt styku na podstawie środka i promienia elipsy)
+    \draw[connector] (nadawczy.east) -- ($(middle)+(-0.6-0.8, 0)$);
+
+    % Linia od układu odbiorczego do prawej krawędzi prawej pętli
+    \draw[connector] (odbiorczy.west) -- ($(middle)+(0.6+0.8, 0)$);
+
+\end{tikzpicture}
+    \end{center}
+    \caption{Schemat działania wykrywacza balansu indukcyjnego}\label{fig:ib_schemat}
+\end{figure}
+
+
+Oryginalnie przedstawiona przed doktora Davida Edwarda Hughesa \cite{doi:10.1098/rspl.1879.0012} w 1879 technologia z powodzeniem używana współcześnie.
+Sonda zbudowana jest z dwóch obwodów - nadawczego oraz odbiorczego. Cewka nadawcza sterowana jest stabilnym sygnałem sinusoidalnym o niskiej częstotliwości (typowo 5-20kHz) \cite{Mazurek_Wdowiak_2015}.
+Z tego powodu technologia ta jest znana również pod nazwą VLF (ang. Very Low Frequency).
+
+Wytwarzane przez cewkę nadawczą zmienne pole elektromagnetyczne odbierane jest przez cewkę odbiorczą.
+W stanie neutralnym (brak przewodników w pobliżu) kostrukcja sondy powoduje zminimalizowanie sygnału powrotnego.
+Umieszczenie w zasięgu działania sondy obiektu mającego wpływ na generowane pole elektromagnetyczne powoduje zakłócenie równowagi.
+Rodzaj przewodnika, a także wielkość oraz odległość od obiektu ma wpływ na amplitudę oraz fazę sygnału odbieranego przez cewkę odbiorczą, co pozwala na przeprowadzenie dyskryminacji rodzaju metalu, z jakiego jest stworzony badany obiekt.
 
 \subsection{PI - Pulse Induction}
-\cite{moreland2024inside}   
 
+\todo[inline]{Schemat blokowy, na podstawie piperformance}
+
+W przeciwieństwie do wcześniej opisywanych, technologia indukcji impulsowej (ang. \textit{Pulse Induction}) operuje w dziedzinie czasu. 
+Sonda najczęściej zbudowana z pojedynczej cewki typu monoloop pełniąca rolę nadawczej oraz odbiorczej.
+Wykrywacz generuje impuls prądu generujący pole magnetyczne penetrujące przestrzeń. Po gwałtownym odcięciu przepływu prądu, pole zanika, co indukuje prądy wirowe w badanym obiekcie \cite{pi_performance}.
+Układ odbiorczy mierzy oraz porównuje zmianę prędkości zaniku sygnału powracającego oraz jego kształt \cite{Mazurek_Wdowiak_2015} \cite{moreland2024inside}.
+
+Pasożytnicza pojemność cewki $C_p$ (wraz z pojemnością kabla) tworzy z indukcyjnością $L$ obwód rezonansowy, który ma tendencję do oscylacji. Oscylacje te maskują słabe sygnały pochodzące z badanych obiektów w fazie odbioru. Aby wygasić oscylacje w minimalnym czasie bez przeregulowania, konieczne jest zastosowanie rezystora tłumiącego $R_d$ włączonego równolegle do cewki.
+
+Wartość dla tłumienia krytycznego wynosi:
+\begin{equation}
+    R_{crit} = \frac{1}{2} \sqrt{\frac{L}{C_p}}
+    \label{eq:pi_crit}
+\end{equation}

@@ -36,7 +36,9 @@
 
 \usepackage{booktabs} % Zalecany pakiet do ładniejszych linii w tabelach
 \usepackage{svg}
-
+\usepackage{tikz}
+\usetikzlibrary{positioning, arrows.meta} % Biblioteki do pozycjonowania i ładniejszych strzałek
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning, decorations.pathmorphing, calc}
 \titleformat{\chapter}[hang]
 {\normalfont\fontsize{12}{15}\bfseries\MakeUppercase}{\thechapter.}{1em}{}
 \titlespacing*{\chapter}{0pt}{12pt}{6pt}

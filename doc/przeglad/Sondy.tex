@@ -1,21 +1,6 @@
-\section{Sondy}
-\todo[inline]{dokładniej opisać teorię}
-Sonda to fundamentalna część wykrywacza metalu odpowiedzialna za interakcję z otoczeniem.
+\section{Przegląd wykorzystywanych typów cewek w wykrywaczach metali}
 
-Podstawowy wzór na indukcyjność cewki soleidalnej:
-
-\begin{equation}
-    L = \frac{\mu N^2 A}{l}
-    \label{eq:indukcyjnosc_cewki}
-\end{equation}
-gdzie $\mu$ oznacza przenikalność materiału użytego do wykonania cewki, N oznacza ilość wykonanych zwojów, A oznacza pole przekroju poprzecznego, l długość
-
-
-\subsection{Przegląd wykorzystywanych typów cewek w wykrywaczach metali}
-
-\todo[inline]{tutaj podeprzeć źródłami}
-
-\subsubsection{Cewki koncentryczne}
+\subsection{Cewki koncentryczne}
 \begin{figure}[H]
     \begin{center}
         \includegraphics[width=0.6\textwidth]{img/minelab_concentric_coil.png}
@@ -25,10 +10,10 @@ gdzie $\mu$ oznacza przenikalność materiału użytego do wykonania cewki, N oz
 \end{figure}
 \todo[inline]{Przetlumaczyc na polski}
 
-Cewki koncentryczne złożone są z dwóch uzwojeń: zewnętrznego, pełniącego funkcję nadawczą, oraz wewnętrzengo, odbierającą sygnał powrotny.
-Dzięki wąskiemu stożkowemu kształtowi generowanego pola elektromagnetycznego, cewka koncentryczna dobrze spełnia się podczas próby dokładnego określenia położenia szukanego obiektu.
+Najczęściej stosowany rodzaj sondy w wykrywaczach metalu. Cewki koncentryczne złożone są z dwóch uzwojeń: zewnętrznego, pełniącego funkcję nadawczą, oraz wewnętrznego, odbierającą sygnał powrotny.
+Dzięki wąskiemu stożkowemu kształtowi generowanego pola elektromagnetycznego, cewka koncentryczna dobrze spełnia się podczas próby dokładnego określenia położenia szukanego obiektu \cite{moreland_bfo_theory}.
 
-\subsubsection{Cewki typu DD}
+\subsection{Cewki typu DD}
 \begin{figure}[H]
     \begin{center}
         \includegraphics[width=0.6\textwidth]{img/minelab_double_d_coil.png}
@@ -38,10 +23,9 @@ Dzięki wąskiemu stożkowemu kształtowi generowanego pola elektromagnetycznego
 \end{figure}
 Cewki typu DD (Podwójne-D, ang. \textit{Double-D}). Składa się z dwóch częściowo nachodzących na siebie uzwojeń, jeden będący uzwojeniem nadawczym,
 drugi odbiorczym. Dzięki częściowemu nałożeniu na siebie, problem balansu gruntowego jest częściowo zniwelowany poprzez przesunięcie fazowe powstałe
-na skutek fizycznego przesunięcia uzwojeń. \todo[inline]{zweryfikować, podeprzeć}
-\todo[inline]{wyjasnic balans gruntowy}
+na skutek fizycznego przesunięcia uzwojeń.
 
-\subsubsection{Cewka typu \textit{monoloop}}
+\subsection{Cewka typu \textit{monoloop}}
 \begin{figure}[H]
     \begin{center}
         \includegraphics[width=0.6\textwidth]{img/minelab_monoloop_coil.png}
@@ -54,10 +38,7 @@ Cewki \textit{monoloop} najczęściej stosowane są w urządzeniach wykorzystuj�
 Składają się z jednego uzwojenia, pełniącego jednocześnie rolę nadawczą oraz odbiorczą.
 Produkuje pole elektromagnetyczne w kształcie stożka.
 
-\subsection{Analiza cewki typu \textit{monoloop}}
-
-% Jak wspomniano wcześniej, cewka typu \textit{monoloop} stosowana jest w wykrywaczach impulsowych.
-% W związku z budową prototypu wykrywacza metalu typu PI w niniejszym podroździale przybliżono teorię stojącą za tym rodzajem
+\section{Analiza cewki typu \textit{monoloop}}
 
 \begin{figure}[H]
     \begin{center}
@@ -67,7 +48,7 @@ Produkuje pole elektromagnetyczne w kształcie stożka.
     \hfill\small źródło: C. Moreland \cite{moreland_bfo_theory} 
 \end{figure}
 
-Wzór na przybliżoną indukcyjność cewki:
+Wzór na przybliżoną indukcyjność cewki (formuła Wheelera, wymiary w calach) \cite{moreland2024inside}:
 \begin{equation}
     L = \frac{0,8 (N A^2)}{6a + 9b + 10c}
     \label{eq:indukcyjnosc_monoloop}
