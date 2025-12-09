@@ -7,3 +7,6 @@
 [submodule "gitkop001/Lib/STM32-ILI9341"]
 	path = gitkop001/Lib/STM32-ILI9341
 	url = https://github.com/Nat-thapas/STM32-ILI9341.git
+[submodule "WeActStudio.STM32H523CoreBoard"]
+	path = WeActStudio.STM32H523CoreBoard
+	url = git@github.com:WeActStudio/WeActStudio.STM32H523CoreBoard.git
