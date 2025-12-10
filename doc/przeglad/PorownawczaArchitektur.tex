@@ -22,26 +22,9 @@ Do generowania żądanej częstotliwości wykorzystywane są przeważnie obwody 
 Pierwszy z oscylatorów, referencyjny, korzysta z cewki o zadanej indukcyjności.
 Oscylator szukający, używa sondy wykrywacza metali jako swoje źródło indukcyjności. \cite{moreland_bfo_theory}
 
-% \begin{figue}[H]
-%     \begin{center}
-%         \includegraphics[width=0.7\textwidth]{./img/bfo_uklad.png}
-%     \end{center}
-%     \caption{Schemat podstawowego systemu BFO}\label{fig:bfo}
-% \end{figure}
-% \todo[inline]{przerysowac i przetlumaczyc na polski}
 \begin{figure}[H]
     \begin{center}
 \begin{tikzpicture}[
-    % Styl dla bloków prostokątnych
-    block/.style={
-        draw, 
-        rectangle, 
-        minimum width=2.5cm, 
-        minimum height=1.2cm, 
-        align=center, 
-        font=\sffamily
-    },
-    % Styl dla miksera (koło)
     mixer/.style={
         draw, 
         circle, 
@@ -49,30 +32,15 @@ Oscylator szukający, używa sondy wykrywacza metali jako swoje źródło indukc
         align=center, 
         font=\sffamily
     },
-    % Styl dla strzałek
-    arrow/.style={
-        -{Latex[length=3mm]}, 
-        thick
-    },
-    % Styl dla etykiet tekstowych (częstotliwości)
     label_text/.style={
         font=\large\itshape
     }
 ]
 
-    % --- Rozmieszczenie węzłów (Nodes) ---
-
-    % Oscylator sondujący (górny)
-    \node[block] (search_osc) at (0, 2.5) {Oscylator\\szukający};
-
-    % Oscylator odniesienia (dolny)
-    \node[block] (ref_osc) at (0, -2.5) {Oscylator\\referencyjny};
-
-    % Mikser (po prawej, wyśrodkowany w pionie)
+    \node[blok] (search_osc) at (0, 2.5) {Oscylator\\szukający};
+    \node[blok] (ref_osc) at (0, -2.5) {Oscylator\\referencyjny};
     \node[mixer] (mixer) at (4, 0) {Mieszacz};
-
-    % Filtr dolnoprzepustowy
-    \node[block] (lpf) at (8, 0) {Filtr\\dolnoprzepustowy};
+    \node[blok] (lpf) at (8, 0) {Filtr\\dolnoprzepustowy};
 
     \coordinate (output) at (11, 0);
 
@@ -116,7 +84,7 @@ gdzie $L$ oraz $C$ to parametry odpowiednio indukcyjności oraz pojemności oscy
     f_{search} = \frac{1}{2\pi\sqrt{(L_0 \pm \Delta L)C}}
     \label{eq:bfo_f_search}
 \end{equation}
-gdzie $L_0$ to indukcyjność własna cewki (idealnie $L$), $\Delta L$ to jej zmiana wywołanej przez obiekt
+gdzie $L_0$ to indukcyjność własna cewki (idealnie $L$), $\Delta L$ to jej zmiana wywołana przez obiekt
 
 Przy założeniu dwóch sygnałów sinusoidalnych:
 \begin{equation}
@@ -160,53 +128,17 @@ Urządzenia oparte o generator zdudnieniowy wymagają częstej rekalibracji, szc
 
 \begin{figure}[H]
     \begin{center}
-\begin{tikzpicture}[
-    % Styl dla bloków
-    block/.style={
-        draw,
-        rectangle,
-        minimum width=3cm,
-        minimum height=1.5cm,
-        align=center,
-        font=\sffamily,
-        line width=1pt
-    },
-    % Styl dla linii połączeniowych (grubsze, jak na rysunku)
-    connector/.style={
-        line width=2pt
-    }
-]
+    \begin{tikzpicture}
+        \node[blok] (nadawczy) at (0,0) {Układ\\nadawczy};
+        \node[blok] (odbiorczy) at (7,0) {Układ\\odbiorczy};
 
-    % --- Umieszczenie bloków ---
-    % Blok lewy
-    \node[block] (nadawczy) at (0,0) {układ\\nadawczy};
+        \coordinate (middle) at ($(nadawczy.east)!0.5!(odbiorczy.west)$);
+        \draw[connector] ($(middle)+(-0.6,0)$) circle (0.8cm);
+        \draw[connector] ($(middle)+(0.6,0)$) circle (0.8cm);
 
-    % Blok prawy (odsunięty w prawo)
-    \node[block] (odbiorczy) at (7,0) {układ\\odbiorczy};
-
-
-    % --- Rysowanie pętli sprzęgających ---
-    % Definiujemy środek obszaru między blokami
-    \coordinate (middle) at ($(nadawczy.east)!0.5!(odbiorczy.west)$);
-
-    % Rysujemy dwie przecinające się elipsy (pętle)
-    % Lewa pętla (przesunięta nieco w lewo od środka)
-    \draw[connector] ($(middle)+(-0.6,0)$) ellipse (0.8cm and 0.6cm);
-
-    % Prawa pętla (przesunięta nieco w prawo od środka)
-    % Rysujemy ją po lewej, aby nałożyć się na nią
-    \draw[connector] ($(middle)+(0.6,0)$) ellipse (0.8cm and 0.6cm);
-
-
-    % --- Linie łączące bloki z pętlami ---
-    % Linia od układu nadawczego do lewej krawędzi lewej pętli
-    % (Obliczamy punkt styku na podstawie środka i promienia elipsy)
-    \draw[connector] (nadawczy.east) -- ($(middle)+(-0.6-0.8, 0)$);
-
-    % Linia od układu odbiorczego do prawej krawędzi prawej pętli
-    \draw[connector] (odbiorczy.west) -- ($(middle)+(0.6+0.8, 0)$);
-
-\end{tikzpicture}
+        \draw[connector] (nadawczy.east) -- ($(middle)+(-0.6-0.8, 0)$);
+        \draw[connector] (odbiorczy.west) -- ($(middle)+(0.6+0.8, 0)$);
+    \end{tikzpicture}
     \end{center}
     \caption{Schemat działania wykrywacza balansu indukcyjnego}\label{fig:ib_schemat}
 \end{figure}
