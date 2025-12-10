@@ -7,7 +7,6 @@
 #include "tim.h"
 #include "usart.h"
 #include "adc.h"
-#include "spi.h"
 
 void buzz(uint16_t freq);
 void PulseOut_Handler();

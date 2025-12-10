@@ -61,12 +61,6 @@ void Error_Handler(void);
 #define USER_LED_GPIO_Port GPIOC
 #define PULSE_IN_Pin GPIO_PIN_0
 #define PULSE_IN_GPIO_Port GPIOA
-#define LCD_RESET_Pin GPIO_PIN_3
-#define LCD_RESET_GPIO_Port GPIOA
-#define LCD_CS_Pin GPIO_PIN_5
-#define LCD_CS_GPIO_Port GPIOA
-#define LCD_DC_Pin GPIO_PIN_6
-#define LCD_DC_GPIO_Port GPIOA
 #define BUZZER_Pin GPIO_PIN_15
 #define BUZZER_GPIO_Port GPIOB
 #define ENC_BTN_Pin GPIO_PIN_8

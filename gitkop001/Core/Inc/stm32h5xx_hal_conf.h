@@ -45,7 +45,7 @@
 /*#define HAL_CRC_MODULE_ENABLED */
 /*#define HAL_CRYP_MODULE_ENABLED */
 /*#define HAL_DAC_MODULE_ENABLED */
-#define HAL_DCACHE_MODULE_ENABLED
+/*#define HAL_DCACHE_MODULE_ENABLED */
 /*#define HAL_DCMI_MODULE_ENABLED */
 /*#define HAL_DTS_MODULE_ENABLED */
 /*#define HAL_FDCAN_MODULE_ENABLED */
@@ -64,8 +64,9 @@
 /*#define HAL_RNG_MODULE_ENABLED */
 /*#define HAL_RTC_MODULE_ENABLED */
 /*#define HAL_SD_MODULE_ENABLED */
+/*#define HAL_SDIO_MODULE_ENABLED */
 /*#define HAL_MMC_MODULE_ENABLED */
-#define HAL_SPI_MODULE_ENABLED
+/*#define HAL_SPI_MODULE_ENABLED */
 /*#define HAL_SRAM_MODULE_ENABLED */
 #define HAL_TIM_MODULE_ENABLED
 /*#define HAL_RAMCFG_MODULE_ENABLED */
@@ -186,7 +187,7 @@
   *        HAL drivers code
   */
 
-/* #define USE_FULL_ASSERT    1U */
+ #define USE_FULL_ASSERT    1U
 
 /* ############################################ Register callback feature configuration ############################# */
 
