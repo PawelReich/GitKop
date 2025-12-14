@@ -1,188 +1,46 @@
-\chapter{Budowa wykrywacza typu PI}
-
-\section{Zasilanie układu}
-Wykrywacz jest zasilany za pomocą napięcia +9V, otrzymywanego za pomocą urządzenia Powerbank posiadającego port USB-C wspierający protokół \textit{Power Delivery}. W celu tłumienia zakłóceń spowodowanych przez nagłe skoki przepływu prądu w momencie sterowania sondą detekcyjną zastosowano kondensatory o pojemności $1500\mu F$ i maksymalnemu napięciu $16V$. Do zasilania mikrokontrolera STM32F411RE zastosowano konwerter obniżający napięcie do $3.3V$ rodzaju buck.
-
-
-\section{Generowanie sygnału sterującego cewką}
-Wykrywacz generuje sygnał za pomocą układu STM32F411RE, który za pomocą sprzętowego licznika wyzwala sygnał \textit{PULSE\_IN} trwający $300 \mu s$  co $10 ms$.
-
+\chapter{Budowa prototypu wykrywacza metalu}
 \begin{figure}[H]
-    \centering
-    \includegraphics[width = 12cm]{img/tranzystory2.png}
-    \caption{Schemat sekcji sterującej tranzystorem MOSFET przy użyciu sygnału \textit{PULSE\_IN}}
+\centering
+    \begin{tikzpicture}[
+        node distance=1.5cm and 2cm,
+        probe/.style = {
+            base,
+            trapezium,
+            trapezium left angle=70,
+            trapezium right angle=70,
+        },
+        label_text/.style = {
+            font=\sffamily\footnotesize\bfseries,
+            fill=white,
+            inner sep=2pt
+        }
+    ]
+        \node[blok] (user) {Panel\\użytkownika};
+        \node[blok, below=1.5cm of user] (digital) {Sekcja\\cyfrowa};
+        \node[blok, below=2.5cm of digital, xshift=-3cm] (rx) {Sekcja\\odbiorcza};
+        \node[blok, below=2.5cm of digital, xshift=3cm] (tx) {Sekcja\\nadawcza};
+        \node[blok, below=2cm of $(rx.south)!0.5!(tx.south)$] (sonda) {Sonda};
+
+        \draw[arrow] ([xshift=-3mm]user.south) -- ([xshift=-3mm]digital.north);
+        \draw[arrow] ([xshift=3mm]digital.north) -- ([xshift=3mm]user.south);
+        \draw[arrow] ([xshift=3mm]digital.south) -- node[label_text, pos=0.6] {PULSE\_OUT} (tx.north);
+        \draw[arrow] (tx.south) -- ([xshift=3mm]sonda.north); 
+        \draw[arrow] ([xshift=-3mm]sonda.north) -- (rx.south);
+        \draw[arrow] (rx.north) -- node[label_text, pos=0.4] {PULSE\_IN} ([xshift=-3mm]digital.south);
+
+    \end{tikzpicture}
+    \caption{Schemat blokowy działania prototypu wykrywacza}
+    \label{sch:budowa}
 \end{figure}
+Prototyp został wykonany z wykorzystaniem wiedzy zebranej w poprzednich rozdziałach.
+Urządzenie zostało zbudowane w oparciu o łatwo dostępne komponenty oraz wydruk 3D.
+Architektura wykonanego urządzenia podzielona jest na 5 części ukazanych na rysunku \ref{sch:budowa}.
+W niniejszym rozdziale zostaną omówione zastosowane rozwiązania tworzące poszczególne sekcje oraz technikalia ich działania.
 
-Generowany sygnał pulsu o napięciu $3.3V$ jest wzmacniany przez dwa tranzystory bipolarne $Q_2$, a następnie $Q_1$ połączone szeregowo pozwalające na uzyskanie wystarczającego napięcia do wysterowania tranzystora MOSFET IRF740 $Q_3$.
-    
-\begin{figure}[H]
-    \centering
-    \includegraphics[width = 7.5cm, height = 7.5cm]{img/output_characteristics.png}
-    \caption{Charakterystyka wyjściowa tranzystora IRF740}
-\end{figure}
-
-\section{Układ cewki}
-\begin{figure}[H]
-    \centering
-    \includegraphics[width = 7.5cm]{img/cewka_sch.png}
-    \caption{sch cewki}
-\end{figure}
-
-Tranzystor $Q_3$ zwiera sondę do masy powodując przepływ prądu przez cewkę podłączoną do \textit{COIL1} i \textit{COIL2}. Po otwarciu tranzystora $Q_3$ na cewce indukowane jest napięcie, którego górnym limitem jest przez napięcie break-down $V_{brk}$ tranzystora. W celu umożliwienia rozładowania napięcia w cewce zastosowano dwie szybkie diody typu \textit{BAV19} połączone równolegle odwrotnie do siebie pozwalające na przepływ prądu dla napięcia powyżej $0.7V$. Efekt jest opóźniony prez zastosowanie rezystora $R_6$. Dla końcowego etapu rozładowywania cewki, czyli kiedy napięcie jest poniżej progu przewodzenia diody rezystor $R5$ wraz z potencjometrem $XX$\todo{brak na 3.3} umożliwia przepływ prądu. Potencjometr zastosowany jest, aby łatwo dostroić tłumienie cewki. Pożądane jest krytyczne tłumienie odpowiedzi sondy pozwalające na najdokładniejsze pomiary zmian. Na rysunku 2.4 narysowano porównanie odpowiedzi sondy nietłumionej oraz krytycznie tłumionej. Zademonstrowana odpowiedź jest mierzona za kondensatorem $C_1$.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.95\textwidth]{../meas/undamped.png}
-    \caption{Odpowiedź nietłumionej cewki}
-\end{figure}
-\todo[inline]{tutaj ch2 jest inverted vs drugi wykres}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.95\textwidth]{../meas/good.png}
-    \caption{Odpowiedź krytycznie tłumionej cewki}
-\end{figure}
-\todo[inline]{zamiast .png wygenerowac wykresy z .edf i skleic}
-
-
-\section{Sonda detekcyjna}
-Sonda detekcyjna wykonana została z miedzianego przewodu o przekroju 0.4mm. Nawinięto 31 zwojów o średnicy 15cm
-\todo[inline]{tutaj eksport modelu obudowy}
-
-\section{Sygnał odpowiedzi}
-\subsection{Wirtualna masa}
-W celu uzyskania pełnej odpowiedzi cewki zastosowana jest sztuczna masa wynosząca $\frac{1}{2}$ napięcia zasilania. Dzięki niej wzmacniacze operacyjne w sekcji wzmocnienia odpowiedzi mogą wzmocnić odpowiedź pracując wyłącznie z dodatnim napięciem, co omija konieczność generowania ujemnego napięcia upraszczając finalny schemat wykrywacza metalu. Wykonana jest za pomocą dzielnika napięcia wykonującego działanie $U_{VGND}=Vcc\cdot\frac{R9}{R8+R9}=Vcc\cdot\frac{1}{2}$, którego wynikowe napięcie przechodzi przez wzmacniacz operacyjny $U3$ kopiujący napięcie wejściowe wzmacniając sygnał, jednocześnie odciążając zastosowane w dzielniku rezystory.
-
-\begin{figure}[H]
-    \begin{center}
-    \includegraphics[width=7.5cm]{img/vgnd.png}
-    \end{center}
-    \caption{Konfiguracja wzmacniacza operacyjnego generującego napięcie $VGND$}
-\end{figure}
-
-\subsection{Wzmocnienie sygnału}
-\begin{figure}[H]
-    \begin{center}
-        \includegraphics[width=0.95\textwidth]{img/wzmocnienie.png}
-    \end{center}
-    \caption{sch}\label{fig:wzmocnienie}
-\end{figure}
-Uzyskana odpowiedź z cewki po przejściu przez kondensator usuwający offset DC podciągana jest do napięcia $VGND$ za pomocą rezystora $R_7$. Następnie odpowiedź jest mnożona 1000-krotnie w celu uwydatnienia ostatniej części odpowiedzi sygnału najbardziej podatnej na działanie powstałego pola magnetycznego. Uzyskane napięcie może posiadać wartość zbliżoną do napięcia zasilania $V_{cc}$, dlatego w celu dostosowania go do poziomu pozwalającego obsłużyć go przez zastosowany w wykrywaczu MCU zastosowano dzielnik napięcia wykonujący $\frac{1}{3}\cdot{}U_{8o}$. Tak wyznaczony sygnał nie jest wystarczająco silny, dlatego przechodzi on przez kopiujący wzmacniacz $U_1$. Warto zaznaczyć, że wzmacniacz MCP6281 jest typu rail-to-rail, pozwalający na operowanie na sygnałach bliskich napięciom zasilania $V_+$, jak i $V_-$ wzmacniacza. Poprzednie sekcje nie wymagały tej specjalnej właściwości. Tak przygotowany sygnał jest gotowy do analizy przez mikrokontroler. Dla dodatkowego bezpieczeństwa zastosowano diodę zenera $3.3V$ gwarantującą, że zakres napięć \textit{SIGNAL\_OUT} należy do zakresu obsługiwanego przez układ STM32F411RE.
-
-\section{Część cyfrowa}
-
-\begin{figure}[H]
-    \begin{center}
-        \includegraphics[width=7.5cm]{img/stm32.png}
-    \end{center}
-    \caption{Cyfrowe przedstawienie układu STM32F411RE wraz z użytymi pinami}\label{fig:stm32}
-\end{figure}
-
-
-Część cyfrowa wykrywacza metalu oparta jest o układ \textbf{STM32H523CE}. Ten produkowany przez ST Microelectronics mikrokontroler posiada jeden rdzeń oparty na architekturze ARM\textregistered{} Cortex-M33\textregistered{} \cite{st_stm32h5_web} \cite{st_stm32h533_ds} oraz m.in wykorzystane w projekcie układy peryferyjne:
-
-\subsection{Liczniki sprzętowe}
-\label{subsec:timery}
-Wykorzystywane są dwa 16-bitowe liczniki sprzętowe napędzane za pomocą zegara \textit{APB2} skonfigurowanego na taktowanie z częstotliwością $F_{timer}=72Mhz$. Częstotliwość przepełnienia licznika sprzętowego można wyznaczyć za pomocą poniższego równania: 
-
-\begin{equation}
-F_{output}=\frac{F_{timer}}{(PSC+1)(ARR+1)}
-\end{equation}
-
-gdzie PSC oznacza Prescaler, natomiast ARR oznacza Auto Reload Register
-
-
-Licznik \textit{TIM10} pełni funkcję maszyny stanów zarządzając aktualnym stanem sygnału \textit{PULSE\_OUT}.
-W celu zachowania dokładności przy jednoczesnym jak najmniejszym obciążeniu MCU licznik wywołuje przerwania w częstotliwości $F_{output}=1\mu s$ poprzez konfigurację $PSC=0, ARR=71$.
-
-Podczas pracy układu cyfrowego w funkcji przerwania sprawdzana jest wartość zmiennej inkrementowanej co każde wywołanie przerwania. Jeżeli licznik jest równy 0, wystawiany jest sygnał +3.3V na pin 1 (PULSE\_OUT) układu, powodując otwarcie tranzystora MOSFET. Następnie w pożądanym momencie sygnał wyjściowy jest wygaszony, co pozwala na dynamiczną konfigurację długości impulsu wysyłanego do cewki.
-
-\begin{lstlisting}[language=c++, caption={Funkcja zarządzająca stanem sygnału wyjściowego}]
-void PulseOut_Handler() {
- 
-    if (pulseTickCtr == 0)
-    {
-        HAL_GPIO_WritePin(PULSE_OUT_GPIO_Port, PULSE_OUT_Pin, 1);
-    }
-
-    if (pulseTickCtr == 251)
-    {
-        HAL_GPIO_WritePin(PULSE_OUT_GPIO_Port, PULSE_OUT_Pin, 0);
-    }
-
-    pulseTickCtr++;
-
-    /* ... */
-
-    if (pulseTickCtr == 2500)
-    {
-        pulseTickCtr = 0;
-    }
-}
-\end{lstlisting}
-
-Drugi licznik \textit{TIM2} wykorzystany jest do generowania sygnału PWM o wypełnieniu 50\% i dynamicznie wyznaczanej częstotliwości do brzęczyka wskazującego o wykryciu anomalii w pomierzonym sygnale \textit{PULSE\_IN}. Preskaler jest skonfigurowany na wartość 71, co daje przerwanie co mikrosekundę.
-
-\begin{lstlisting}[language=c++,caption={Funkcja generująca dzwięk o zadanej częstotliwości}]
-void Buzz(uint16_t freq) {
-    if (freq == 0)
-    {
-        __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, 0);
-        return;
-    }
-
-    uint16_t autoreload = (1000000UL / freq) - 1;
-
-    __HAL_TIM_SET_AUTORELOAD(&htim2, autoreload);
-    __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, autoreload / 2);
-}
-\end{lstlisting}
-
-\subsection{Konwerter cyfrowo-analogowy}
-
-ADC napędzany jest sygnałem zegarowym \textit{PCLK2} o częstotliwości $72Mhz$, z preskalerem o wartości $2$, co daje końcową częstotliwość podukładu wynoszącą $36Mhz$.
-Maksymalna rozdzielczość pomiaru wynosi 12 bitów, co daje dokładność na poziomie 8 mV.
-
-\todo[inline]{tutaj potencjalnie porownanie rozdzielczosc vs dokladnosc wykrywania metalu, 
-w gre wchodzi tez fakt, ze ADC dla 12-bit zajmuje 15 cykli, 10-bit 13, 8-bit 11, 6-bit 9)}
-
-\begin{equation}
-R= \frac{Vref}{2^N - 1} =\frac{3.3V}{4096}\approx 8mV
-\end{equation}
-
-gdzie $V_{ref}$  to napięcie referencyjne (tutaj $V_{in}=3.3V$), N = ilość bitów
-
-
-W celu osiągnięcia jak największego zasięgu wykrywacza wymagana jest jednocześnie jak największa dokładność układu ADC oraz jego szybkość działania. Dla trybu 12-bitowego każdy pomiar zajmuje 15 cykli zegarowych dających teorytyczny limit $2.4 MSPS$, co daje jedną próbkę napięcia co $~0.41\mu s$.
-
-Dla maksymalnego odciążenia mikrokontrolera wykorzystany został tryb DMA z wyłączonym generowaniem przerwań sprzętowych. Każda nowa próbka zmierzona przez konwerter zapisywana jest w docelowym miejscu pamięci skazanym podczas konfiguracji bez dodatkowego udziału MCU.
-Podczas wykonywania kodu maszyny stanów w pożądanym momencie kopiowana jest aktualna wartość próbki i dokonywany jest proces analizy sygnału.
-
-\section{Algorytm}
-
-\begin{figure}[H]
-    \centering
-    \smartdiagramset{back arrow disabled}
-    \smartdiagram[flow diagram:horizontal]{Pobranie próbki sygnału \textit{PULSE\_OUT}, Suma czterech próbek, Suma 32 próbek, -background, sprawdzenie anomalii, buzzer}
-    \caption{Schemat blokowy działania algorytmu}\label{fig:diagram}
-\end{figure}
-\todo[inline]{napisac na porzadnie, wyczyscic, zrobic czytelniejsze}
-
-Algorytm wykrywania metalu oparty jest o próbkowanie sygnału \textit{PULSE\_OUT} w stałym odstępie czasowym. Zbierana jest suma czterech następnych próbek, która zapisywana jest do bufora cyklicznego przechowującego 32 pozycje (Stage 1). Średnia obliczona ze wszystkich wartości znajdujących się w buforze etatu 1 umieszczana jest w drugim buforze cyklicznym, mający pojemność 64 próbki. Ten bufor służy do eliminacji tła. Średnia wartości etapu pierwszego porównywana jest ze średnią wartości znajdujących się w buforze tła, każda różnica co najmniej 5 jednostek traktowana jest jako anomalia i oznacza wykrycie metalu.
-
-\begin{figure}[H]
-    \begin{center}
-        \includegraphics[width=0.95\textwidth]{../meas/pulse_out.png}
-    \end{center}
-    \caption{Wykres sygnału \textit{PULSE\_OUT} używany w algorytmie}\label{fig:meas}
-
-\end{figure}
-
-\section{Płytka drukowana}
-Płytka drukowana do projektu została wykonana w otwartoźródłowym programie typu CAD (projektowanie wspomagane komputerowo, ang. \textit{Computer Aided Design}) KiCad\cite{kicad}. 
-\cite{WeActStudio_STM32H523CoreBoard}
-
-\section{Obudowa}
-Obudowa wykrywacza metalu została wykonana w technologii druku 3D z wykorzystaniem plastiku PLA.
-\todo[inline]{jeszcze nie zostala}
-\todo[inline]{tutaj eksport modelu obudowy}
+\input{budowa/Zasilanie}
+\input{budowa/SekcjaNadawcza}
+\input{budowa/Sonda}
+\input{budowa/SekcjaOdbiorcza}
+\input{budowa/SekcjaCyfrowa}
+\input{budowa/PCB}
+\input{budowa/Obudowa}

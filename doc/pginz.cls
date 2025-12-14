@@ -31,7 +31,6 @@
 \RequirePackage{enumitem} %to, czego brakowało przy symbolach
 \RequirePackage[normalem]{ulem}
 \RequirePackage{todonotes}
-\RequirePackage{smartdiagram}
 %*************
 
 \usepackage{booktabs} % Zalecany pakiet do ładniejszych linii w tabelach
@@ -114,3 +113,4 @@
 \addbibresource[glob=true]{bib/*}
 
 \DeclareUnicodeCharacter{03B4}{\ensuremath{\delta}}
+\pdfsuppresswarningpagegroup=1
