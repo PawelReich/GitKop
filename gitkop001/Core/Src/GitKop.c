@@ -9,8 +9,10 @@
 #define PULSE_TIMER htim2
 #define UART huart1
 
-volatile static uint16_t pulseTickCtr = 0;
+volatile static uint32_t pulseTickCtr = 0;
 volatile static uint16_t pulseTickAnalysisCtr = 0;
+static const uint16_t PULSE_WIDTH = 15;
+static const uint16_t TOTAL_WIDTH = 5000;
 
 #define DMA_BUFFER_ENTRIES 2048
 __attribute__((aligned(32))) volatile static uint16_t value[DMA_BUFFER_ENTRIES];
@@ -26,19 +28,19 @@ void PulseOut_Handler() {
         HAL_GPIO_WritePin(PULSE_OUT_GPIO_Port, PULSE_OUT_Pin, 1);
     }
 
-    if (pulseTickCtr == 25)
+    if (pulseTickCtr == PULSE_WIDTH)
     {
         HAL_GPIO_WritePin(PULSE_OUT_GPIO_Port, PULSE_OUT_Pin, 0);
     }
 
-    if (pulseTickCtr == 35)
+    if (pulseTickCtr == PULSE_WIDTH + 10)
     {
         pulseTickAnalysisCtr++;
         dmaIndex = __HAL_DMA_GET_COUNTER(hadc1.DMA_Handle) / 2;
     }
 
     pulseTickCtr++;
-    if (pulseTickCtr == 500)
+    if (pulseTickCtr == TOTAL_WIDTH)
     {
         pulseTickCtr = 0;
     }
@@ -68,80 +70,39 @@ void buzz(uint16_t freq) {
 #include <stdbool.h>
 #include <stdlib.h> // do abs()
 
-// Definicje rozmiarów buforów (najlepiej potęgi 2 dla szybkości dzielenia)
-#define FAST_WINDOW 16   // Szybki filtr (np. 16 próbek)
-#define SLOW_WINDOW 256  // Wolny filtr - tło (np. 256 próbek)
-
-// Bufory i sumy
-static uint16_t buf_fast[FAST_WINDOW];
-static uint16_t buf_slow[SLOW_WINDOW];
-
-static uint32_t sum_fast = 0;
-static uint32_t sum_slow = 0;
-
-static uint16_t idx_fast = 0;
-static uint16_t idx_slow = 0;
-
 static bool initialized = false;
 
-// Zmienne wynikowe dostępne "na zewnątrz"
-volatile int16_t signal_diff = 0; // Różnica (Sygnał - Tło)
-volatile uint16_t background_level = 0;
+// --- Configuration ---
+const float ALPHA_FAST = 0.1;    // Responsive: Smoothing for the signal
+const float ALPHA_SLOW = 0.005;  // Sluggish: Tracks drifting background/ground
+const float THRESHOLD  = 15.0;   // Trigger sensitivity (adjust based on your noise)
 
-int handle_data(uint16_t raw_sample)
+// --- State Variables ---
+float fastAvg = 0;
+float slowAvg = 0;
+bool isInitialized = false;
+
+float handle_data(uint16_t rawSample)
 {
-    // --- 1. Inicjalizacja przy pierwszym uruchomieniu ---
-    if (!initialized) {
-        // Wypełniamy bufory pierwszą wartością, żeby średnia nie startowała od 0
-        for (int i = 0; i < FAST_WINDOW; i++) buf_fast[i] = raw_sample;
-        for (int i = 0; i < SLOW_WINDOW; i++) buf_slow[i] = raw_sample;
-        
-        sum_fast = raw_sample * FAST_WINDOW;
-        sum_slow = raw_sample * SLOW_WINDOW;
-        
-        initialized = true;
-    }
+  if (!isInitialized) {
+    fastAvg = rawSample;
+    slowAvg = rawSample;
+    isInitialized = true;
+    return 0; // Skip the rest of this loop iteration
+  }
 
-    // --- 2. Obsługa szybkiego filtra (FAST - Signal) ---
-    // Odejmij najstarszą, dodaj nową
-    sum_fast -= buf_fast[idx_fast];
-    buf_fast[idx_fast] = raw_sample;
-    sum_fast += raw_sample;
+  fastAvg = (ALPHA_FAST * rawSample) + ((1.0 - ALPHA_FAST) * fastAvg);
 
-    idx_fast++;
-    if (idx_fast >= FAST_WINDOW) idx_fast = 0;
+  float difference = fastAvg - slowAvg;
 
-    // --- 3. Obsługa wolnego filtra (SLOW - Background) ---
-    // Odejmij najstarszą, dodaj nową
-    sum_slow -= buf_slow[idx_slow];
-    buf_slow[idx_slow] = raw_sample;
-    sum_slow += raw_sample;
-
-    idx_slow++;
-    if (idx_slow >= SLOW_WINDOW) idx_slow = 0;
-
-    // --- 4. Obliczenie średnich ---
-    // Kompilator zamieni to na przesunięcia bitowe (bit-shift), jeśli dzielimy przez potęgę 2
-    uint16_t avg_fast = sum_fast / FAST_WINDOW;
-    uint16_t avg_slow = sum_slow / SLOW_WINDOW;
-
-    // Zapisz poziom tła (do debugowania lub wyświetlania)
-    background_level = avg_slow;
-
-    // --- 5. Wykrycie zmiany (Sygnał użyteczny) ---
-    // Obliczamy różnicę. 
-    // Wynik dodatni = nagły wzrost sygnału.
-    // Wynik ujemny = nagły spadek sygnału.
-    signal_diff = (int16_t)avg_fast - (int16_t)avg_slow;
-
-    return signal_diff;
-
-    /*
-    Przykład użycia (pseudokod):
-    if (abs(signal_diff) > THRESHOLD) {
-        // Wykryto dotyk / zdarzenie / pik!
-    }
-    */
+  uint8_t metalDetected = false;
+  
+  if (difference > THRESHOLD) {
+    metalDetected = true;
+  } else {
+    slowAvg = (ALPHA_SLOW * rawSample) + ((1.0 - ALPHA_SLOW) * slowAvg);
+  }
+  return difference;
 }
 
 void GitKop_Init()
@@ -210,9 +171,9 @@ void GitKop_Loop()
             }
         }
 
-        int val = handle_data(smallestSample);
+        float val = handle_data(smallestSample);
 
-        if (pulseTickAnalysisCtr > 250)
+        if (pulseTickAnalysisCtr > 100)
         {
             if (DEBUG_MODE)
             {
@@ -221,8 +182,8 @@ void GitKop_Loop()
                 {
                     printf("%d ", linear_history[i]);
                 }
-                printf("] %d %d$\r\n", smallestSampleIndex, areaOfInterestIndex);
-                printf("smallestSample: %d, val: %d\r\n", smallestSample, val);
+                printf("] %d %d %f$\r\n", smallestSampleIndex, areaOfInterestIndex, val);
+                // printf("smallestSample: %d, val: %d\r\n", smallestSample, signal_diff);
             }
             pulseTickAnalysisCtr = 0;
         }
