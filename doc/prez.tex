@@ -1,0 +1,343 @@
+\documentclass[10pt]{beamer}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\RequirePackage[main=polish,english, provide=*]{babel}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{svg}
+\usepackage{tikz}
+\usetikzlibrary{positioning, shapes.geometric, arrows.meta, positioning, decorations.pathmorphing, calc}
+
+\usetheme{default}
+\usecolortheme{dolphin}
+
+\title[Wykrywacz Metalu]{Wykrywacz metalu}
+\subtitle{Projekt i realizacja prototypu w technologii impulsowej}
+\author{Paweł Reich}
+\institute[Politechnika Gdańska]{
+  Wydział Elektroniki, Telekomunikacji i Informatyki\\
+  Kierunek: Automatyka, Cybernetyka i Robotyka\\
+  \vspace{0.5cm}
+  Opiekun pracy: dr inż. Kamil Stawiarski
+}
+\date{2025}
+
+\begin{document}
+
+\tikzset{
+    base/.style = {
+        font=\sffamily\footnotesize,
+        align=center,
+        thick
+    },
+    blok/.style={
+        draw,
+        rectangle,
+        thick,
+        rounded corners=3pt,
+        align=center,
+        minimum width=3.5cm,
+        minimum height=1.2cm,
+        inner sep=2mm
+    },
+    startstop/.style = {
+        base,
+        rectangle,
+        rounded corners,
+        draw=black!80!black,
+        minimum width=3cm,
+        minimum height=1cm
+    },
+    decision/.style = {
+        base,
+        diamond,
+        aspect=2.5, % Rozciąga romb w poziomie
+        draw=black!80!black,
+        inner sep=0pt,
+        text width=3.5cm % Zawijanie tekstu wewnątrz
+    },
+    process/.style = {
+        base,
+        rectangle,
+        draw=black!80!black,
+        minimum width=3.5cm,
+        minimum height=1cm
+    },
+    connector/.style = {
+        thick,
+        draw=gray!80!black
+    },
+    arrow/.style = {
+        connector,
+        ->,
+        >=stealth,
+    },
+}
+% Slajd tytułowy
+\begin{frame}
+  \titlepage
+\end{frame}
+
+% Spis treści
+\begin{frame}{Plan prezentacji}
+  \tableofcontents
+\end{frame}
+
+% --- SEKCJA 1: WSTĘP ---
+\section{Wstęp i cel pracy}
+
+\begin{frame}{Cel pracy}
+  \begin{block}{Główny cel}
+    Celem pracy było wykonanie porównania popularnych architektur wykrywaczy metali oraz zbudowanie prototypu wybranego rodzaju przy użyciu łatwo dostępnych komponentów.
+  \end{block}
+
+  \begin{itemize}
+    \item Analiza zjawisk fizycznych (indukcja elektromagnetyczna, prądy wirowe)
+    \item Przegląd istniejących technologii (BFO, IB, PI)
+    \item Projekt obwodów analogowych i cyfrowych
+    \item Implementacja algorytmów na mikrokontrolerze STM32
+  \end{itemize}
+\end{frame}
+
+% --- SEKCJA 2: TEORIA ---
+\section{Podstawy teoretyczne}
+
+\begin{frame}{Elektrodynamika}
+  Podstawą działania urządzenia jest \textbf{Prawo Indukcji Faradaya} oraz \textbf{Prądy Wirowe}.
+
+  \begin{columns}
+    \column{0.6\textwidth}
+    \begin{itemize}
+      \item Zmienne pole magnetyczne cewki przenika grunt
+      \item W obiekcie metalowym indukują się prądy wirowe
+      \item Zgodnie z regułą Lenza, prądy te wytwarzają przeciwne pole magnetyczne
+      \item Istotnym czynnikiem jest \textbf{zjawisko naskórkowości} -- ogranicza ono penetrację przy wysokich częstotliwościach
+    \end{itemize}
+    
+    \column{0.4\textwidth}
+    \begin{center}
+        \begin{figure}
+            \begin{center}
+                \includegraphics[width=0.6\textwidth]{img/moreland_induction_eddy.png} 
+            \end{center}
+        \end{figure}
+    \end{center}
+  \end{columns}
+\end{frame}
+
+% --- SEKCJA 3: PRZEGLĄD ROZWIĄZAŃ ---
+\section{Analiza architektur}
+
+\begin{frame}{Porównanie technologii detekcji}
+  W pracy przeanalizowano trzy główne architektury :
+  
+  \begin{enumerate}
+    \item \textbf{BFO (Beat Frequency Oscillator):}
+      \begin{itemize}
+        \item Prosta konstrukcja oparta na dudnieniu częstotliwości
+        \item Wada: Niska stabilność, wymaga częstej rekalibracji
+      \end{itemize}
+    \item \textbf{IB (Induction Balance / VLF):}
+      \begin{itemize}
+        \item Układ cewek nadawczych i odbiorczych w równowadze
+        \item Dobra dyskryminacja metali
+      \end{itemize}
+    \item \textbf{PI (Pulse Induction) -- Wybrana do projektu:}
+      \begin{itemize}
+        \item Działanie w dziedzinie czasu (impulsy prądowe)
+        \item Jedna cewka (Monoloop)
+        \item Wysoka odporność na mineralizację gruntu
+        \item Głęboka penetracja
+      \end{itemize}
+  \end{enumerate}
+\end{frame}
+
+% --- SEKCJA 4: BUDOWA PROTOTYPU ---
+\section{Budowa prototypu}
+
+\begin{frame}{Schemat blokowy urządzenia}
+  Architektura systemu została podzielona na 5 głównych sekcji:
+  
+  \begin{center}
+
+      \resizebox{5cm}{5cm}{%
+    \begin{tikzpicture}[
+        node distance=1.5cm and 2cm,
+        probe/.style = {
+            base,
+            trapezium,
+            trapezium left angle=70,
+            trapezium right angle=70,
+        },
+        label_text/.style = {
+            font=\sffamily\footnotesize\bfseries,
+            fill=white,
+            inner sep=2pt
+        }
+    ]
+        \node[blok] (user) {Panel\\użytkownika};
+        \node[blok, below=1.5cm of user] (digital) {Sekcja\\cyfrowa};
+        \node[blok, below=2.5cm of digital, xshift=-3cm] (rx) {Sekcja\\odbiorcza};
+        \node[blok, below=2.5cm of digital, xshift=3cm] (tx) {Sekcja\\nadawcza};
+        \node[blok, below=2cm of $(rx.south)!0.5!(tx.south)$] (sonda) {Sonda};
+
+        \draw[arrow] ([xshift=-3mm]user.south) -- ([xshift=-3mm]digital.north);
+        \draw[arrow] ([xshift=3mm]digital.north) -- ([xshift=3mm]user.south);
+        \draw[arrow] ([xshift=3mm]digital.south) -- node[label_text, pos=0.6] {PULSE\_OUT} (tx.north);
+        \draw[arrow] (tx.south) -- ([xshift=3mm]sonda.north); 
+        \draw[arrow] ([xshift=-3mm]sonda.north) -- (rx.south);
+        \draw[arrow] (rx.north) -- node[label_text, pos=0.4] {PULSE\_IN} ([xshift=-3mm]digital.south);
+
+    \end{tikzpicture}
+}
+  \end{center}
+
+  \begin{itemize}
+    \item \textbf{Interfejs:} Panel użytkownika
+    \item \textbf{Sekcja cyfrowa:} Sterowanie i analiza sygnału
+    \item \textbf{Sekcja nadawcza:} Generowanie impulsu dużej mocy
+    \item \textbf{Sekcja odbiorcza:} Wzmacnianie słabego sygnału powrotnego
+    \item \textbf{Sonda:} Cewka Monoloop
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Sekcja Analogowa - Nadawcza i Odbiorcza}
+  \begin{columns}
+    \column{0.5\textwidth}
+    \textbf{Nadajnik :}
+    \begin{itemize}
+      \item Tranzystor MOSFET IRF740 sterowany układem bipolarnym
+      \item Generowanie silnego impulsu elektromagnetycznego
+      \item Diodowe układy tłumiące oscylacje pasożytnicze (tłumienie krytyczne)
+    \end{itemize}
+
+    \column{0.5\textwidth}
+    \textbf{Odbiornik :}
+    \begin{itemize}
+      \item Wzmacniacze operacyjne TL071 oraz MCP6281 (Rail-to-Rail)
+      \item Zastosowanie wirtualnej masy ($V_{GND} = \frac{1}{2} V_{CC}$) do obsługi sygnałów bipolarnych
+      \item Wzmocnienie sygnału echa po zaniku impulsu głównego
+    \end{itemize}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Sekcja Cyfrowa - STM32}
+  Sercem układu jest mikrokontroler \textbf{STM32H523CE} (Cortex-M33).
+  
+  \vspace{0.5cm}
+  \textbf{Kluczowe peryferia:}
+  \begin{itemize}
+    \item \textbf{Liczniki sprzętowe (Timers):} Precyzyjne generowanie impulsów (rozdzielczość $1\mu s$)
+    \item \textbf{ADC (Przetwornik A/C):} Próbkowanie sygnału powrotnego z częstotliwością ok. 4.16 MSPS
+    \item \textbf{DMA (Direct Memory Access):} Zapis próbek do bufora cyklicznego bez obciążania procesora
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Sonda Detekcyjna}
+  \begin{columns}
+    \column{0.6\textwidth}
+    \begin{itemize}
+      \item Typ cewki: \textbf{Monoloop} (jedna cewka nadawczo-odbiorcza)
+      \item Konstrukcja: Przewód miedziany 0.4mm, 31 zwojów, średnica 15cm
+      \item Obudowa cewki zaprojektowana w CAD 3D i wydrukowana
+    \end{itemize}
+    \column{0.4\textwidth}
+    \begin{center}
+        \begin{figure}
+            \begin{center}
+                \includegraphics[width=0.95\textwidth]{img/donut otwarty kat.png}
+            \end{center}
+        \end{figure}
+    \end{center}
+  \end{columns}
+\end{frame}
+
+\section{Prototyp}
+
+\begin{figure}
+    \begin{center}
+        \includegraphics[width=0.95\textwidth]{img/pudlo otwarte.png}
+    \end{center}
+\end{figure}
+
+\section{Algorytm detekcji}
+
+\begin{frame}{Algorytm wykrywania anomalii}
+  Proces analizy sygnału realizowany programowo :
+  
+  \begin{enumerate}
+    \item \textbf{Próbkowanie:} Pobranie próbek po wygaszeniu impulsu nadawczego
+    \item \textbf{Buforowanie i uśrednianie:} Uśrednianie szumu sondy z wykorzystaniem EMA
+    \item \textbf{Eliminacja tła:} Porównanie bieżącej średniej z EMA tła (dłuższa stała czasowa)
+    \item \textbf{Detekcja:} Wykrycie różnicy przekraczającej próg (threshold) sygnalizuje obecność metalu
+  \end{enumerate}
+
+  \begin{figure}
+      \begin{center}
+          \includesvg[height=0.5\textheight]{img/filtry_wykryte.svg}
+      \end{center}
+  \end{figure}
+  
+\end{frame}
+
+% --- SEKCJA 6: REALIZACJA ---
+\section{Realizacja praktyczna}
+
+\begin{frame}{PCB i Obudowa}
+  \begin{columns}
+    \column{0.5\textwidth}
+    \textbf{Płytka PCB :}
+    \begin{itemize}
+      \item Projekt w KiCad
+      \item PCB dwuwarstwowa
+      \item Integracja z modułem STM32
+    \end{itemize}
+    
+    \column{0.5\textwidth}
+    \textbf{Obudowa :}
+    \begin{itemize}
+      \item Projekt w Autodesk Fusion
+      \item Technologia druku 3D (materiał PET-G)
+      \item Ergonomiczne rozmieszczenie portów i wyświetlacza
+    \end{itemize}
+  \end{columns}
+
+  \begin{center}
+    \vspace{0.5cm}
+    \begin{figure}
+        \begin{center}
+            \includegraphics[height=0.5\textheight]{img/pcb_3drender.png}
+        \end{center}
+    \end{figure}
+    
+  \end{center}
+\end{frame}
+
+    \begin{figure}
+        \includegraphics[ width=1.0\textwidth]{Schematic.pdf}
+    \end{figure}
+% --- SEKCJA 7: PODSUMOWANIE ---
+\section{Podsumowanie}
+
+\begin{frame}{Podsumowanie}
+  \begin{block}{Osiągnięte rezultaty}
+    \begin{itemize}
+      \item Zaprojektowano i zbudowano działający prototyp wykrywacza metali typu PI (Pulse Induction)
+      \item Opracowano dedykowany układ elektroniczny (analogowy i cyfrowy)
+      \item Zaimplementowano oprogramowanie sterujące na platformie STM32 z wykorzystaniem DMA
+      \item Wykonano obudowę w technologii druku 3D
+    \end{itemize}
+  \end{block}
+
+  \vspace{0.5cm}
+  Projekt potwierdził możliwość budowy skutecznego wykrywacza impulsowego przy użyciu powszechnie dostępnych komponentów.
+\end{frame}
+
+\begin{frame}
+  \begin{center}
+    \Huge Dziękuję za uwagę
+  \end{center}
+\end{frame}
+
+\end{document}
