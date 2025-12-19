@@ -1,8 +1,19 @@
 \section{Sonda detekcyjna}
 Sonda detekcyjna wykonana została z miedzianego przewodu o przekroju 0.4mm. Nawinięto 31 zwojów o średnicy 15cm.
-\todo[inline]{wyznaczyc teorytyczna indukcyjnosc}
 
-\begin{figure}
+Zgodnie z formułą Wheelera (\ref{eq:wheeler}) przedstawioną podczas przeglądu literatury indukcyjność cewki może zostać oszacowana w łatwy sposób. Jednostką miary w omawianym wzorze jest cal, więc wzór należy przekonwertować, aby móc z niego wygodnie skorzystać posiadając wymiary cewki w systemie metrycznym:
+\begin{equation}
+    L = \frac{0,8\cdot N^2 (\frac{a}{2,54})^2}{\frac{1}{2,54}\cdot(6a + 9b + 10c)}=\frac{0,315 \cdot N^2 a^2}{6a + 9b + 10c}
+    \label{eq:cewka_id}
+\end{equation}
+gdzie a, b, c są wymiarami w centymetrach według rysunku \ref{fig:poprz}, N jest ilością zwojów w cewce.
+
+\begin{equation}
+    L=\frac{0,315 \cdot N^2 a^2}{6a + 9b + 10c}=\frac{0,315 \cdot 31^2 \cdot 7,5^2}{6 \cdot 7,5 + 9 \cdot 0,5 + 10 \cdot 0,5} \approx 312,4 \mu H
+    \label{eq:cewka_obl}
+\end{equation}
+
+\begin{figure}[H]
     \begin{center}
         \includegraphics[width=0.6\textwidth]{img/donut otwarty kat.png}
     \end{center}
