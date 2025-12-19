@@ -88,9 +88,9 @@ class FFTTab(BasePlotTab):
     def update_view(self, context):
         
         values = context['values']
-        smallest_idx = values[int(context['special'][0])]
+        smallest = values[int(context['special'][0])]
 
-        self.fft_history_buffer.append(values[smallest_idx])
+        self.fft_history_buffer.append(smallest)
         data_np = np.array(self.fft_history_buffer)
         
         # Remove DC Offset (center signal at 0)
@@ -158,7 +158,7 @@ class ProcessedTab(BasePlotTab):
         self.buffer = deque(maxlen=1000) 
 
     def update_view(self, context):
-        processed = context['special'][2]
+        processed = context['values'][int(context['special'][0])]
 
         self.buffer.append(processed)
 
