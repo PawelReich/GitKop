@@ -94,12 +94,12 @@ int main(void)
   MX_GPDMA1_Init();
   MX_ADC1_Init();
   MX_TIM12_Init();
-  MX_TIM2_Init();
   MX_USART1_UART_Init();
   MX_ICACHE_Init();
+  MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
 
-    GitKop_Init();
+  GitKop_Init();
 
   /* USER CODE END 2 */
 
@@ -110,7 +110,6 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    GitKop_Loop();
   }
   /* USER CODE END 3 */
 }
@@ -204,7 +203,7 @@ void assert_failed(uint8_t *file, uint32_t line)
   /* USER CODE BEGIN 6 */
   /* User can add his own implementation to report the file name and line number,
      ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-    printf("Wrong parameters value: file %s on line %d\r\n", file, line);
+    printf("Wrong parameters value: file %s on line %ld\r\n", file, line);
   /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */
