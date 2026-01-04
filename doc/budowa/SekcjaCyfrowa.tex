@@ -4,7 +4,7 @@
     \begin{center}
         \includegraphics[width=7.5cm]{img/stm32.png}
     \end{center}
-    \caption{Cyfrowe przedstawienie układu STM32F411RE wraz z użytymi pinami}\label{fig:stm32}
+    \caption{Cyfrowe przedstawienie układu STM32H523CE wraz z użytymi portami}\label{fig:stm32}
 \end{figure}
 
 
@@ -12,63 +12,42 @@ Część cyfrowa wykrywacza metalu oparta jest o moduł STM32H523CECoreBoard \ci
 
 \subsection{Liczniki sprzętowe}
 \label{subsec:timery}
-Wykorzystywane są dwa 16-bitowe liczniki sprzętowe napędzane za pomocą zegara \textit{APB2} skonfigurowanego na taktowanie z częstotliwością $F_{timer}=250Mhz$. Częstotliwość przepełnienia licznika sprzętowego można wyznaczyć za pomocą poniższego równania: 
+Wykorzystywane są dwa 16-bitowe liczniki sprzętowe napędzane za pomocą zegara \textit{APB2} skonfigurowanego na taktowanie z częstotliwością $F_{timer}=250Mhz$.
+
+Konfiguracja oraz interakcja z licznikami w rodzinie układów STM32 odbywa się za pomocą rejestrów:
+\begin{itemize}
+    \item PSC (Dzielnik, ang. \textit{Prescaler}) - dzieli częstotliwość wejściową $F_{timer}$
+    \item ARR (Rejestr Automatycznego Przeładowania, ang. \textit{Auto Reload Register}) - określa długość całego cyklu, po przeładowaniu następuje reset licznika
+    \item CCR (Rejestr Przechwytywania i Przeładowania, ang. \textit{Capture/Compare Register}) - w trybie PWM określa moment przełączenia sygnału
+    \item CNT (Licznik, ang. \textit{Counter}) - przechowuję aktualną liczbę tyknięć licznika
+\end{itemize}
+
+Częstotliwość przepełnienia licznika sprzętowego można wyznaczyć za pomocą poniższego równania: 
 
 \begin{equation}
-F_{output}=\frac{F_{timer}}{(PSC+1)(ARR+1)}
+    F_{output}=\frac{F_{timer}}{(PSC+1)(ARR+1)}
+    \label{eq:timer_f}
 \end{equation}
 
-gdzie PSC oznacza Prescaler, natomiast ARR oznacza Auto Reload Register
 
+Licznik \textit{TIM1} pełni funkcję generatora sygnału \textit{PULSE\_OUT} za pomocą trybu sprzętowego trybu modulacji szerokości impulsów.
+Pozwala on na konfigurację częstotliwości oraz wypełnienia sygnału przez mikrokontroler. Jeżeli wartość rejestru \textit{CNT} jest mniejsza od \textit{CCR}, wystawiany jest sygnał +3.3V na pin 1 (PULSE\_OUT) układu, powodując otwarcie tranzystora MOSFET. Następnie w pożądanym momencie sygnał wyjściowy jest wygaszony, co pozwala na dynamiczną konfigurację długości impulsu wysyłanego do cewki.
 
-Licznik \textit{TIM10} pełni funkcję maszyny stanów zarządzając aktualnym stanem sygnału \textit{PULSE\_OUT}.
-W celu zachowania dokładności przy jednoczesnym jak najmniejszym obciążeniu MCU licznik wywołuje przerwania w częstotliwości $F_{output}=1\mu s$ poprzez konfigurację $PSC=0, ARR=249$.
+Drugi licznik \textit{TIM12} wykorzystany jest do generowania sygnału PWM o wypełnieniu 50\% i dynamicznie wyznaczanej częstotliwości do brzęczyka wskazującego o wykryciu anomalii w przetworzonym sygnale \textit{SIGNAL\_OUT}.
+Dynamiczna rekonfiguracja rejestrów licznika pozwala na uzyskanie tonu o zadanej częstotliwości. 
+Wzór na wartość rejestru ARR można wyznaczyć przekształcając wzór \ref{eq:timer_f}:
 
-Podczas pracy układu cyfrowego w funkcji przerwania sprawdzana jest wartość zmiennej inkrementowanej co każde wywołanie przerwania. Jeżeli licznik jest równy 0, wystawiany jest sygnał +3.3V na pin 1 (PULSE\_OUT) układu, powodując otwarcie tranzystora MOSFET. Następnie w pożądanym momencie sygnał wyjściowy jest wygaszony, co pozwala na dynamiczną konfigurację długości impulsu wysyłanego do cewki.
+\begin{equation}
+    ARR = \frac{F_{timer}}{(PSC+1) \cdot f_{target}} - 1
+    \label{eq:buzzer_arr}
+\end{equation}
 
-\begin{figure}[H]
-    \begin{center}
-\begin{tikzpicture}[node distance=1cm and 2.5cm]
+W celu uzyskania wypełnienia 50\% należy ustawić rejestr \textit{CCR} na połowę wartości rejestru \textit{ARR}:
 
-    \node[startstop] (start) {Wywołanie przerwania};
-    
-    \node[decision, below=1cm of start] (dec1) {Czy \texttt{pulseTickCtr == 0}?};
-    \node[decision, below=of dec1] (dec2) {Czy \texttt{pulseTickCtr} \\ \texttt{== PULSE\_WIDTH}?};
-    \node[decision, below=of dec2] (dec3) {Czy \texttt{pulseTickCtr} \\ \texttt{== PULSE\_WIDTH} \\ \texttt{+ 10us}?};
-    \node[decision, below=of dec3] (dec4) {Czy \texttt{pulseTickCtr} \\ \texttt{== TOTAL\_WIDTH}?};
-    
-    \node[process, below=of dec4] (inc) {Inkrementuj \texttt{pulseTickCtr}};
-    \node[startstop, below=of inc] (stop) {Koniec};
-
-    \node[process, right=of dec1] (proc1) {Wystaw sygnał\\ \textbf{PULSE\_OUT}};
-    \node[process] (proc2) at (proc1 |- dec2) {Wygaś sygnał\\ \textbf{PULSE\_OUT}};
-    \node[process] (proc3) at (proc1 |- dec3) {Zapisz licznik DMA do\\ \textbf{dmaBufferHead}};
-    \node[process] (proc4) at (proc1 |- dec4) {Ustaw \\ \texttt{pulseTickCtr = 0}};
-    
-    \draw[arrow] (start) -- (dec1);
-    \draw[arrow] (dec1) -- node[left] {Nie} (dec2);
-    \draw[arrow] (dec2) -- node[left] {Nie} (dec3);
-    \draw[arrow] (dec3) -- node[left] {Nie} (dec4);
-    \draw[arrow] (dec4) -- node[left] {Nie} (inc);
-    \draw[arrow] (inc) -- node[left] {} (stop);
-    
-    \draw[arrow] (dec1) -- node[above] {Tak} (proc1);
-    \draw[arrow] (dec2) -- node[above] {Tak} (proc2);
-    \draw[arrow] (dec3) -- node[above] {Tak} (proc3);
-    \draw[arrow] (dec4) -- node[above] {Tak} (proc4);
-
-    \draw[arrow] (proc1) |- ($(dec1.south)!0.5!(dec2.north)$);
-    \draw[arrow] (proc2) |- ($(dec2.south)!0.5!(dec3.north)$);
-    \draw[arrow] (proc3) |- ($(dec3.south)!0.5!(dec4.north)$);
-    \draw[arrow] (proc4) |- (stop);
-
-\end{tikzpicture}
-    \end{center}
-    \caption{Procedura przerwania TIM10}
-\end{figure}
-
-
-Drugi licznik \textit{TIM2} wykorzystany jest do generowania sygnału PWM o wypełnieniu 50\% i dynamicznie wyznaczanej częstotliwości do brzęczyka wskazującego o wykryciu anomalii w przetworzonym sygnale \textit{PULSE\_IN}.
+\begin{equation}
+    CCR = \frac{ARR}{2}
+    \label{eq:buzzer_ccr}
+\end{equation}
 
 \subsection{Konwerter cyfrowo-analogowy}
 
@@ -84,142 +63,94 @@ gdzie $V_{ref}$  to napięcie referencyjne (tutaj $V_{in}=3.3V$), N = ilość bi
 W celu osiągnięcia jak największego zasięgu wykrywacza wymagana jest jednocześnie jak największa dokładność układu ADC oraz jego szybkość działania. Dla trybu 12-bitowego każdy pomiar zajmuje $C_{sample}=15$ cykli zegarowych dających teorytyczny limit przy ustalonym wcześniej taktowaniu zegara ADC wynoszący $4,16 MSPS$ (milionów próbek na sekundę ,ang. \textit{Mega Sample Per Second}), co daje jedną próbkę napięcia co $~0,24\mu s$.
 
 \begin{equation}
-    SPS = \frac{F_{ADC}}{C_{sample}}=\frac{62,5\cdot10^{6}}{15}\approx{4,16\cdot10^6}
+    SPS = \frac{F_{ADC}}{C_{sample}}=\frac{62,5\cdot10^6}{15}\approx{4,16\cdot10^6}\frac{S}{s}
 \end{equation}
 
-Dla maksymalnego odciążenia mikrokontrolera wykorzystany został tryb DMA z wyłączonym generowaniem przerwań sprzętowych. Każda nowa próbka zmierzona przez konwerter analogowo-cyfrowy zapisywana jest w do cyklicznego buforu znajdującym się pamięci SRAM wskazanym podczas konfiguracji bez dodatkowego udziału MCU.
-Podczas wykonywania algorytmu wykrywania kopiowany jest pożądany indeks próbki z bufora i dokonywany jest proces analizy sygnału.
+Dla maksymalnego odciążenia mikrokontrolera wykorzystany został tryb DMA (bezpośredni dostęp do pamięci, ang. \textit{Direct Memory Access}) z wyłączonym generowaniem przerwań sprzętowych. Każda nowa próbka napięcia wykonana przez konwerter analogowo-cyfrowy zapisywana jest przez układ peryferyjny GPDMA1 do cyklicznego buforu znajdującym się pamięci SRAM wskazanym podczas konfiguracji bez dodatkowego udziału rdzenia Cortex-M33.
+
+\begin{figure}[H]
+    \begin{center}
+        \includegraphics[width=0.95\textwidth]{img/pulse_out.png}
+    \end{center}
+    \caption{Wykres odpowiedzi sondy \textit{PULSE\_OUT}}\label{fig:pulse_out}
+\end{figure}
+
+W celu dokładnego wyznaczenia trwania nasyconej odpowiedzi sondy wykorzystywany jest wbudowany w ADC sprzętowy komparator okienkowy (Analog Watchdog, AWD). To peryferium konwertera analogowo-cyfrowego pozwala na wyznaczenie zakresu wartości próbek, którego opuszczenie wywoła przerwanie mikrokontrolera. W prototypie moduł ten skonfigurowany jest na wykrywanie momentu przekroczenia przez sygnał wartości dolnej granicy wynoszącej 3000. Górna granica okna wynosi 4095, czyli maksymalną wartość próbki przy rozdzielczości 12-bit, efektywnie eliminując możliwość wywołania przerwania.
+
 
 \section{Algorytm wykrywania anomalii}
 
-Główny algorytm napędzający prototyp wykrywacza metali podzielony jest na X części.
-\subsection{Odszukanie obszaru zainteresowania}
-
-Pierwsza część odpowiada za wyszukanie obszaru zainteresowania. Ze względu na 
-
-\begin{figure}[H]
-    \begin{center}
-\begin{tikzpicture}[node distance=1.5cm and 2cm]
-
-    % Węzły
-    \node[startstop] (start) {Start};
-    \node[decision, below=of start] (dec1) {Czy wszystkie \\ próbki?};
-    \node[decision, below=of dec1] (dec2) {Czy próbka \\ $\ge$ \texttt{THRES}?};
-    
-    % "Następna próbka" po lewej stronie (zgodnie z rysunkiem)
-    \node[process, left=of dec2] (next) {Następna \\ próbka};
-    
-    % Akcja po znalezieniu progu
-    \node[process, below=of dec2] (set_area) {Ustaw \\ \texttt{AREA\_START} \\ na indeks};
-    
-    \node[startstop, below=of set_area] (stop) {Koniec};
-
-    % Połączenia
-    \draw[arrow] (start) -- (dec1);
-    
-    % Decyzja 1: Czy wszystkie sprawdzone?
-    \draw[arrow] (dec1) -- node[right] {Nie} (dec2);
-    % Tak -> Koniec (ścieżka bokiem, omijająca resztę)
-    \draw[arrow] (dec1.east) -- node[above] {Tak} ++(2,0) |- (stop);
-
-    % Decyzja 2: Czy przekroczono próg?
-    \draw[arrow] (dec2) -- node[right] {Tak} (set_area);
-    \draw[arrow] (set_area) -- (stop);
-
-    % Pętla "Nie" (powrót do sprawdzania kolejnej próbki)
-    \draw[arrow] (dec2) -- node[above] {Nie} (next);
-    \draw[arrow] (next) |- (dec1);
-
-\end{tikzpicture}
-    \end{center}
-    \caption{}\label{fig:}
-\end{figure}
-
-
-\begin{figure}[H]
+\begin{figure}
     \centering
-\begin{tikzpicture}[node distance=1cm and 2.5cm]
+    \begin{tikzpicture}[node distance=1cm, auto]
 
-    % Węzły główne (pionowa oś)
-    \node[startstop] (start) {Start};
-    
-    \node[process, below=of start] (fetch) {Pobierz próbkę \\ (z ostatnich 10us)};
-    
-    \node[decision, below=of fetch] (dec1) {Czy próbka \\ > \texttt{AREA\_THRESHOLD}?};
-    
-    \node[decision, below=of dec1] (dec2) {Czy poprzednia \\ > \texttt{MIN\_SAMPLE}?};
-    
-    \node[process, below=of dec2] (filter) {Dodaj do \\ \texttt{1ST\_STAGE\_SAMPLES} \\ \textit{Oblicz} \texttt{1ST\_STAGE\_AVG}};
-    
-    \node[decision, below=of filter] (dec3) {Czy próbka \\ > \texttt{1ST\_STAGE\_AVG}?};
-    
-    \node[startstop, below=of dec3] (stop) {Koniec};
+        \node (start) [startstop] {Start};
+        \node (fast) [process, below=of start] {Wyznacz nową wartość \\szybkiego filtru};
+        \node (slow) [process, below=of fast] {Wyznacz nową wartość \\wolnego filtru};
+        \node (dec) [decision, below=of slow] {Czy\\$S_f - S_s > T_h$ ?};
+        \node (change) [process, below=of dec, node distance=2.5cm] {Wyznacz zmianę\\napięcia w\\czasie};
+        \node (signal) [process, below=of change] {Uruchom\\sygnalizację\\akustyczną};
+        \node (end) [startstop, below=of signal] {Koniec};
 
-    % Węzły boczne (akcje warunkowe)
-    \node[process, right=of dec2] (proc_min) {Przypisz wartość do \\ \texttt{MIN\_SAMPLE}};
-    
-    \node[process, right=of dec3] (proc_alarm) {Anomalia: \\ Ustal brzęczyk};
+        \draw [arrow] (start) -- (fast);
+        \draw [arrow] (fast) -- (slow);
+        \draw [arrow] (slow) -- (dec);
+        
+        \draw [arrow] (dec) -- node[anchor=east] {Tak} (change);
+        \draw [arrow] (change) -- (signal);
+        \draw [arrow] (signal) -- (end);
+        
+        \draw [arrow] (dec.east) -- ++(2.5,0) node[midway, above] {Nie} |- (end.east);
 
-    % Połączenia - Główna ścieżka i logika Tak/Nie
-    \draw[arrow] (start) -- (fetch);
-    \draw[arrow] (fetch) -- (dec1);
-
-    % Decyzja 1: Threshold
-    % Nie: Idź do następnej próbki (pętla powrotna do pobierania)
-    \draw[arrow] (dec1.west) -- node[above] {Nie} ++(-1,0) |- (fetch.west);
-    % Tak: Szukanie najniższej próbki
-    \draw[arrow] (dec1) -- node[left] {Tak} (dec2);
-
-    % Decyzja 2: Min Sample
-    % Tak: Ignoruj (przejdź od razu do filtracji)
-    \draw[arrow] (dec2) -- node[left] {Tak} (filter);
-    % Nie: Aktualizuj MIN_SAMPLE
-    \draw[arrow] (dec2) -- node[above] {Nie} (proc_min);
-    
-    % Powrót z aktualizacji MIN_SAMPLE do głównego nurtu (przed filtracją)
-    \draw[arrow] (proc_min) |- ($(dec2.south)!0.5!(filter.north)$);
-
-    % Połączenie do Decyzji 3
-    \draw[arrow] (filter) -- (dec3);
-
-    % Decyzja 3: Anomalia
-    % Nie: Koniec
-    \draw[arrow] (dec3) -- node[left] {Nie} (stop);
-    % Tak: Anomalia
-    \draw[arrow] (dec3) -- node[above] {Tak} (proc_alarm);
-    
-    % Powrót z obsługi anomalii do Końca
-    \draw[arrow] (proc_alarm) |- (stop);
-
-\end{tikzpicture}
-    % \begin{tikzpicture}
-    %     \node[startstop] (start) {Start};
-    %     \node[process, below=of start] (analiza) {Analiza zawartości bufora cyklicznego};
-    %     \node[process, below=of analiza] (wyznaczenie) {Wyznaczenie próbki o najmniejszej wartości w obszarze zainteresowania};
-    %     \node[blok, below=of wyznaczenie] (suma4) {Suma\\czterech próbek};
-    %     \node[blok, below=of suma4] (suma32) {Suma 32\\próbek};
-    %     \node[blok, below=of suma32] (tlo) {- background};
-    %     \node[blok, below=of tlo] (anomalia) {sprawdzenie\\anomalii};
-    %     \node[blok, below=of anomalia] (buzzer) {buzzer};
-    %     \node[startstop, below=of buzzer] (koniec) {Koniec};
-    %     \draw[arrow] (start) -- (analiza);
-    %     \draw[arrow] (analiza) -- (wyznaczenie);
-    %     \draw[arrow] (wyznaczenie) -- (suma4);
-    %     \draw[arrow] (suma4) -- (suma32);
-    %     \draw[arrow] (suma32) -- (tlo);
-    %     \draw[arrow] (tlo) -- (anomalia);
-    %     \draw[arrow] (anomalia) -- (buzzer);
-    %     \draw[arrow] (buzzer) -- (koniec);
-    % \end{tikzpicture}
+    \end{tikzpicture}
     \caption{Schemat blokowy działania algorytmu}\label{fig:diagram}
 \end{figure}
 
-Algorytm wykrywania metalu oparty jest o próbkowanie sygnału \textit{PULSE\_OUT} w dynamicznie określanym odstępie czasowym. Zbierana jest suma czterech następnych próbek, która zapisywana jest do bufora cyklicznego przechowującego 32 pozycje (Stage 1). Średnia obliczona ze wszystkich wartości znajdujących się w buforze etatu 1 umieszczana jest w drugim buforze cyklicznym, mający pojemność 64 próbki. Ten bufor służy do eliminacji tła. Średnia wartości etapu pierwszego porównywana jest ze średnią wartości znajdujących się w buforze tła, każda różnica co najmniej 5 jednostek traktowana jest jako anomalia i oznacza wykrycie metalu.
+Algorytm napędzający prototyp wykrywacza metali wykorzystuje komparator okienkowy w celu wykrywania anomalii czasu trwania odpowiedzi sondy.
+Jak można zauważyć na wykresie \ref{fig:pulse_out}, podczas przybliżenia metalowego obiektu zmienia się charakterystyka sygnału \textit{SIGNAL\_OUT}.
+Wykorzystanie sprzętowego rozwiązania pozwala na dokładne wyznaczenie momentu przekroczenia granicy 2,41V ($\frac{3000}{4095}\cdot 3,3V$). Kod przerwania wywołanego przez AWD zapisuje w pamięci mikrokontrolera aktualną wartość licznika \textit{TIM1}, co pozwala dokładnie odtworzyć względny czas wywołania przerwania po wyłączeniu sygnału \textit{PULSE\_OUT}. Przechwycona wartość mnożona jest przez czas pomiędzy inkrementacją licznika.
 
-\begin{figure}[H]
-    \begin{center}
-        \includegraphics[width=0.95\textwidth]{../meas/pulse_out.png}
-    \end{center}
-    \caption{Wykres sygnału \textit{PULSE\_OUT} używany w algorytmie}\label{fig:meas}
 
-\end{figure}
+\subsection{Filtracja sygnału pomiarowego i detekcja obiektu}
+
+Ze względu na charakter wzmocnionego sygnału wyjściowego z sekcji odbiorczej, który obarczony jest znacznym szumem o charakterze stochastycznym, a także szumom wynikającym z przetwornika analogowo-cyfrowego konieczne było zastosowanie odpowiednich metod cyfrowego przetwarzania sygnałów. Wstępna analiza widmowa z wykorzystaniem Szybkiej Transformaty Fouriera (FFT) wykazała, że zakłócenia mają charakter szerokopasmowy (szum biały), co uniemożliwia skuteczne odfiltrowanie ich poprzez proste wycięcie konkretnych częstotliwości bez utraty istotnych informacji o zmianach amplitudy sygnału użytecznego. W związku z tym, do kondycjonowania sygnału wybrano filtr dolnoprzepustowy w dziedzinie czasu.
+
+\subsection{Charakterystyka filtru EMA}
+
+Wykładnicza średnia krocząca  (ang. \textit{Exponential Moving Average}, EMA) jest filtrem o nieskończonej odpowiedzi impulsowej (IIR), który przypisuje wagi do danych historycznych w sposób malejący wykładniczo. Jest to rozwiązanie szczególnie korzystne w systemach wbudowanych o ograniczonych zasobach obliczeniowych, ponieważ nie wymaga buforowania dużej liczby próbek, a jedynie przechowywania poprzedniej wartości przefiltrowanej.
+
+Równanie rekurencyjne filtru EMA opisuje wzór:
+
+\begin{equation}
+    S_t = \alpha \cdot Y_t + (1 - \alpha) \cdot S_{t-1}
+    \label{eq:ema}
+\end{equation}
+
+gdzie $S_t$ - aktualna wartość przefiltrowana, $Y_t$ - aktualna surowa wartość, $S_{t-1}$ - poprzednia wartość przefiltrowana, $\alpha$ - współczynnik wygładzania z przedziału $(0, 1)$.
+
+Współczynnik $\alpha$ decyduje o stałej czasowej filtru. Niska wartość $\alpha$ skutkuje silnym tłumieniem szumu, ale wprowadza większe opóźnienie w detekcji szybkich zmian sygnału. Wysoka wartość $\alpha$ zapewnia szybszą reakcję układu, lecz słabiej eliminuje zakłócenia o wysokiej częstotliwości.
+
+\subsection{Algorytm detekcji różnicowej}
+
+W celu eliminacji efektu pływania zera w algorytmie zastosowano dodatkowa średnią z filtrem EMA o niskiej wartości $\alpha$, reprezentującą tło.
+
+Warunek detekcji metalu opiera się na analizie różnicy między tymi dwoma sygnałami, co przedstawia nierówność (\ref{eq:trigger}):
+
+\begin{equation}
+    Diff=S_{fast} - S_{slow} > T_{h}
+    \label{eq:trigger}
+\end{equation}
+
+gdzie $Diff$ to wyznaczona różnica, $S_{fast}$ to aktualna wartość szybkiego filtra EMA, $S_{slow}$ to aktualna wartość wolnego filtra EMA, $T_{h}$ to próg detekcji.
+
+Zaletą zastosowania dwóch średnich jest automatyczna kalibracja układu. W stanie spoczynku różnica $Diff$ oscyluje wokół zera, niezależnie od bezwzględnej wartości odpowiedzi sygnału z cewki. W momencie pojawienia się obiektu metalowego, $S_{fast}$ narasta znacznie szybciej niż $S_{slow}$, powodując przekroczenie progu $T_{h}$.
+
+
+\subsection{Nachylenie odpowiedzi}
+
+Podczas wykonywania algorytmu wykrywania kopiowany jest segment bufora uzupełnianego przez DMA zawierający ostatnie $N=42$ próbek i dokonywany jest proces analizy nachylenia sygnału.
+
+\begin{equation}
+    N = \frac{T}{SPS}=\frac{10\mu s}{4,16\cdot10^6 \frac{S}{s}} \approx{42}
+\end{equation}
+

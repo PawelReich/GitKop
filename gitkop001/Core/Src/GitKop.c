@@ -1,109 +1,97 @@
 #include <stdint.h>
-#include <stdbool.h>
-#include <stdlib.h> // do abs()
 
 #include "GitKop.h"
+#include "ema.h"
 #include "main.h"
-#include "stm32h523xx.h"
-#include "stm32h5xx_hal.h"
 #include "stm32h5xx_hal_dma.h"
 #include "stm32h5xx_hal_gpio.h"
+#include "stm32h5xx_hal_rcc.h"
 #include "stm32h5xx_hal_tim.h"
 
-#define PULSE_ADC hadc1
-#define BUZZ_TIMER htim12
-#define PULSE_TIMER htim1
-#define UART huart1
-
-volatile static uint32_t pulseTickCtr = 0;
 volatile static uint16_t pulseTickAnalysisCtr = 0;
-volatile static uint16_t dmaIndex;
+volatile static uint16_t dmaIndex = 0;
 volatile static uint16_t timerIndex = 0;
 
-static const uint16_t PULSE_WIDTH = 15;
-static const uint16_t TOTAL_WIDTH = 5000;
-
-static uint8_t DEBUG_MODE = 0;
+uint16_t stabilizedCounter = 0;
+volatile static uint8_t outOfWindowTriggered = 1;
 
 #define DMA_BUFFER_ENTRIES 2048
 __attribute__((aligned(32))) volatile static uint16_t value[DMA_BUFFER_ENTRIES];
 
-static inline __attribute__((always_inline)) void Save_Pulse()
-{
-    pulseTickAnalysisCtr++;
-    dmaIndex = __HAL_DMA_GET_COUNTER(PULSE_ADC.DMA_Handle) / 2;
-    timerIndex = __HAL_TIM_GET_COUNTER(&PULSE_TIMER);
-    HAL_GPIO_WritePin(USER_LED_GPIO_Port, USER_LED_Pin, 1);
-    __HAL_ADC_DISABLE_IT(&PULSE_ADC, ADC_IT_AWD1);
-}
+float detectionThreshold = 5;
+EMA_t slowFilter;
+EMA_t fastFilter;
+
+uint8_t test = 0;
+uint8_t emaSetUp = 0;
 
 int _write(int file, char* ptr, int len) {
     HAL_UART_Transmit(&UART, (uint8_t*) ptr, len, HAL_MAX_DELAY);
     return len;
 }
 
-void buzz(uint16_t freq) {
-    if (freq == 0)
+void Buzzer_Set(uint16_t freqHz)
+{
+    if (freqHz == 0)
     {
-        __HAL_TIM_SET_COMPARE(&BUZZ_TIMER, TIM_CHANNEL_1, 0);
+        __HAL_TIM_SET_COMPARE(&BUZZ_TIMER, BUZZ_CHANNEL, 0);
         return;
     }
 
-    uint16_t autoreload = (1000000UL / freq) - 1;
+    uint32_t apb1 = HAL_RCC_GetPCLK1Freq();
+    uint32_t psc = BUZZ_TIMER.Instance->PSC;
 
-    __HAL_TIM_SET_AUTORELOAD(&BUZZ_TIMER, autoreload);
+    uint32_t newAutoreload = (apb1 / ((psc + 1) * freqHz)) - 1;
 
-    __HAL_TIM_SET_COMPARE(&BUZZ_TIMER, TIM_CHANNEL_1, autoreload / 2);
+    __HAL_TIM_SET_AUTORELOAD(&BUZZ_TIMER, newAutoreload);
+    __HAL_TIM_SET_COMPARE(&BUZZ_TIMER, BUZZ_CHANNEL, newAutoreload / 2);
 }
 
-
-
-// --- Configuration ---
-const float ALPHA_FAST = 0.1;    // Responsive: Smoothing for the signal
-const float ALPHA_SLOW = 0.005;  // Sluggish: Tracks drifting background/ground
-const float THRESHOLD  = 15.0;   // Trigger sensitivity (adjust based on your noise)
-
-// --- State Variables ---
-float fastAvg = 0;
-float slowAvg = 0;
-bool isInitialized = false;
-
-float handle_data(uint16_t rawSample)
+float Handle_Sample(uint16_t rawSample)
 {
-  if (!isInitialized) {
-    fastAvg = rawSample;
-    slowAvg = rawSample;
-    isInitialized = true;
-    return 0; // Skip the rest of this loop iteration
-  }
+    float x = rawSample;
+    if (!emaSetUp)
+    {
+        EMA_Init(&slowFilter, 0.005, x);
+        EMA_Init(&fastFilter, 0.1, x);
+        emaSetUp = 1;
+    }
+    else
+    {
+        EMA_Update(&fastFilter, rawSample);
+    }
 
-  fastAvg = (ALPHA_FAST * rawSample) + ((1.0 - ALPHA_FAST) * fastAvg);
+    float difference = fastFilter.out - slowFilter.out;
 
-  float difference = fastAvg - slowAvg;
-
-  uint8_t metalDetected = false;
-
-  if (difference > THRESHOLD) {
-    metalDetected = true;
-  } else {
-    slowAvg = (ALPHA_SLOW * rawSample) + ((1.0 - ALPHA_SLOW) * slowAvg);
-  }
-  return difference;
+        EMA_Update(&slowFilter, rawSample);
+    if (difference < detectionThreshold)
+    {
+        Buzzer_Set(0);
+    }
+    else if (ENABLE_BUZZER)
+    {
+        float hz = difference;
+        Buzzer_Set(hz);
+        printf("buzzing: %d, %f, %f, %f\r\n", rawSample, fastFilter.out, slowFilter.out, hz);
+    }
+    return difference;
 }
 
 void GitKop_Init()
 {
     printf("GitKop build %s %s\r\nCreated by Pawel Reich, https://gitmanik.dev\r\n", __TIME__, __DATE__);
+
     HAL_TIM_PWM_Start(&PULSE_TIMER, TIM_CHANNEL_3);
     HAL_TIM_Base_Start_IT(&PULSE_TIMER);
-    // HAL_TIM_Base_Start_IT(&BUZZ_TIMER);
+    HAL_TIM_Base_Start_IT(&BUZZ_TIMER);
 
-    // HAL_TIM_PWM_Start(&BUZZ_TIMER, TIM_CHANNEL_1);
-    // buzz(0);
+    HAL_TIM_PWM_Start(&BUZZ_TIMER, BUZZ_CHANNEL);
+    Buzzer_Set(0);
 
-    HAL_ADC_Start_DMA(&PULSE_ADC, (uint32_t*)value, DMA_BUFFER_ENTRIES);
-    HAL_ADC_Start_IT(&PULSE_ADC);
+    HAL_ADC_Start_DMA(&ADC, (uint32_t*)value, DMA_BUFFER_ENTRIES);
+    HAL_ADC_Start_IT(&ADC);
     HAL_GPIO_WritePin(USER_LED_GPIO_Port, USER_LED_Pin, 0);
+
 
     while(1)
     {
@@ -114,15 +102,24 @@ void GitKop_Init()
 
 void HAL_ADC_LevelOutOfWindowCallback(ADC_HandleTypeDef *hadc)
 {
-    Save_Pulse();
+    if (outOfWindowTriggered)
+        return;
+    pulseTickAnalysisCtr++;
+    dmaIndex = __HAL_DMA_GET_COUNTER(ADC.DMA_Handle) / 2;
+    timerIndex = __HAL_TIM_GET_COUNTER(&PULSE_TIMER);
+    outOfWindowTriggered = 1;
 }
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-    if (htim == &htim1)
+    if (htim == &PULSE_TIMER)
     {
-        __HAL_ADC_CLEAR_FLAG(&hadc1, ADC_FLAG_AWD1);
-        __HAL_ADC_ENABLE_IT(&hadc1, ADC_IT_AWD1);
+        if (!test)
+        {
+            test = 1;
+            return;
+        }
+        outOfWindowTriggered = 0;
     }
 }
 
@@ -142,48 +139,23 @@ void Get_Last_N_Samples(uint16_t *buffer, uint16_t *output, uint16_t head_idx, u
     }
 }
 
-void __attribute__((always_inline)) GitKop_Loop()
+void GitKop_Loop()
 {
     if (dmaIndex != 0)
     {
-        if (pulseTickAnalysisCtr > 100)
-        {
-            pulseTickAnalysisCtr = 0;
-        }
+        stabilizedCounter++;
+        if (stabilizedCounter < 1000)
+            goto end;
 
         #define HISTORY_LEN 42
-        #define INTEREST_THRES 2800
-                // printf("smallestSample: %d, val: %d\r\n", smallestSample, signal_diff);
         uint16_t linear_history[HISTORY_LEN];
 
         uint16_t head_ptr = DMA_BUFFER_ENTRIES - dmaIndex;
 
         Get_Last_N_Samples(value, linear_history, head_ptr, HISTORY_LEN, DMA_BUFFER_ENTRIES);
 
-        size_t areaOfInterestIndex = 0;
-        size_t smallestSampleIndex = 0;
-        size_t smallestSample = 0;
-
-        for (size_t i = 0; i < HISTORY_LEN; i++)
-        {
-            uint16_t sample = linear_history[i];
-            if (areaOfInterestIndex == 0 && sample < INTEREST_THRES)
-            {
-                areaOfInterestIndex = i;
-                smallestSampleIndex = i;
-                continue;
-            }
-            if (areaOfInterestIndex > 0)
-            {
-                if (sample < smallestSample)
-                {
-                    smallestSample = sample;
-                    smallestSampleIndex = i;
-                }
-            }
-        }
-
-        float val = handle_data(smallestSample);
+        float time = timerIndex * 0.02f;
+        float val = Handle_Sample(time);
 
         if (pulseTickAnalysisCtr > 100)
         {
@@ -194,11 +166,11 @@ void __attribute__((always_inline)) GitKop_Loop()
                 {
                     printf("%d ", linear_history[i]);
                 }
-                printf("] %d %d %f$\r\n", smallestSampleIndex, areaOfInterestIndex, val);
+                printf("] %d %f %f$\r\n", 0, time, val);
             }
             pulseTickAnalysisCtr = 0;
         }
-
+        end:
         dmaIndex = 0;
     }
 }

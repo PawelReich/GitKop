@@ -5,19 +5,28 @@ import os
 from scipy.signal import savgol_filter  # Import the smoothing filter
 
 FILE_LIST = [
-    ['../meas/good.edf', 'Cewka tłumiona krytycznie'],
-    ['../meas/undamped.edf', 'Cewka nietłumiona']
+    ['../meas/good2.edf', 'Cewka tłumiona krytycznie'],
+    ['../meas/overdamped.edf', 'Cewka przetłumiona'],
+    # ['../meas/undamped.edf', 'Cewka nietłumiona']
 ]
+FILENAME = 'meas.png'
+TIME_LIMIT_SEC = 0.00002
+
+# FILE_LIST = [
+#     ['../meas/pulse_out_nometal.edf', 'Bazowa odpowiedź sondy'],
+#     ['../meas/pulse_out_metal.edf', 'Odpowiedź sondy z metalem w pobliżu']
+# ]
+# FILENAME = 'cewka_odp.png'
+# TIME_LIMIT_SEC = 0.0005
 
 TRIGGER_CH_INDEX = 0
 DATA_CH_INDEX = 1
 
-TIME_LIMIT_SEC = 0.00002
 REMOVE_OFFSET = True
 
 # --- SMOOTHING CONFIGURATION ---
 APPLY_SMOOTHING = True
-SMOOTH_WINDOW = 51   # Must be odd (e.g., 21, 51, 101). Higher = smoother but less detail.
+SMOOTH_WINDOW = 401   # Must be odd (e.g., 21, 51, 101). Higher = smoother but less detail.
 SMOOTH_POLY = 3      # Polynomial order (3 is usually good for scope traces)
 
 # --- VISUAL CONFIGURATION ---
@@ -64,6 +73,7 @@ def process_edf_files():
                 aligned_data = aligned_data[:max_samples]
 
         if REMOVE_OFFSET and len(aligned_data) > 0:
+            print(f"removing offset: {aligned_data[0]}") 
             aligned_data = aligned_data - aligned_data[0]
 
         # --- APPLY SMOOTHING ---
@@ -85,7 +95,7 @@ def process_edf_files():
     plt.tight_layout()
     # plt.show()
 
-    plt.savefig("meas.png")
+    plt.savefig(FILENAME)
 
 if __name__ == "__main__":
     process_edf_files()

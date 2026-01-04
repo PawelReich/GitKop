@@ -158,7 +158,7 @@ class ProcessedTab(BasePlotTab):
         self.buffer = deque(maxlen=1000) 
 
     def update_view(self, context):
-        processed = context['values'][int(context['special'][0])]
+        processed = context['special'][2]
 
         self.buffer.append(processed)
 
