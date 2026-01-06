@@ -1,0 +1,12 @@
+\section{Oprogramowanie pomocnicze}
+
+W celu zwizualizowania oraz wykreślenia danych testowych generowanych w czasie rzeczywistym przez prototyp wykrywacza metalu powstał program pomocniczy.
+Napisany w języku Python, łączy się z urządzeniem za pomocą peryferium \textit{USART1} (Uniwersalny Synchroniczny Asynchroniczny Nadajnik-Odbiornik, ng. \textit{Universal Synchronous Asynchronous Receiver Transmitter}) wbudowanego w mikrokontroler.
+Połączenie z komputerem następuje dzięki urządzeniu ST-Link oferującemu, oprócz interfejsu SWD (Szeregowy Interfejs Debugowania, ang. \textit{Serial Wire Debug}), konwerter komunikacji szeregowej TTL (logika tranzystor-tranzystor, ang. \textit{Transistor-Transistor Logic}). Dzięki zastosowaniu języka Python, program pozwala na szybką iterację, przetwarzanie oraz prezentację danych generowanych przez wykrywacz.
+
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.0\textwidth]{img/test_ss.png}
+    \caption{Zrzut ekranu oprogramowania pomocniczego po włączeniu}\label{fig:test_program}
+\end{figure}

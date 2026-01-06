@@ -1,0 +1,28 @@
+\section{Test działania prototypu}
+
+Podczas pracy wykrywacza pobierany prąd wynosił stałe $60mA$, przy przyjętym wcześniej napięciu zasilania $10V$, daje to stałe obciążenie $0.6W$, czyniąc prototyp energooszczędnym.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{img/test_bufor.png}
+    \caption{Prototyp wykrywacza metali podłączony do aparatury testowej}
+    \label{fig:wykrywacz}
+\end{figure}
+
+Program umożliwia wykres bufora próbek zebranych przez konwerter analogowo-cyfrowy. Jak widać na rysunku \ref{fig:bufor_wyglad}, prototyp poprawnie agreguje informacje zwrotne pochodzące z sondy.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{img/test_bufor.png}
+    \caption{Wykres widoku bufora}\label{fig:bufor_wyglad}
+\end{figure}
+
+Urządzenie poprawnie wyznacza czas trwania odpowiedzi sondy, wraz z filtracją szumów. Na rysunku \ref{fig:bufor_czas} wykreślono surowe, pomierzone dane próbek wraz ze stanami filtrów EMA oraz końcowym, wynikowym sygnałem
+będący podstawą do podjęcia decyzji o stwierdzonej anomalii sygnału.
+
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.9\textwidth]{img/test_bufor.png}
+    \caption{Wykres wewnętrznych stanów wykrywacza}\label{fig:bufor_czas}
+\end{figure}

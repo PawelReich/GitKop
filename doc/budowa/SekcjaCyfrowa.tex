@@ -19,7 +19,7 @@ Konfiguracja oraz interakcja z licznikami w rodzinie układów STM32 odbywa się
     \item PSC (Dzielnik, ang. \textit{Prescaler}) - dzieli częstotliwość wejściową $F_{timer}$
     \item ARR (Rejestr Automatycznego Przeładowania, ang. \textit{Auto Reload Register}) - określa długość całego cyklu, po przeładowaniu następuje reset licznika
     \item CCR (Rejestr Przechwytywania i Przeładowania, ang. \textit{Capture/Compare Register}) - w trybie PWM określa moment przełączenia sygnału
-    \item CNT (Licznik, ang. \textit{Counter}) - przechowuję aktualną liczbę tyknięć licznika
+    \item CNT (Licznik, ang. \textit{Counter}) - przechowuje aktualną liczbę tyknięć licznika
 \end{itemize}
 
 Częstotliwość przepełnienia licznika sprzętowego można wyznaczyć za pomocą poniższego równania: 
@@ -113,7 +113,7 @@ Wykorzystanie sprzętowego rozwiązania pozwala na dokładne wyznaczenie momentu
 
 \subsection{Filtracja sygnału pomiarowego i detekcja obiektu}
 
-Ze względu na charakter wzmocnionego sygnału wyjściowego z sekcji odbiorczej, który obarczony jest znacznym szumem o charakterze stochastycznym, a także szumom wynikającym z przetwornika analogowo-cyfrowego konieczne było zastosowanie odpowiednich metod cyfrowego przetwarzania sygnałów. Wstępna analiza widmowa z wykorzystaniem Szybkiej Transformaty Fouriera (FFT) wykazała, że zakłócenia mają charakter szerokopasmowy (szum biały), co uniemożliwia skuteczne odfiltrowanie ich poprzez proste wycięcie konkretnych częstotliwości bez utraty istotnych informacji o zmianach amplitudy sygnału użytecznego. W związku z tym, do kondycjonowania sygnału wybrano filtr dolnoprzepustowy w dziedzinie czasu.
+Ze względu na charakter wzmocnionego sygnału wyjściowego z sekcji odbiorczej         , który obarczony jest znacznym szumem o charakterze stochastycznym, a także szumom wynikającym z przetwornika analogowo-cyfrowego konieczne było zastosowanie odpowiednich metod cyfrowego przetwarzania sygnałów. Wstępna analiza widmowa z wykorzystaniem Szybkiej Transformaty Fouriera (FFT) wykazała, że zakłócenia mają charakter szerokopasmowy (szum biały), co uniemożliwia skuteczne odfiltrowanie ich poprzez proste wycięcie konkretnych częstotliwości bez utraty istotnych informacji o zmianach sygnału użytecznego. W związku z tym, do kondycjonowania sygnału wybrano filtr dolnoprzepustowy w dziedzinie czasu.
 
 \subsection{Charakterystyka filtru EMA}
 
@@ -148,9 +148,14 @@ Zaletą zastosowania dwóch średnich jest automatyczna kalibracja układu. W st
 
 \subsection{Nachylenie odpowiedzi}
 
-Podczas wykonywania algorytmu wykrywania kopiowany jest segment bufora uzupełnianego przez DMA zawierający ostatnie $N=42$ próbek i dokonywany jest proces analizy nachylenia sygnału.
+Podczas wykonywania algorytmu wykrywania kopiowany jest segment bufora cyklicznego uzupełnianego przez DMA do bufora $x$ zawierajego ostatnie $N=42$ próbek. Dokonywany jest proces analizy nachylenia sygnału.
 
 \begin{equation}
     N = \frac{T}{SPS}=\frac{10\mu s}{4,16\cdot10^6 \frac{S}{s}} \approx{42}
 \end{equation}
 
+Nachylenie sygnału wyznaczane jest za pomocą uproszczonego uśrednienia zmiany napięcia:
+\begin{equation}
+    Delta = \frac{x[N] - x[0]}{N}
+    \label{eq:nachyl}
+\end{equation}
