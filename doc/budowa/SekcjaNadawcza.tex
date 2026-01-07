@@ -2,7 +2,7 @@
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width = 12cm]{img/budowa/sekcja_nadawcza.png}
+    \includegraphics[width = 12cm]{img/budowa/sch/Sekcja_nadawcza.png}
     \caption{Schemat sekcji sterującej tranzystorem MOSFET przy użyciu sygnału \textit{PULSE\_IN}}
 \end{figure}
 
@@ -17,11 +17,11 @@ Wygenerowany przez układ sterujący sekcją cyfrową sygnał prostokątny o nap
 \subsection{Pętla cewki}
 \begin{figure}[H]
     \centering
-    \includegraphics[width = 7.5cm]{img/budowa/petla_cewki.png}
+    \includegraphics[width = 12cm]{img/budowa/sch/Pętla_cewki.png}
     \caption{Pętla rozładowująca cewkę}
 \end{figure}
 
-Tranzystor $Q_3$ zwiera sondę do masy powodując przepływ prądu przez cewkę podłączoną do \textit{COIL1} i \textit{COIL2}. Po otwarciu tranzystora $Q_3$ na cewce indukowane jest napięcie, którego górnym limitem jest przez napięcie breakdown $V_{brk}$ tranzystora wynoszące minimum $400V$ \cite{irf740}. W celu umożliwienia rozładowania napięcia w cewce zastosowano dwie szybkie diody typu \textit{BAV19} połączone równolegle odwrotnie do siebie pozwalające na przepływ prądu dla napięcia powyżej $0.7V$. Efekt jest opóźniony prez zastosowanie rezystora $R_6$. Dla końcowego etapu rozładowywania cewki, czyli kiedy napięcie jest poniżej progu przewodzenia diody rezystor $R5$ wraz z trymerem rezystorowym $RV1$ umożliwia przepływ prądu. Potencjometr zastosowany jest, aby łatwo dostroić tłumienie cewki w sposób inżynierski (zamiast wyznaczania wartości rezystora tłumiącego przy pomocy równania \ref{eq:pi_crit}). Pożądane jest krytyczne tłumienie odpowiedzi sondy pozwalające na najdokładniejsze pomiary zmian. Na rysunku 2.4 narysowano porównanie odpowiedzi sondy nietłumionej oraz krytycznie tłumionej. Zademonstrowana odpowiedź jest mierzona za kondensatorem $C_1$.
+Tranzystor $Q_3$ zwiera sondę do masy powodując przepływ prądu przez cewkę podłączoną do \textit{COIL1} i \textit{COIL2}. Po otwarciu tranzystora $Q_3$ na cewce indukowane jest napięcie, którego górnym limitem jest przez napięcie breakdown $V_{brk}$ tranzystora wynoszące minimum $400V$ \cite{irf740}. W celu umożliwienia rozładowania napięcia w cewce zastosowano dwie szybkie diody typu \textit{BAV19} połączone równolegle odwrotnie do siebie pozwalające na przepływ prądu dla napięcia powyżej $0,7V$. Efekt jest opóźniony prez zastosowanie rezystora $R_6$. Dla końcowego etapu rozładowywania cewki, czyli kiedy napięcie jest poniżej progu przewodzenia diody rezystor $R5$ wraz z trymerem rezystorowym $RV1$ umożliwia przepływ prądu. Potencjometr zastosowany jest, aby łatwo dostroić tłumienie cewki w sposób inżynierski (zamiast wyznaczania wartości rezystora tłumiącego przy pomocy równania \ref{eq:pi_crit}). Pożądane jest krytyczne tłumienie odpowiedzi sondy pozwalające na najdokładniejsze pomiary zmian. Na rysunku 2.4 narysowano porównanie odpowiedzi sondy nietłumionej oraz krytycznie tłumionej. Zademonstrowana odpowiedź jest mierzona za kondensatorem $C_1$.
 
 \begin{figure}[H]
     \centering
