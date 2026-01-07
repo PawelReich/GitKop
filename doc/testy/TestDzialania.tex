@@ -2,18 +2,18 @@
 
 Podczas pracy wykrywacza pobierany prąd wynosił stałe $60mA$, przy przyjętym wcześniej napięciu zasilania $10V$, daje to stałe obciążenie $0.6W$, czyniąc prototyp energooszczędnym.
 
-\begin{figure}[H]
+\begin{figure}
     \centering
-    \includegraphics[width=0.9\textwidth]{img/test_bufor.png}
+    \includegraphics[width=0.9\textwidth, angle=-90]{img/testy/prototyp.jpg}
     \caption{Prototyp wykrywacza metali podłączony do aparatury testowej}
     \label{fig:wykrywacz}
 \end{figure}
 
 Program umożliwia wykres bufora próbek zebranych przez konwerter analogowo-cyfrowy. Jak widać na rysunku \ref{fig:bufor_wyglad}, prototyp poprawnie agreguje informacje zwrotne pochodzące z sondy.
 
-\begin{figure}[H]
+\begin{figure}
     \centering
-    \includegraphics[width=0.9\textwidth]{img/test_bufor.png}
+    \includesvg[width=0.9\textwidth]{img/testy/bufor.svg}
     \caption{Wykres widoku bufora}\label{fig:bufor_wyglad}
 \end{figure}
 
@@ -21,8 +21,16 @@ Urządzenie poprawnie wyznacza czas trwania odpowiedzi sondy, wraz z filtracją 
 będący podstawą do podjęcia decyzji o stwierdzonej anomalii sygnału.
 
 
-\begin{figure}[h]
+\begin{figure}
     \centering
-    \includegraphics[width=0.9\textwidth]{img/test_bufor.png}
-    \caption{Wykres wewnętrznych stanów wykrywacza}\label{fig:bufor_czas}
+    \includesvg[width=0.9\textwidth]{img/testy/filtry.svg}
+    \caption{Wykres wewnętrznych stanów wykrywacza}\label{fig:filtry_wewnetrzne}
 \end{figure}
+
+\begin{figure}
+    \centering
+    \includesvg[width=0.9\textwidth]{img/testy/filtry_wykryte.svg}
+    \caption{Wykres wewnętrznych stanów wykrywacza z obiektem w pobliżu}\label{fig:filtry_wykryte}
+\end{figure}
+
+
