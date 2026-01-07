@@ -112,5 +112,6 @@
 \usepackage[sorting=none]{biblatex}
 \addbibresource[glob=true]{bib/*}
 
+\DeclareUnicodeCharacter{03A9}{\ensuremath{\Omega}}
 \DeclareUnicodeCharacter{03B4}{\ensuremath{\delta}}
 \pdfsuppresswarningpagegroup=1
