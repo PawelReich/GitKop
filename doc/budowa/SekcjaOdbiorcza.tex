@@ -3,7 +3,7 @@
 
 \begin{figure}[H]
     \begin{center}
-    \includegraphics[width = 12cm]{img/budowa/sch/Sekcja_odbiorcza.png}
+    \includegraphics[width = 14cm]{img/budowa/sch/Sekcja_odbiorcza.png}
     \end{center}
     \caption{Schemat sekcji przetwarzającej sygnał odebrany przez sondę}
 \end{figure}
@@ -13,12 +13,12 @@ Uzyskana odpowiedź z cewki po przejściu przez kondensator usuwający offset DC
 \subsection{Wirtualna masa}
 \begin{figure}[H]
     \begin{center}
-    \includegraphics[width = 12cm]{img/budowa/sch/Wirtualna_masa.png}
+    \includegraphics[width = 7.5cm]{img/budowa/sch/Wirtualna_masa.png}
     \end{center}
     \caption{Konfiguracja wzmacniacza operacyjnego generującego napięcie $VGND$}
 \end{figure}
 
-W celu uzyskania pełnej odpowiedzi cewki zastosowana jest sztuczna masa wynosząca $0,5$ napięcia zasilania. Dzięki niej wzmacniacze operacyjne w sekcji wzmocnienia odpowiedzi mogą wzmocnić odpowiedź pracując wyłącznie z dodatnim napięciem, co omija konieczność generowania ujemnego napięcia upraszczając finalny schemat wykrywacza metalu. Wykonana jest za pomocą dzielnika napięcia wykonującego działanie
+W celu uzyskania pełnej odpowiedzi cewki zastosowana jest sztuczna masa wynosząca połowę napięcia zasilania. Dzięki niej wzmacniacze operacyjne w sekcji wzmocnienia odpowiedzi mogą wzmocnić odpowiedź pracując wyłącznie z dodatnim napięciem, co omija konieczność generowania ujemnego napięcia upraszczając finalny schemat wykrywacza metalu. Wykonana jest za pomocą dzielnika napięcia wykonującego działanie
 
 \begin{equation}
     U_{VGND}=Vcc\cdot\frac{R9}{R8+R9}=Vcc\cdot\frac{1}{2}  
