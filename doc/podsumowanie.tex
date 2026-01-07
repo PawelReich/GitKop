@@ -1,0 +1,30 @@
+\chapter{Podsumowanie}
+
+Niniejsza praca dyplomowa stanowiła kompleksowe studium inżynierskie, którego nadrzędnym celem było zaprojektowanie, wykonanie oraz analiza prototypu wykrywacza metali.
+
+W toku prac projektowych przeprowadzono szczegółową analizę zjawisk fizycznych będących podstawą technik detekcji metali, takich jak prawo indukcji Faradaya oraz powstawanie prądów wirowych w obiektach przewodzących.
+Zastosowany w prototypie układ nadawczy oparty o tranzystor MOSFET IRF740 sterowany sygnałem PWM pozwolił na wytworzenie pola elektromagnetycznego niezbędnego do penetracji obiektu badanego.
+Kluczowym aspektem było również zaprojektowanie układu tłumienia cewki, gdzie poprzez zastosowanie trymera i diod szybkich BAV19 udało się uzyskać tłumienie krytyczne.
+Umożliwiło to wygaszenie oscylacji w minimalnym czasie bez przeregulowania, co bezpośrednio przełożyło się na czułość układu odbiorczego i możliwość wykrycia subtelnych zmian w sygnale zwrotnym.
+Główny cel pracy został osiągnięty poprzez stworzenie funkcjonalnego urządzenia umożliwiającego badanie reakcji cewki typu \textit{monoloop} na metale,
+jednocześnie umożliwiając samodzielne działanie jako wykrywacz metali dzięki zastosowanemu interfejsowi użytkownika wraz z sygnalizacją dźwiękową.
+
+Sercem części cyfrowej projektu stał się mikrokontroler STM32H523CE wyposażony w rdzeń ARM Cortex-M33, którego zaawansowane peryferia sprzętowe odegrały decydującą rolę w procesie przetwarzania sygnału.
+Istotnym osiągnięciem było wykorzystanie przetwornika analogowo-cyfrowego pracującego w trybie bezpośredniego dostępu do pamięci pozwoliło na akwizycję danych z częstotliwością próbkowania pozwalającą na precyzyjne odwzorowanie krzywej zaniku napięcia na cewce, bez nadmiernego obciążania głównego procesora.
+Zaimplementowanie algorytmu detekcji różnicowej opartego na dwóch filtrach wykładniczej średniej kroczącej o różnych stałych czasowych, gdzie filtr szybki jest porównywany z filtrem wolnym (reprezentującym tło), skutecznie wyeliminowało problem pływania zera i umożliwiło automatyczną kalibrację urządzenia do warunków otoczenia. 
+Dzięki temu rozwiązaniu, prototyp wykazuje stabilność działania niezależnie od powolnych zmian parametrów środowiskowych.
+Mimo zaimplementowania mechanizmu analizy nachylenia odpowiedzi sondy, testy nie wykazały znaczących zmian tego parametru, które mogłyby posłużyć do celów dyskryminacji rodzaju metalu.
+
+Testy praktyczne prototypu dostarczyły konkretnych wartości liczbowych, które walidują projekt pod kątem użytkowym.
+Urządzenie, zasilane napięciem 10V, charakteryzuje się poborem prądu w granicach 50-60 mA, co przekłada się na moc pobieraną na poziomie około 0,5 W.
+Taka charakterystyka energetyczna czyni konstrukcję wysoce energooszczędną i kwalifikuje ją do zastosowań mobilnych przy stabilnym zasilaniu bateryjnym.
+Przeprowadzone próby z wykorzystaniem dedykowanego oprogramowania pomocniczego potwierdziły skuteczność detekcji metalowego obiektu testowego z odległości 15 cm.
+Wykresy zmian napięcia oraz wewnętrznych stanów urządzenia jednoznacznie wskazały moment wystąpienia anomalii sygnałowej, co skutkowało uruchomieniem sygnalizacji akustycznej.
+
+W kontekście dalszego rozwoju rekomenduje się udoskonalenie algorytmów przetwarzania sygnału zawartych w prototypie oraz rozwinięcie interfejsu użytkownika.
+Istniejące rozwiązanie wykorzystuje port wyświetlacza SSD1306 informując użytkownika o czasie odpowiedzi oraz nachyleniu końcowej części sygnału.
+Skonstruowane urządzenie posiada niewykorzystany enkoder, który w przyszłości może stanowić centralny punkt obsługi urządzenia, umożliwiając dobór długości impulsu oraz konfigurację czułości oraz parametrów filtrów.
+
+Podsumowując, zrealizowana praca inżynierska posiada wartość praktyczną oraz edukacyjną.
+Zaprojektowane urządzenie jest kompletnym prototypem, gotowym do dalszych testów terenowych oraz badań nad metodami detekcji metali.
+Praca kondensuje podstawowe informacje konieczne do rozpoczęcia badań w kierunku praktycznego zastosowania teorii pola elektromagnetycznego oraz przetwarzania sygnałów w systemach wbudowanych.
