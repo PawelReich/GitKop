@@ -3,15 +3,16 @@
 Niniejsza praca dyplomowa stanowiła kompleksowe studium inżynierskie, którego nadrzędnym celem było zaprojektowanie, wykonanie oraz analiza prototypu wykrywacza metali.
 
 W toku prac projektowych przeprowadzono szczegółową analizę zjawisk fizycznych będących podstawą technik detekcji metali, takich jak prawo indukcji Faradaya oraz powstawanie prądów wirowych w obiektach przewodzących.
-Zastosowany w prototypie układ nadawczy oparty o tranzystor MOSFET IRF740 sterowany sygnałem PWM pozwolił na wytworzenie pola elektromagnetycznego niezbędnego do penetracji obiektu badanego.
+Zastosowany w prototypie układ nadawczy, oparty o tranzystor MOSFET IRF740 sterowany sygnałem PWM, pozwolił na wytworzenie pola elektromagnetycznego niezbędnego do penetracji badanego obiektu.
 Kluczowym aspektem było również zaprojektowanie układu tłumienia cewki, gdzie poprzez zastosowanie trymera i diod szybkich BAV19 udało się uzyskać tłumienie krytyczne.
 Umożliwiło to wygaszenie oscylacji w minimalnym czasie bez przeregulowania, co bezpośrednio przełożyło się na czułość układu odbiorczego i możliwość wykrycia subtelnych zmian w sygnale zwrotnym.
 Główny cel pracy został osiągnięty poprzez stworzenie funkcjonalnego urządzenia umożliwiającego badanie reakcji cewki typu \textit{monoloop} na metale,
 jednocześnie umożliwiając samodzielne działanie jako wykrywacz metali dzięki zastosowanemu interfejsowi użytkownika wraz z sygnalizacją dźwiękową.
+Warto również zaznaczyć, że całkowity koszt budowy wykrywacza jest ułamkiem ceny komercyjnych rozwiązań, co czyni projekt atrakcyjną alternatywą w zastosowaniach amatorskich i edukacyjnych.
 
 Sercem części cyfrowej projektu stał się mikrokontroler STM32H523CE wyposażony w rdzeń ARM Cortex-M33, którego zaawansowane peryferia sprzętowe odegrały decydującą rolę w procesie przetwarzania sygnału.
-Istotnym osiągnięciem było wykorzystanie przetwornika analogowo-cyfrowego pracującego w trybie bezpośredniego dostępu do pamięci pozwoliło na akwizycję danych z częstotliwością próbkowania pozwalającą na precyzyjne odwzorowanie krzywej zaniku napięcia na cewce, bez nadmiernego obciążania głównego procesora.
-Zaimplementowanie algorytmu detekcji różnicowej opartego na dwóch filtrach wykładniczej średniej kroczącej o różnych stałych czasowych, gdzie filtr szybki jest porównywany z filtrem wolnym (reprezentującym tło), skutecznie wyeliminowało problem pływania zera i umożliwiło automatyczną kalibrację urządzenia do warunków otoczenia. 
+Istotnym osiągnięciem było wykorzystanie przetwornika analogowo-cyfrowego pracującego w trybie bezpośredniego dostępu do pamięci, co pozwoliło na precyzyjną akwizycję danych z częstotliwością próbkowania pozwalającą na precyzyjne odwzorowanie krzywej zaniku napięcia na cewce, bez nadmiernego obciążania głównego procesora.
+Zaimplementowanie algorytmu detekcji różnicowej opartego na dwóch filtrach wykładniczej średniej kroczącej (EMA) o różnych stałych czasowych, gdzie filtr szybki jest porównywany z filtrem wolnym (reprezentującym tło), skutecznie wyeliminowało problem pływania zera i umożliwiło automatyczną kalibrację urządzenia do warunków otoczenia. 
 Dzięki temu rozwiązaniu, prototyp wykazuje stabilność działania niezależnie od powolnych zmian parametrów środowiskowych.
 Mimo zaimplementowania mechanizmu analizy nachylenia odpowiedzi sondy, testy nie wykazały znaczących zmian tego parametru, które mogłyby posłużyć do celów dyskryminacji rodzaju metalu.
 
@@ -21,9 +22,9 @@ Taka charakterystyka energetyczna czyni konstrukcję wysoce energooszczędną i 
 Przeprowadzone próby z wykorzystaniem dedykowanego oprogramowania pomocniczego potwierdziły skuteczność detekcji metalowego obiektu testowego z odległości 15 cm.
 Wykresy zmian napięcia oraz wewnętrznych stanów urządzenia jednoznacznie wskazały moment wystąpienia anomalii sygnałowej, co skutkowało uruchomieniem sygnalizacji akustycznej.
 
-W kontekście dalszego rozwoju rekomenduje się udoskonalenie algorytmów przetwarzania sygnału zawartych w prototypie oraz rozwinięcie interfejsu użytkownika.
+W kontekście dalszego rozwoju rekomenduje się udoskonalenie algorytmów przetwarzania sygnału zawartych w prototypie oraz rozwinięcie interfejsu użytkownika. Zastosowany mikrokontroler STM32H523 dysponuje znacznym zapasem mocy obliczeniowej, co w przyszłości pozwala na implementację bardziej złożonych rozwiązań cyfrowego przetwarzania sygnałów.
 Istniejące rozwiązanie wykorzystuje port wyświetlacza SSD1306 informując użytkownika o czasie odpowiedzi oraz nachyleniu końcowej części sygnału.
-Skonstruowane urządzenie posiada niewykorzystany enkoder, który w przyszłości może stanowić centralny punkt obsługi urządzenia, umożliwiając dobór długości impulsu oraz konfigurację czułości oraz parametrów filtrów.
+Skonstruowane urządzenie posiada niewykorzystany enkoder, który w przyszłości może stanowić centralny punkt obsługi urządzenia, umożliwiając konfigurację parametrów pracy wykrywacza, takich jak długość impulsu, parametry filtrów czy czułość algorytmu.
 
 Podsumowując, zrealizowana praca inżynierska posiada wartość praktyczną oraz edukacyjną.
 Zaprojektowane urządzenie jest kompletnym prototypem, gotowym do dalszych testów terenowych oraz badań nad metodami detekcji metali.
