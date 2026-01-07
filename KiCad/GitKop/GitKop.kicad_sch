@@ -9496,7 +9496,7 @@
 				)
 			)
 		)
-		(property "Value" "1000"
+		(property "Value" "3100"
 			(at 135.89 124.46 90)
 			(effects
 				(font
@@ -11724,21 +11724,21 @@
 		(fields_autoplaced yes)
 		(uuid "e279a987-c425-4a5b-95d6-771d9b5622cd")
 		(property "Reference" "R5"
-			(at 118.11 140.9699 0)
+			(at 123.19 140.9699 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(justify right)
+				(justify left)
 			)
 		)
-		(property "Value" "2000"
-			(at 118.11 143.5099 0)
+		(property "Value" "130"
+			(at 123.19 143.5099 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(justify right)
+				(justify left)
 			)
 		)
 		(property "Footprint" "Resistor_SMD:R_1206_3216Metric_Pad1.30x1.75mm_HandSolder"
