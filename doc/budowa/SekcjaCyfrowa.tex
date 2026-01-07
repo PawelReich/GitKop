@@ -58,9 +58,9 @@ Maksymalna rozdzielczość pomiaru wynosi 12 bitów, co daje dokładność na po
 R= \frac{Vref}{2^N - 1} =\frac{3,3V}{4095}\approx 0,8mV
 \end{equation}
 
-gdzie $V_{ref}$  to napięcie referencyjne (tutaj $V_{in}=3,3V$), N = ilość bitów
+gdzie $V_{ref}$  to napięcie referencyjne (tutaj $V_{in}=3,3V$), $N$ = liczba bitów
 
-W celu osiągnięcia jak największego zasięgu wykrywacza wymagana jest jednocześnie jak największa dokładność układu ADC oraz jego szybkość działania. Dla trybu 12-bitowego każdy pomiar zajmuje $C_{sample}=15$ cykli zegarowych dających teorytyczny limit przy ustalonym wcześniej taktowaniu zegara ADC wynoszący $4,16 MSPS$ (milionów próbek na sekundę ,ang. \textit{Mega Sample Per Second}), co daje jedną próbkę napięcia co $~0,24\mu s$.
+W celu osiągnięcia jak największego zasięgu wykrywacza wymagana jest jednocześnie jak największa dokładność układu ADC oraz jego szybkość działania. Dla trybu 12-bitowego każdy pomiar zajmuje $C_{sample}=15$ cykli zegarowych dających teorytyczny limit przy ustalonym wcześniej taktowaniu zegara ADC wynoszący $4,16 MSPS$ (milionów próbek na sekundę, ang. \textit{Mega Sample Per Second}), co daje jedną próbkę napięcia co $~0,24\mu s$.
 
 \begin{equation}
     SPS = \frac{F_{ADC}}{C_{sample}}=\frac{62,5\cdot10^6}{15}\approx{4,16\cdot10^6}\frac{S}{s}
@@ -75,7 +75,7 @@ Dla maksymalnego odciążenia mikrokontrolera wykorzystany został tryb DMA (bez
     \caption{Wykres odpowiedzi sondy \textit{PULSE\_OUT}}\label{fig:pulse_out}
 \end{figure}
 
-W celu dokładnego wyznaczenia trwania nasyconej odpowiedzi sondy wykorzystywany jest wbudowany w ADC sprzętowy komparator okienkowy (Analog Watchdog, AWD). To peryferium konwertera analogowo-cyfrowego pozwala na wyznaczenie zakresu wartości próbek, którego opuszczenie wywoła przerwanie mikrokontrolera. W prototypie moduł ten skonfigurowany jest na wykrywanie momentu przekroczenia przez sygnał wartości dolnej granicy wynoszącej 3000. Górna granica okna wynosi 4095, czyli maksymalną wartość próbki przy rozdzielczości 12-bit, efektywnie eliminując możliwość wywołania przerwania.
+W celu dokładnego wyznaczenia trwania nasyconej odpowiedzi sondy wykorzystywany jest wbudowany w ADC sprzętowy komparator okienkowy (Analog Watchdog, AWD). To peryferium konwertera analogowo-cyfrowego pozwala na wyznaczenie zakresu wartości próbek, którego opuszczenie wywoła przerwanie mikrokontrolera. W prototypie moduł ten skonfigurowany jest na wykrywanie momentu przekroczenia przez sygnał wartości dolnej granicy wynoszącej 3000. Górna granica okna wynosi 4095, czyli maksymalną wartość próbki przy rozdzielczości 12-bitów, efektywnie eliminując możliwość wywołania przerwania.
 
 
 \section{Algorytm wykrywania anomalii}
@@ -113,7 +113,7 @@ Wykorzystanie sprzętowego rozwiązania pozwala na dokładne wyznaczenie momentu
 
 \subsection{Filtracja sygnału pomiarowego i detekcja obiektu}
 
-Ze względu na charakter wzmocnionego sygnału wyjściowego z sekcji odbiorczej         , który obarczony jest znacznym szumem o charakterze stochastycznym, a także szumom wynikającym z przetwornika analogowo-cyfrowego konieczne było zastosowanie odpowiednich metod cyfrowego przetwarzania sygnałów. Wstępna analiza widmowa z wykorzystaniem Szybkiej Transformaty Fouriera (FFT) wykazała, że zakłócenia mają charakter szerokopasmowy (szum biały), co uniemożliwia skuteczne odfiltrowanie ich poprzez proste wycięcie konkretnych częstotliwości bez utraty istotnych informacji o zmianach sygnału użytecznego. W związku z tym, do kondycjonowania sygnału wybrano filtr dolnoprzepustowy w dziedzinie czasu.
+Ze względu na charakter wzmocnionego sygnału wyjściowego z sekcji odbiorczej, który obarczony jest znacznym szumem o charakterze stochastycznym, a także szumom wynikającym z przetwornika analogowo-cyfrowego konieczne było zastosowanie odpowiednich metod cyfrowego przetwarzania sygnałów. Wstępna analiza widmowa z wykorzystaniem Szybkiej Transformaty Fouriera (FFT) wykazała, że zakłócenia mają charakter szerokopasmowy (szum biały), co uniemożliwia skuteczne odfiltrowanie ich poprzez proste wycięcie konkretnych częstotliwości bez utraty istotnych informacji o zmianach sygnału użytecznego. W związku z tym, do kondycjonowania sygnału wybrano filtr dolnoprzepustowy w dziedzinie czasu.
 
 \subsection{Charakterystyka filtru EMA}
 
