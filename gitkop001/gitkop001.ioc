@@ -2,7 +2,7 @@
 ADC1.AWD1FilteringConfig=ADC_AWD_FILTERING_4SAMPLES
 ADC1.AWD1HighThreshold=4095
 ADC1.AWD1ITMode=ENABLE
-ADC1.AWD1LowThreshold=3000
+ADC1.AWD1LowThreshold=2500
 ADC1.Channel-1\#ChannelRegularConversion=ADC_CHANNEL_0
 ADC1.ContinuousConvMode=ENABLE
 ADC1.DMAContinuousRequests=ENABLE

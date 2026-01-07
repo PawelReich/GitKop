@@ -108,7 +108,7 @@ W celu dokładnego wyznaczenia trwania nasyconej odpowiedzi sondy wykorzystywany
 
 Algorytm napędzający prototyp wykrywacza metali wykorzystuje komparator okienkowy w celu wykrywania anomalii czasu trwania odpowiedzi sondy.
 Jak można zauważyć na wykresie \ref{fig:pulse_out}, podczas przybliżenia metalowego obiektu zmienia się charakterystyka sygnału \textit{SIGNAL\_OUT}.
-Wykorzystanie sprzętowego rozwiązania pozwala na dokładne wyznaczenie momentu przekroczenia granicy 2,41V ($\frac{3000}{4095}\cdot 3,3V$). Kod przerwania wywołanego przez AWD zapisuje w pamięci mikrokontrolera aktualną wartość licznika \textit{TIM1}, co pozwala dokładnie odtworzyć względny czas wywołania przerwania po wyłączeniu sygnału \textit{PULSE\_OUT}. Przechwycona wartość mnożona jest przez czas pomiędzy inkrementacją licznika.
+Wykorzystanie sprzętowego rozwiązania pozwala na dokładne wyznaczenie momentu przekroczenia granicy 2,01V ($\frac{2500}{4095}\cdot 3,3V$). Kod przerwania wywołanego przez AWD zapisuje w pamięci mikrokontrolera aktualną wartość licznika \textit{TIM1}, co pozwala dokładnie odtworzyć względny czas wywołania przerwania po wyłączeniu sygnału \textit{PULSE\_OUT}. Przechwycona wartość mnożona jest przez czas pomiędzy inkrementacją licznika.
 
 
 \subsection{Filtracja sygnału pomiarowego i detekcja obiektu}
