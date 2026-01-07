@@ -31,7 +31,7 @@ Częstotliwość przepełnienia licznika sprzętowego można wyznaczyć za pomoc
 
 
 Licznik \textit{TIM1} pełni funkcję generatora sygnału \textit{PULSE\_OUT} za pomocą trybu sprzętowego trybu modulacji szerokości impulsów.
-Pozwala on na konfigurację częstotliwości oraz wypełnienia sygnału przez mikrokontroler. Jeżeli wartość rejestru \textit{CNT} jest mniejsza od \textit{CCR}, wystawiany jest sygnał +3.3V na pin 1 (PULSE\_OUT) układu, powodując otwarcie tranzystora MOSFET. Następnie w pożądanym momencie sygnał wyjściowy jest wygaszony, co pozwala na dynamiczną konfigurację długości impulsu wysyłanego do cewki.
+Pozwala on na konfigurację częstotliwości oraz wypełnienia sygnału przez mikrokontroler. Jeżeli wartość rejestru \textit{CNT} jest mniejsza od \textit{CCR}, wystawiany jest sygnał +3,3V na pin 1 (PULSE\_OUT) układu, powodując otwarcie tranzystora MOSFET. Następnie w pożądanym momencie sygnał wyjściowy jest wygaszony, co pozwala na dynamiczną konfigurację długości impulsu wysyłanego do cewki.
 
 Drugi licznik \textit{TIM12} wykorzystany jest do generowania sygnału PWM o wypełnieniu 50\% i dynamicznie wyznaczanej częstotliwości do brzęczyka wskazującego o wykryciu anomalii w przetworzonym sygnale \textit{SIGNAL\_OUT}.
 Dynamiczna rekonfiguracja rejestrów licznika pozwala na uzyskanie tonu o zadanej częstotliwości. 
@@ -55,10 +55,10 @@ ADC napędzany jest sygnałem zegarowym \textit{HCLK} o częstotliwości $F_{ADC
 Maksymalna rozdzielczość pomiaru wynosi 12 bitów, co daje dokładność na poziomie $0,8 mV$.
 
 \begin{equation}
-R= \frac{Vref}{2^N - 1} =\frac{3.3V}{4095}\approx 0,8mV
+R= \frac{Vref}{2^N - 1} =\frac{3,3V}{4095}\approx 0,8mV
 \end{equation}
 
-gdzie $V_{ref}$  to napięcie referencyjne (tutaj $V_{in}=3.3V$), N = ilość bitów
+gdzie $V_{ref}$  to napięcie referencyjne (tutaj $V_{in}=3,3V$), N = ilość bitów
 
 W celu osiągnięcia jak największego zasięgu wykrywacza wymagana jest jednocześnie jak największa dokładność układu ADC oraz jego szybkość działania. Dla trybu 12-bitowego każdy pomiar zajmuje $C_{sample}=15$ cykli zegarowych dających teorytyczny limit przy ustalonym wcześniej taktowaniu zegara ADC wynoszący $4,16 MSPS$ (milionów próbek na sekundę ,ang. \textit{Mega Sample Per Second}), co daje jedną próbkę napięcia co $~0,24\mu s$.
 
