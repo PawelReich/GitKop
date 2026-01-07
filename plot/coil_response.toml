@@ -1,0 +1,28 @@
+[general]
+filename = "../doc/img/budowa/coil_response.png"
+trigger_ch_index = 0
+data_ch_index = 1
+time_limit_sec = 0.00002
+remove_offset = false
+x_label = "Czas (μs)"
+y_label = "Napięcie (mV)"
+
+[smoothing]
+apply = true
+window = 401
+poly = 3
+
+[visual]
+line_width = 1.0
+
+[[files]]
+path = "../meas/good2.edf"
+label = "Cewka tłumiona krytycznie"
+
+[[files]]
+path = "../meas/overdamped.edf"
+label = "Cewka przetłumiona"
+
+# [[files]]
+# path = "../meas/undamped.edf"
+# label = "Cewka nietłumiona"
