@@ -7,7 +7,7 @@
     \end{center}
     \caption{Schemat sekcji przetwarzającej sygnał odebrany przez sondę}
 \end{figure}
-Uzyskana odpowiedź z cewki po przejściu przez kondensator usuwający offset DC podciągana jest do napięcia $VGND$ za pomocą rezystora $R_7$. Następnie odpowiedź jest mnożona 1000-krotnie w celu uwydatnienia ostatniej części odpowiedzi sygnału najbardziej podatnej na działanie powstałego pola magnetycznego. Uzyskane napięcie może posiadać wartość zbliżoną do napięcia zasilania $V_{cc}$, dlatego w celu dostosowania go do poziomu pozwalającego obsłużyć go przez zastosowany w wykrywaczu MCU zastosowano dzielnik napięcia wykonujący mnożenie razy $\frac{1}{3}$. Tak wyznaczony sygnał nie jest wystarczająco silny, dlatego przechodzi on przez kopiujący wzmacniacz $U_1$. Warto zaznaczyć, że wzmacniacz MCP6281 jest typu rail-to-rail, pozwalający na operowanie na sygnałach bliskich napięciom zasilania $V_+$, jak i $V_-$ wzmacniacza \cite{mcp6281_ds}. Poprzednie sekcje nie wymagały tej specjalnej właściwości. Tak przygotowany sygnał jest gotowy do analizy przez mikrokontroler. Dla dodatkowego bezpieczeństwa zastosowano diodę zenera $3.3V$ gwarantującą, że \textit{SIGNAL\_OUT} należy do zakresu napięć obsługiwanego przez sekcję cyfrową.
+Uzyskana odpowiedź z cewki po przejściu przez kondensator usuwający offset DC podciągana jest do napięcia $VGND$ za pomocą rezystora $R_7$. Następnie odpowiedź jest mnożona 1000-krotnie w celu uwydatnienia ostatniej części odpowiedzi sygnału najbardziej podatnej na działanie powstałego pola magnetycznego. Uzyskane napięcie może posiadać wartość zbliżoną do napięcia zasilania $V_{cc}$, dlatego w celu dostosowania go do poziomu pozwalającego obsłużyć go przez zastosowany w wykrywaczu MCU zastosowano dzielnik napięcia wykonujący mnożenie razy $0,33$. Tak wyznaczony sygnał nie jest wystarczająco silny, dlatego przechodzi on przez kopiujący wzmacniacz $U_1$. Warto zaznaczyć, że wzmacniacz MCP6281 jest typu rail-to-rail, pozwalający na operowanie na sygnałach bliskich napięciom zasilania $V_+$, jak i $V_-$ wzmacniacza \cite{mcp6281_ds}. Poprzednie sekcje nie wymagały tej specjalnej właściwości. Tak przygotowany sygnał jest gotowy do analizy przez mikrokontroler. Dla dodatkowego bezpieczeństwa zastosowano diodę zenera $3,3V$ gwarantującą, że \textit{SIGNAL\_OUT} należy do zakresu napięć obsługiwanego przez sekcję cyfrową.
 
 
 \subsection{Wirtualna masa}
@@ -18,7 +18,7 @@ Uzyskana odpowiedź z cewki po przejściu przez kondensator usuwający offset DC
     \caption{Konfiguracja wzmacniacza operacyjnego generującego napięcie $VGND$}
 \end{figure}
 
-W celu uzyskania pełnej odpowiedzi cewki zastosowana jest sztuczna masa wynosząca $\frac{1}{2}$ napięcia zasilania. Dzięki niej wzmacniacze operacyjne w sekcji wzmocnienia odpowiedzi mogą wzmocnić odpowiedź pracując wyłącznie z dodatnim napięciem, co omija konieczność generowania ujemnego napięcia upraszczając finalny schemat wykrywacza metalu. Wykonana jest za pomocą dzielnika napięcia wykonującego działanie
+W celu uzyskania pełnej odpowiedzi cewki zastosowana jest sztuczna masa wynosząca $0,5$ napięcia zasilania. Dzięki niej wzmacniacze operacyjne w sekcji wzmocnienia odpowiedzi mogą wzmocnić odpowiedź pracując wyłącznie z dodatnim napięciem, co omija konieczność generowania ujemnego napięcia upraszczając finalny schemat wykrywacza metalu. Wykonana jest za pomocą dzielnika napięcia wykonującego działanie
 
 \begin{equation}
     U_{VGND}=Vcc\cdot\frac{R9}{R8+R9}=Vcc\cdot\frac{1}{2}  
