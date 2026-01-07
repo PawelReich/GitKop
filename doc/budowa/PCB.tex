@@ -1,16 +1,19 @@
 \section{Płytka drukowana}
-Płytka drukowana do projektu została wykonana w otwartoźródłowym programie typu CAD (projektowanie wspomagane komputerowo, ang. \textit{Computer Aided Design}) KiCad\cite{kicad}.
+Płytka drukowana (PCB, ang. \textit{Printed Circuit Board}) prototypu została zaprojektowana w otwartoźródłowym programie typu CAD (projektowanie wspomagane komputerowo, ang. \textit{Computer Aided Design}) KiCad\cite{kicad}.
+Finalny produkt został wykonany z wykorzystaniem laminatu dwustronnego o wymiarach $80mm$ x $101mm$.
+W celu minimalizacji zakłóceń elektromagnetycznych, wolne przestrzenie na obu warstwach PCB zostały wypełnione wylewką miedzi (ang. \textit{copper pour}) podłączoną do potencjału masy.
 
 \begin{figure}[H]
 \centering
   \includegraphics[width=0.5\textwidth]{./pcb.pdf}
-  \caption{Schemat projektu PCB}
+  \caption{Schemat projektu PCB (z pominiętą płaszczyzną masy)}
 \end{figure}
 
 Projekt zawiera enkoder, który umożliwia interakcję z użytkownikiem poprzez przekręcanie oraz wciskanie wystającego wału oraz dwa porty przygotowane pod moduły wyświetlaczy ILI9341 oraz SSD1306.
 
 
-\begin{figure}[H]
+
+\begin{figure}
 \centering
   \includegraphics[width=0.7\textwidth]{./img/pcb_3drender.png}
   \caption{Trójwymiarowe komputerowe przedstawienie projektu PCB}
