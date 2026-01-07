@@ -9,7 +9,7 @@
 
 \RequirePackage[T1]{fontenc}
 \RequirePackage[utf8]{inputenc}
-\RequirePackage[main=polish,english, provide=*]{babel}
+\RequirePackage[main=polish, provide=*]{babel}
 \RequirePackage{pdfpages}
 
 \RequirePackage[titletoc,title]{appendix}
@@ -17,6 +17,8 @@
 \RequirePackage{helvet}
 \RequirePackage{siunitx}
 \renewcommand*{\familydefault}{\sfdefault}
+
+\RequirePackage{microtype}
 
 \RequirePackage{float}
 
