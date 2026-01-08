@@ -50,11 +50,10 @@ class SerialManager:
         while not self.stop_event.is_set() and self.serial_port and self.serial_port.is_open:
             try:
                 if self.serial_port.in_waiting:
-                    # errors='replace' prevents crashing on corrupt bytes
                     line = self.serial_port.readline().decode('utf-8', errors='replace').strip()
                     if line:
                         self.data_queue.put(line)
                 else:
-                    time.sleep(0.005) # Yield CPU
+                    time.sleep(0.005)
             except Exception:
                 break

@@ -1,3 +1,4 @@
+import math
 import tkinter as tk
 from tkinter import ttk
 import matplotlib.pyplot as plt
@@ -5,22 +6,14 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolb
 import numpy as np
 from collections import deque
 
-# --- 1. The Registry ---
-# This list holds references to all view classes marked with @register_view
 AVAILABLE_VIEWS = []
 
 def register_view(cls):
-    """Decorator to register a view class automatically."""
     AVAILABLE_VIEWS.append(cls)
     return cls
 
-# --- 2. Base Class ---
 class BasePlotTab(ttk.Frame):
-    """
-    Parent class to handle common Matplotlib embedding logic.
-    Subclasses must implement update_view(self, context).
-    """
-    name = "Base Plot" # Override this in subclasses
+    name = "Base Plot"
 
     def __init__(self, parent):
         super().__init__(parent)
@@ -28,11 +21,9 @@ class BasePlotTab(ttk.Frame):
         self.ax.set_title(self.name)
         self.ax.grid(True, alpha=0.3)
         
-        # Embed Canvas
         self.canvas = FigureCanvasTkAgg(self.figure, master=self)
         self.canvas.draw()
         
-        # Toolbar
         self.toolbar = NavigationToolbar2Tk(self.canvas, self)
         self.toolbar.update()
         
@@ -43,40 +34,49 @@ class BasePlotTab(ttk.Frame):
         self.ax.autoscale_view()
         self.canvas.draw()
 
-    def update_view(self, context):
+    def update_view(self, values, special):
         pass
-
-# --- 3. The Views ---
 
 @register_view
 class TimeDomainTab(BasePlotTab):
-    name = "Time Domain"
+    name = "Widok bufora"
 
     def __init__(self, parent):
         super().__init__(parent)
-        self.ax.set_xlabel("Sample Index")
-        self.ax.set_ylabel("Raw ADC Value")
+        self.ax.set_xlabel("Próbka")
+        self.ax.set_ylabel("Wartość ADC")
         
         self.line_ref, = self.ax.plot([], [], 'o-', color='#1f77b4', linewidth=1, markersize=3)
-        self.area_ref  = self.ax.axvline(x=0, color='red', linestyle='--', label='Area')
-        self.smallest_ref  = self.ax.axvline(x=0, color='green', linestyle=':', label='Smallest')
-        self.ax.legend(loc='upper right')
 
-    def update_view(self, context):
-        values = context['values']
-        special = context['special']
+    def update_view(self, values, special):
         
         x_data = range(len(values))
-        self.line_ref.set_xdata(x_data)
-        self.line_ref.set_ydata(values)
+        self.line_ref.set_data(x_data, values)
         
-        self.area_ref.set_xdata([special[1]])
-        self.smallest_ref.set_xdata([special[0]])
+        self.redraw()
+
+@register_view
+class Slope(BasePlotTab):
+    name = "Nachylenie"
+
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.ax.set_xlabel("Próbka")
+        self.ax.set_ylabel("Nachylenie (V/s)")
+        
+        self.line_ref, = self.ax.plot([], [], 'o-', color='#1f77b4', linewidth=1, markersize=3)
+        self.buffer = deque(maxlen=100) 
+
+    def update_view(self, values, special):
+        self.buffer.append(special[3])
+        x_data = range(len(self.buffer))
+        self.line_ref.set_data(x_data, self.buffer)
+        
         self.redraw()
 
 @register_view
 class FFTTab(BasePlotTab):
-    name = "FFT (History of Smallest)"
+    name = "FFT"
 
     def __init__(self, parent):
         super().__init__(parent)
@@ -85,26 +85,20 @@ class FFTTab(BasePlotTab):
         self.line_ref, = self.ax.plot([], [], color='#ff7f0e', linewidth=1)
         self.fft_history_buffer = deque(maxlen=1000) 
 
-    def update_view(self, context):
-        
-        values = context['values']
-        smallest = values[int(context['special'][0])]
+    def update_view(self, values, special):
+        smallest = special[1]
 
         self.fft_history_buffer.append(smallest)
         data_np = np.array(self.fft_history_buffer)
         
-        # Remove DC Offset (center signal at 0)
         data_np = data_np - np.mean(data_np) 
         
-        # Apply Hanning window to smooth spectral leakage
         windowing = np.hanning(len(data_np)) 
         data_np = data_np * windowing
 
-        # Perform FFT
         fft_vals = np.fft.rfft(data_np)
         fft_mag = np.abs(fft_vals)
         
-        # Create X-axis (Bins)
         freqs = np.linspace(0, len(data_np)/2, len(fft_mag))
         
         self.line_ref.set_xdata(freqs)
@@ -113,58 +107,108 @@ class FFTTab(BasePlotTab):
 
 @register_view
 class EMATab(BasePlotTab):
-    name = "EMA Filter (Alpha=0.1)"
+    name = "Filtr EMA"
 
     def __init__(self, parent):
         super().__init__(parent)
-        self.ax.set_xlabel("History Index")
-        self.ax.set_ylabel("Amplitude")
-        self.raw_line, = self.ax.plot([], [], color='lightgray', label='Raw', linewidth=0)
-        self.ema_line, = self.ax.plot([], [], color='#d62728', label='EMA', linewidth=2)
+        self.ax.set_xlabel("Próbka")
+        self.ax.set_ylabel("Wartość")
+        self.raw_line, = self.ax.plot([], [], '-o', color='#808080ff', label='Surowa wartość', linewidth=2)
+        self.slow_line, = self.ax.plot([], [],'-o', color='#d67728', label='Wartość wolnego filtru', linewidth=2)
+        self.fast_line, = self.ax.plot([], [], '-o',color='#d6FF28', label='Wartość szybkiego filtru', linewidth=2)
         self.ax.legend(loc='upper right')
-        self.buffer = deque(maxlen=1000) 
 
-    def update_view(self, context):
-        val = context['values'][int(context['special'][0])]
-        self.buffer.append(val)
+        max_len = 100
+        self.raw = deque(maxlen=max_len) 
+        self.slow = deque(maxlen=max_len)
+        self.fast = deque(maxlen=max_len)
 
-        data = np.array(self.buffer)
-        
-        # Calculate Exponential Moving Average
-        alpha = 0.2
-        ema = [data[0]]
-        for i in range(1, len(data)):
-            val = (data[i] * alpha) + (ema[-1] * (1 - alpha))
-            ema.append(val)
+    def update_view(self, values, special):
+        self.raw.append(special[1])
+        self.fast.append(special[4])
+        self.slow.append(special[5])
 
-        x_axis = range(len(data))
-        self.raw_line.set_xdata(x_axis)
-        self.raw_line.set_ydata(data)
-        self.ema_line.set_xdata(x_axis)
-        self.ema_line.set_ydata(ema)
+        x_axis = range(len(self.raw))
+        self.raw_line.set_data(x_axis, self.raw)
+        self.fast_line.set_data(x_axis, self.fast)
+        self.slow_line.set_data(x_axis, self.slow)
         self.redraw()
-
 
 @register_view
-class ProcessedTab(BasePlotTab):
-    name = "Processed"
+class EMASplitTab(BasePlotTab):
+    name = "Filtr EMA (Separowane)"
 
     def __init__(self, parent):
         super().__init__(parent)
-        self.ax.set_xlabel("History Index")
-        self.ax.set_ylabel("Amplitude")
-        self.ema_line, = self.ax.plot([], [], color='#d62728', label='Value', linewidth=2)
-        self.ax.legend(loc='upper right')
-        self.buffer = deque(maxlen=1000) 
 
-    def update_view(self, context):
-        processed = context['special'][2]
+        self.figure.clf()
 
-        self.buffer.append(processed)
+        self.ax1 = self.figure.add_subplot(211) 
+        self.ax2 = self.figure.add_subplot(212, sharex=self.ax1)
 
-        data = np.array(self.buffer)
+        self.ax1.set_title("Surowe dane")
+        self.ax1.set_xlabel("Próbka")
+        self.ax1.set_ylabel("Wartość")
+        self.ax1.grid(True, alpha=0.3)
+        self.raw_line, = self.ax1.plot([], [], '-o',color='#808080', label='Surowa', linewidth=1)
 
-        x_axis = range(len(data))
-        self.ema_line.set_xdata(x_axis)
-        self.ema_line.set_ydata(data)
+        self.ax2.set_title("Przefiltrowane dane")
+        self.ax2.set_xlabel("Próbka")
+        self.ax2.set_ylabel("Wartość")
+        self.ax2.grid(True, alpha=0.3)
+        self.ema_line, = self.ax2.plot([], [], '-o',label='EMA', linewidth=2)
+
+        self.raw = deque(maxlen=100) 
+        self.filtered = deque(maxlen=100) 
+        self.fill_collection = None
+        self.vlines_collection = None
+        self.figure.tight_layout()
+
+    def update_view(self, values, special):
+        self.raw.append(special[1])
+        self.filtered.append(special[2])
+
+        arr_raw = np.array(self.raw)
+        arr_filtered = np.array(self.filtered)
+        x_axis = np.arange(len(arr_raw))
+        
+        self.raw_line.set_data(x_axis, arr_raw)
+        self.ema_line.set_data(x_axis, arr_filtered)
+        
+        if self.fill_collection:
+            self.fill_collection.remove()
+            self.fill_collection = None
+        if self.vlines_collection:
+            self.vlines_collection.remove()
+            self.vlines_collection = None
+
+        alarm_mask = np.abs(self.filtered) > 1
+
+        self.fill_collection = self.ax2.fill_between(
+            x_axis,
+            0, 1,
+            where=alarm_mask,
+            transform=self.ax2.get_xaxis_transform(),
+            facecolor='red',
+            alpha=0.2,
+            interpolate=False
+        )
+
+        self.vlines_collection = self.ax2.vlines(
+            x_axis[alarm_mask],
+            ymin=0, ymax=1,
+            transform=self.ax2.get_xaxis_transform(),
+            colors='red',
+            alpha=0.2,
+            linewidth=1
+        )
         self.redraw()
+
+    def redraw(self):
+        self.ax1.relim()
+        self.ax1.autoscale_view()
+        
+        self.ax2.relim()
+        self.ax2.autoscale_view()
+        self.canvas.draw()
+

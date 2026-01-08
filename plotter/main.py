@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+import time
 import tkinter as tk
 from tkinter import ttk, scrolledtext, filedialog, messagebox
 import csv
@@ -12,43 +13,38 @@ class GitKopDebugger:
         self.root = root
         self.root.title("GitKop Debugging Tool")
 
-        # --- Logic Modules ---
         self.serial_mgr = SerialManager()
         
-        # Store latest packet for CSV export
         self.current_data = [] 
 
-        # Dictionary to store active view instances: { "widget_id": ViewObject }
-        self.active_views = {}
-
-        # --- UI Setup ---
+        self.active_views : list[ViewClass] = {} 
+        
         self._setup_top_controls()
         self._setup_main_area()
-        self._setup_log_area()
 
-        # Start the processing loop
         self.root.after(50, self.process_queue)
 
     def _setup_top_controls(self):
-        control_frame = ttk.LabelFrame(self.root, text="Connection Settings", padding=5)
+        control_frame = ttk.LabelFrame(self.root, text="Konfiguracja", padding=5)
         control_frame.pack(side=tk.TOP, fill=tk.X, padx=5, pady=5)
 
         ttk.Label(control_frame, text="Port:").pack(side=tk.LEFT, padx=5)
         self.port_combobox = ttk.Combobox(control_frame, width=20)
         self.port_combobox.pack(side=tk.LEFT, padx=5)
         
-        ttk.Button(control_frame, text="Refresh", command=self.refresh_ports).pack(side=tk.LEFT, padx=2)
-
         ttk.Label(control_frame, text="Baud:").pack(side=tk.LEFT, padx=5)
         self.baud_combobox = ttk.Combobox(control_frame, values=["2000000", "9600", "115200", "921600"], width=10)
         self.baud_combobox.current(0)
         self.baud_combobox.pack(side=tk.LEFT, padx=5)
 
-        self.btn_connect = ttk.Button(control_frame, text="Connect", command=self.toggle_connection)
+        self.btn_connect = ttk.Button(control_frame, text="Polacz", command=self.toggle_connection)
         self.btn_connect.pack(side=tk.LEFT, padx=10)
 
-        self.btn_export = ttk.Button(control_frame, text="Export Packet CSV", command=self.export_csv, state=tk.DISABLED)
+        self.btn_export = ttk.Button(control_frame, text="CSV", command=self.export_csv, state=tk.DISABLED)
         self.btn_export.pack(side=tk.RIGHT, padx=10)
+        
+        self.btn_png = ttk.Button(control_frame, text="SVG", command=self.export_png, state=tk.DISABLED)
+        self.btn_png.pack(side=tk.RIGHT, padx=10)
         
         self.refresh_ports()
 
@@ -58,24 +54,9 @@ class GitKopDebugger:
 
         for ViewClass in AVAILABLE_VIEWS:
             view_instance = ViewClass(self.notebook)
-            
-            # Add to notebook tab
             self.notebook.add(view_instance, text=ViewClass.name)
-            
-            # Register in our dictionary so we can identify it later
             self.active_views[str(view_instance)] = view_instance
 
-    def _setup_log_area(self):
-        log_frame = ttk.LabelFrame(self.root, text="Logs", height=150)
-        log_frame.pack(side=tk.BOTTOM, fill=tk.X, padx=5, pady=5)
-        
-        self.log_text = scrolledtext.ScrolledText(log_frame, state='disabled', height=8, font=("Consolas", 9))
-        self.log_text.pack(fill=tk.BOTH, expand=True)
-        self.log_text.tag_config('DATA', foreground='blue')
-        self.log_text.tag_config('ERROR', foreground='red')
-        self.log_text.tag_config('INFO', foreground='black')
-
-    # --- Actions ---
     def refresh_ports(self):
         ports = self.serial_mgr.list_ports()
         self.port_combobox['values'] = ports
@@ -89,7 +70,7 @@ class GitKopDebugger:
             
             success, msg = self.serial_mgr.connect(port, baud)
             if success:
-                self.btn_connect.config(text="Disconnect")
+                self.btn_connect.config(text="Rozlacz")
                 self.log_message("INFO", msg)
             else:
                 messagebox.showerror("Connection Error", msg)
@@ -99,37 +80,32 @@ class GitKopDebugger:
             self.log_message("INFO", msg)
 
     def process_queue(self):
-        # Process up to 50 lines to keep GUI responsive
         count = 0
         while not self.serial_mgr.data_queue.empty() and count < 50:
             line = self.serial_mgr.data_queue.get()
             self.parse_line(line)
             count += 1
+        if count >= 50:
+            self.log_message(f"Flooded with messages: {self.serial_mgr.data_queue.qsize()}")
         self.root.after(20, self.process_queue)
 
     def parse_line(self, line):
-        # Expected Format: DATA[1 2 3 ...] [10 5] $
         if line.startswith("DATA[") and line.endswith("$"):
             try:
-                # 1. Parse raw string
                 main_end = line.index("]")
                 values = [int(x) for x in line[5:main_end].split()]
                 
-                special_part = line[main_end+1:-1].replace('[', '').replace(']', '').split()
+                special_part = line[main_end+1:-1].split()
                 special_vals = [float(x) for x in special_part]
 
                 self.current_data = values
                 self.btn_export.config(state=tk.NORMAL)
-
-                context = {
-                    'values': values,
-                    'special': special_vals,
-                }
+                self.btn_png.config(state=tk.NORMAL)
 
                 current_tab_id = self.notebook.select()
                 
                 if current_tab_id in self.active_views:
-                    self.active_views[current_tab_id].update_view(context)
+                    self.active_views[current_tab_id].update_view(values, special_vals)
 
                 self.log_message("DATA", f"Packet: {len(values)} samples")
 
@@ -140,11 +116,8 @@ class GitKopDebugger:
             self.log_message("INFO", line)
 
     def log_message(self, tag, message):
-        self.log_text.config(state='normal')
-        self.log_text.insert(tk.END, message + "\n", tag)
-        self.log_text.see(tk.END)
-        self.log_text.config(state='disabled')
-
+        print(f"[{tag}] {message}")
+    
     def export_csv(self):
         if not self.current_data: return
         path = filedialog.asksaveasfilename(defaultextension=".csv")
@@ -158,6 +131,17 @@ class GitKopDebugger:
                 messagebox.showinfo("Success", "Saved CSV successfully.")
             except Exception as e:
                 messagebox.showerror("Error", str(e))
+
+    def export_png(self):
+        current_tab_id = self.notebook.select()
+        t = time.localtime()
+        timestamp = time.strftime('%b-%d-%Y_%H%M%S', t)
+        if current_tab_id in self.active_views:
+            fig = self.active_views[current_tab_id].figure
+            sz = fig.get_size_inches()
+            fig.set_size_inches(8, 6)
+            fig.savefig(f"fig-{timestamp}.svg")
+            fig.set_size_inches(sz)
 
 if __name__ == "__main__":
     root = tk.Tk()
