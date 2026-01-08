@@ -3,19 +3,25 @@
 #include "GitKop.h"
 #include "ema.h"
 #include "main.h"
+#include "stm32h5xx_hal.h"
 #include "stm32h5xx_hal_dma.h"
 #include "stm32h5xx_hal_gpio.h"
 #include "stm32h5xx_hal_rcc.h"
 #include "stm32h5xx_hal_tim.h"
 
-volatile static uint16_t pulseTickAnalysisCtr = 0;
+#include "ssd1306.h"
+#include "ssd1306_fonts.h"
+
+static uint16_t debugOutputCtr = 0;
+static uint16_t updateOledCtr = 0;
+static uint16_t stabilizedCounter = 0;
+
 volatile static uint16_t dmaIndex = 0;
 volatile static uint16_t timerIndex = 0;
-
-uint16_t stabilizedCounter = 0;
 volatile static uint8_t outOfWindowTriggered = 1;
 
 #define DMA_BUFFER_ENTRIES 2048
+
 __attribute__((aligned(32))) volatile static uint16_t value[DMA_BUFFER_ENTRIES];
 
 float detectionThreshold = 5;
@@ -52,27 +58,27 @@ float Handle_Sample(uint16_t rawSample)
     float x = rawSample;
     if (!emaSetUp)
     {
-        EMA_Init(&slowFilter, 0.005, x);
+        EMA_Init(&slowFilter, 0.0005, x);
         EMA_Init(&fastFilter, 0.1, x);
         emaSetUp = 1;
     }
     else
     {
         EMA_Update(&fastFilter, rawSample);
+        EMA_Update(&slowFilter, rawSample);
     }
 
     float difference = fastFilter.out - slowFilter.out;
 
-        EMA_Update(&slowFilter, rawSample);
     if (difference < detectionThreshold)
     {
         Buzzer_Set(0);
     }
-    else if (ENABLE_BUZZER)
+    else
     {
         float hz = difference;
-        Buzzer_Set(hz);
-        printf("buzzing: %d, %f, %f, %f\r\n", rawSample, fastFilter.out, slowFilter.out, hz);
+        if (ENABLE_BUZZER)
+            Buzzer_Set(hz);
     }
     return difference;
 }
@@ -92,6 +98,10 @@ void GitKop_Init()
     HAL_ADC_Start_IT(&ADC);
     HAL_GPIO_WritePin(USER_LED_GPIO_Port, USER_LED_Pin, 0);
 
+    SSD1306_Init();
+    SSD1306_WriteString("GitKop", Font_11x18, White);
+    SSD1306_UpdateScreen();
+    HAL_Delay(500);
 
     while(1)
     {
@@ -104,7 +114,7 @@ void HAL_ADC_LevelOutOfWindowCallback(ADC_HandleTypeDef *hadc)
 {
     if (outOfWindowTriggered)
         return;
-    pulseTickAnalysisCtr++;
+
     dmaIndex = __HAL_DMA_GET_COUNTER(ADC.DMA_Handle) / 2;
     timerIndex = __HAL_TIM_GET_COUNTER(&PULSE_TIMER);
     outOfWindowTriggered = 1;
@@ -139,15 +149,29 @@ void Get_Last_N_Samples(uint16_t *buffer, uint16_t *output, uint16_t head_idx, u
     }
 }
 
+float Calculate_Slope(uint16_t* buffer, size_t sz)
+{
+    float delta_s = ((float) (buffer[sz-1] - buffer[0]));
+    float delta_v = delta_s * (3.3f / 4095.0f);
+    float delta_time = (sz - 1)/(4160000.f);
+    return delta_v / delta_time;
+}
+#define CALCULATE_N(us)    ((((us) * 416) + 50) / 100)
+
+uint16_t enc_s = 0;
 void GitKop_Loop()
 {
     if (dmaIndex != 0)
     {
         stabilizedCounter++;
         if (stabilizedCounter < 1000)
+        {
             goto end;
+        }
 
-        #define HISTORY_LEN 42
+        debugOutputCtr++;
+        updateOledCtr++;
+        #define HISTORY_LEN CALCULATE_N(10)
         uint16_t linear_history[HISTORY_LEN];
 
         uint16_t head_ptr = DMA_BUFFER_ENTRIES - dmaIndex;
@@ -156,8 +180,9 @@ void GitKop_Loop()
 
         float time = timerIndex * 0.02f;
         float val = Handle_Sample(time);
+        float delta = Calculate_Slope(linear_history, HISTORY_LEN);
 
-        if (pulseTickAnalysisCtr > 100)
+        if (debugOutputCtr > 100)
         {
             if (DEBUG_MODE)
             {
@@ -166,9 +191,22 @@ void GitKop_Loop()
                 {
                     printf("%d ", linear_history[i]);
                 }
-                printf("] %d %f %f$\r\n", 0, time, val);
+                printf("] %d %f %f %f %f %f$\r\n", 0, time, val, delta, fastFilter.out, slowFilter.out);
             }
-            pulseTickAnalysisCtr = 0;
+            debugOutputCtr = 0;
+        }
+        if (updateOledCtr > 250)
+        {
+            SSD1306_Fill(Black);
+            char buf[60] = {0};
+            snprintf(buf, 60, "T: %d us", (int)time);
+            SSD1306_SetCursor(0,0);
+            SSD1306_WriteString(buf, Font_11x18, White);
+            SSD1306_SetCursor(0,20);
+            snprintf(buf, 60, "S: %d V/s", (int) delta);
+            SSD1306_WriteString(buf, Font_11x18, White);
+            SSD1306_UpdateScreen();
+            updateOledCtr = 0;
         }
         end:
         dmaIndex = 0;

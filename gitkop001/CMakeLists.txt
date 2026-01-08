@@ -70,12 +70,13 @@ add_subdirectory(cmake/stm32cubemx)
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user sources here
     ${CMAKE_CURRENT_SOURCE_DIR}/Core/Src/GitKop.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/Core/Src/ssd1306.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/Core/Src/ssd1306_fonts.c
 )
 #
 # Add include paths
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user defined include paths
-    "${CMAKE_CURRENT_SOURCE_DIR}/Lib/STM32-ILI9341/Inc"
 )
 
 # Add project symbols (macros)
@@ -94,8 +95,6 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
 )
 
 
-file(GLOB_RECURSE C_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/Lib/STM32-ILI9341/Src/*.c")
-# file(GLOB_RECURSE C_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/Core/Src/ili9341/*.c")
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE ${C_SOURCES})
 
 add_custom_target(upload

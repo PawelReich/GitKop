@@ -74,7 +74,7 @@ void MX_ADC1_Init(void)
   AnalogWDGConfig.Channel = ADC_CHANNEL_0;
   AnalogWDGConfig.ITMode = ENABLE;
   AnalogWDGConfig.HighThreshold = 4095;
-  AnalogWDGConfig.LowThreshold = 3000;
+  AnalogWDGConfig.LowThreshold = 2500;
   AnalogWDGConfig.FilteringConfig = ADC_AWD_FILTERING_4SAMPLES;
   if (HAL_ADC_AnalogWDGConfig(&hadc1, &AnalogWDGConfig) != HAL_OK)
   {

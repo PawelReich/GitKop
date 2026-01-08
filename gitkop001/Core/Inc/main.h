@@ -61,12 +61,20 @@ void Error_Handler(void);
 #define USER_LED_GPIO_Port GPIOC
 #define PULSE_IN_Pin GPIO_PIN_0
 #define PULSE_IN_GPIO_Port GPIOA
+#define ENC_A_Pin GPIO_PIN_1
+#define ENC_A_GPIO_Port GPIOB
+#define I2C_SDA_Pin GPIO_PIN_10
+#define I2C_SDA_GPIO_Port GPIOB
 #define BUZZER_Pin GPIO_PIN_15
 #define BUZZER_GPIO_Port GPIOB
 #define ENC_BTN_Pin GPIO_PIN_8
 #define ENC_BTN_GPIO_Port GPIOA
+#define ENC_B_Pin GPIO_PIN_9
+#define ENC_B_GPIO_Port GPIOA
 #define PULSE_OUT_Pin GPIO_PIN_10
 #define PULSE_OUT_GPIO_Port GPIOA
+#define I2C_SCL_Pin GPIO_PIN_6
+#define I2C_SCL_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 
