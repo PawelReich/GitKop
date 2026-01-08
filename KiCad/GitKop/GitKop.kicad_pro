@@ -488,7 +488,7 @@
       "gencad": "",
       "idf": "",
       "netlist": "",
-      "plot": "gerber/",
+      "plot": "../../doc/img/pcb/",
       "pos_files": "",
       "specctra_dsn": "",
       "step": "GitKop.step",
