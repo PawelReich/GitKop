@@ -1,3 +1,17 @@
+# GitKop - engineering thesis
+
+![Schematic](./doc/img/budowa/sch/Sekcja_odbiorcza.png)
+
+This is a repository containing my engineering thesis document, hardware and software project with simulations.
+
+The heart of the device is a STM32H523CE microcontroller, with custom-made PCB.
+
+![PCB](./doc/img/pudlo%20otwarte.png)
+
+The software is currently written in baremetal C with HAL. Accompanying software is written in Python with tkinter.
+
+![Prototype](./doc/img/testy/prototyp.jpg)
+
 # Wykrywacz metalu - Paweł Reich 2025
 
 ## Zadania do wykonania:	
