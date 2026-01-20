@@ -16,13 +16,9 @@ poly = 3
 line_width = 1.0
 
 [[files]]
-path = "../meas/good2.edf"
+path = "good.edf"
 label = "Cewka tłumiona krytycznie"
 
 [[files]]
-path = "../meas/overdamped.edf"
+path = "overdamped.edf"
 label = "Cewka przetłumiona"
-
-# [[files]]
-# path = "../meas/undamped.edf"
-# label = "Cewka nietłumiona"
