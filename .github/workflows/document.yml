@@ -18,3 +18,29 @@ jobs:
         with:
           name: PDF
           path: doc/PracaInz.pdf
+  deploy:
+    needs: build_latex
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download PDF file
+        uses: actions/download-artifact@v4
+        with:
+          name: PDF
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+      - name: Generate viewer
+        run: |
+          echo "<embed src=\"PracaInz.pdf\" width=\"100%\" height=\"100%\" type=\"application/pdf\">" >> "index.html"
+      - name: Upload page
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+      - name: Deploy to Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
