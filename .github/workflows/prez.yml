@@ -1,7 +1,7 @@
 name: Build presentation
 on: [push]
 jobs:
-  build_latex:
+  build_prez:
     runs-on: ubuntu-latest
     steps:
       - name: Set up Git repository
@@ -17,4 +17,4 @@ jobs:
         uses: actions/upload-artifact@v5
         with:
           name: Prezentacja
-          path: doc/Prezentacja.pdf
+          path: doc/prez.pdf
