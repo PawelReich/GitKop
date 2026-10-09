@@ -9,11 +9,7 @@
 #include "stm32h5xx_hal_rcc.h"
 #include "stm32h5xx_hal_tim.h"
 
-#include "ssd1306.h"
-#include "ssd1306_fonts.h"
-
 static uint16_t debugOutputCtr = 0;
-static uint16_t updateOledCtr = 0;
 static uint16_t stabilizedCounter = 0;
 
 volatile static uint16_t dmaIndex = 0;
@@ -98,11 +94,6 @@ void GitKop_Init()
     HAL_ADC_Start_IT(&ADC);
     HAL_GPIO_WritePin(USER_LED_GPIO_Port, USER_LED_Pin, 0);
 
-    SSD1306_Init();
-    SSD1306_WriteString("GitKop", Font_11x18, White);
-    SSD1306_UpdateScreen();
-    HAL_Delay(500);
-
     while(1)
     {
         GitKop_Loop();
@@ -170,7 +161,6 @@ void GitKop_Loop()
         }
 
         debugOutputCtr++;
-        updateOledCtr++;
         #define HISTORY_LEN CALCULATE_N(10)
         uint16_t linear_history[HISTORY_LEN];
 
@@ -194,19 +184,6 @@ void GitKop_Loop()
                 printf("] %d %f %f %f %f %f$\r\n", 0, time, val, delta, fastFilter.out, slowFilter.out);
             }
             debugOutputCtr = 0;
-        }
-        if (updateOledCtr > 250)
-        {
-            SSD1306_Fill(Black);
-            char buf[60] = {0};
-            snprintf(buf, 60, "T: %d us", (int)time);
-            SSD1306_SetCursor(0,0);
-            SSD1306_WriteString(buf, Font_11x18, White);
-            SSD1306_SetCursor(0,20);
-            snprintf(buf, 60, "S: %d V/s", (int) delta);
-            SSD1306_WriteString(buf, Font_11x18, White);
-            SSD1306_UpdateScreen();
-            updateOledCtr = 0;
         }
         end:
         dmaIndex = 0;

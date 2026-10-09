@@ -70,8 +70,6 @@ add_subdirectory(cmake/stm32cubemx)
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user sources here
     ${CMAKE_CURRENT_SOURCE_DIR}/Core/Src/GitKop.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/Core/Src/ssd1306.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/Core/Src/ssd1306_fonts.c
 )
 #
 # Add include paths
