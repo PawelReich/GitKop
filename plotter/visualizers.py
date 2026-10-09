@@ -4,6 +4,8 @@ from tkinter import ttk
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 import numpy as np
+
+from detector import DETECTION_THRESHOLD
 from collections import deque
 
 AVAILABLE_VIEWS = []
@@ -34,7 +36,7 @@ class BasePlotTab(ttk.Frame):
         self.ax.autoscale_view()
         self.canvas.draw()
 
-    def update_view(self, values, special):
+    def update_view(self, measurement):
         pass
 
 @register_view
@@ -48,10 +50,10 @@ class TimeDomainTab(BasePlotTab):
         
         self.line_ref, = self.ax.plot([], [], 'o-', color='#1f77b4', linewidth=1, markersize=3)
 
-    def update_view(self, values, special):
+    def update_view(self, measurement):
         
-        x_data = range(len(values))
-        self.line_ref.set_data(x_data, values)
+        x_data = range(len(measurement.samples))
+        self.line_ref.set_data(x_data, measurement.samples)
         
         self.redraw()
 
@@ -67,8 +69,8 @@ class Slope(BasePlotTab):
         self.line_ref, = self.ax.plot([], [], 'o-', color='#1f77b4', linewidth=1, markersize=3)
         self.buffer = deque(maxlen=100) 
 
-    def update_view(self, values, special):
-        self.buffer.append(special[3])
+    def update_view(self, measurement):
+        self.buffer.append(measurement.slope)
         x_data = range(len(self.buffer))
         self.line_ref.set_data(x_data, self.buffer)
         
@@ -85,8 +87,8 @@ class FFTTab(BasePlotTab):
         self.line_ref, = self.ax.plot([], [], color='#ff7f0e', linewidth=1)
         self.fft_history_buffer = deque(maxlen=1000) 
 
-    def update_view(self, values, special):
-        smallest = special[1]
+    def update_view(self, measurement):
+        smallest = measurement.time
 
         self.fft_history_buffer.append(smallest)
         data_np = np.array(self.fft_history_buffer)
@@ -123,10 +125,10 @@ class EMATab(BasePlotTab):
         self.slow = deque(maxlen=max_len)
         self.fast = deque(maxlen=max_len)
 
-    def update_view(self, values, special):
-        self.raw.append(special[1])
-        self.fast.append(special[4])
-        self.slow.append(special[5])
+    def update_view(self, measurement):
+        self.raw.append(measurement.time)
+        self.fast.append(measurement.fast)
+        self.slow.append(measurement.slow)
 
         x_axis = range(len(self.raw))
         self.raw_line.set_data(x_axis, self.raw)
@@ -164,9 +166,9 @@ class EMASplitTab(BasePlotTab):
         self.vlines_collection = None
         self.figure.tight_layout()
 
-    def update_view(self, values, special):
-        self.raw.append(special[1])
-        self.filtered.append(special[2])
+    def update_view(self, measurement):
+        self.raw.append(measurement.time)
+        self.filtered.append(measurement.difference)
 
         arr_raw = np.array(self.raw)
         arr_filtered = np.array(self.filtered)
@@ -182,7 +184,7 @@ class EMASplitTab(BasePlotTab):
             self.vlines_collection.remove()
             self.vlines_collection = None
 
-        alarm_mask = np.abs(self.filtered) > 1
+        alarm_mask = np.abs(self.filtered) > DETECTION_THRESHOLD
 
         self.fill_collection = self.ax2.fill_between(
             x_axis,

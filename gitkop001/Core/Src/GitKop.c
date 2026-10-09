@@ -1,7 +1,8 @@
 #include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "GitKop.h"
-#include "ema.h"
 #include "main.h"
 #include "stm32h5xx_hal.h"
 #include "stm32h5xx_hal_dma.h"
@@ -9,8 +10,8 @@
 #include "stm32h5xx_hal_rcc.h"
 #include "stm32h5xx_hal_tim.h"
 
-static uint16_t debugOutputCtr = 0;
 static uint16_t stabilizedCounter = 0;
+static uint16_t streamCtr = 0;
 
 volatile static uint16_t dmaIndex = 0;
 volatile static uint16_t timerIndex = 0;
@@ -20,12 +21,12 @@ volatile static uint8_t outOfWindowTriggered = 1;
 
 __attribute__((aligned(32))) volatile static uint16_t value[DMA_BUFFER_ENTRIES];
 
-float detectionThreshold = 5;
-EMA_t slowFilter;
-EMA_t fastFilter;
-
 uint8_t test = 0;
-uint8_t emaSetUp = 0;
+
+#define RX_LINE_MAX 16
+static char rxLine[RX_LINE_MAX];
+static uint8_t rxLineLen = 0;
+static uint8_t rxByte;
 
 int _write(int file, char* ptr, int len) {
     HAL_UART_Transmit(&UART, (uint8_t*) ptr, len, HAL_MAX_DELAY);
@@ -49,34 +50,34 @@ void Buzzer_Set(uint16_t freqHz)
     __HAL_TIM_SET_COMPARE(&BUZZ_TIMER, BUZZ_CHANNEL, newAutoreload / 2);
 }
 
-float Handle_Sample(uint16_t rawSample)
+static void Execute_Command(void)
 {
-    float x = rawSample;
-    if (!emaSetUp)
+    if (strncmp(rxLine, BUZZ_COMMAND, strlen(BUZZ_COMMAND)) != 0)
+        return;
+
+    Buzzer_Set((uint16_t) atoi(&rxLine[strlen(BUZZ_COMMAND)]));
+}
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+    if (huart != &UART)
+        return;
+
+    if (rxByte == '\n' || rxByte == '\r')
     {
-        EMA_Init(&slowFilter, 0.0005, x);
-        EMA_Init(&fastFilter, 0.1, x);
-        emaSetUp = 1;
+        if (rxLineLen > 0)
+        {
+            rxLine[rxLineLen] = '\0';
+            rxLineLen = 0;
+            Execute_Command();
+        }
     }
-    else
+    else if (rxLineLen < RX_LINE_MAX - 1)
     {
-        EMA_Update(&fastFilter, rawSample);
-        EMA_Update(&slowFilter, rawSample);
+        rxLine[rxLineLen++] = (char) rxByte;
     }
 
-    float difference = fastFilter.out - slowFilter.out;
-
-    if (difference < detectionThreshold)
-    {
-        Buzzer_Set(0);
-    }
-    else
-    {
-        float hz = difference;
-        if (ENABLE_BUZZER)
-            Buzzer_Set(hz);
-    }
-    return difference;
+    HAL_UART_Receive_IT(&UART, &rxByte, 1);
 }
 
 void GitKop_Init()
@@ -92,6 +93,7 @@ void GitKop_Init()
 
     HAL_ADC_Start_DMA(&ADC, (uint32_t*)value, DMA_BUFFER_ENTRIES);
     HAL_ADC_Start_IT(&ADC);
+    HAL_UART_Receive_IT(&UART, &rxByte, 1);
     HAL_GPIO_WritePin(USER_LED_GPIO_Port, USER_LED_Pin, 0);
 
     while(1)
@@ -140,52 +142,37 @@ void Get_Last_N_Samples(uint16_t *buffer, uint16_t *output, uint16_t head_idx, u
     }
 }
 
-float Calculate_Slope(uint16_t* buffer, size_t sz)
-{
-    float delta_s = ((float) (buffer[sz-1] - buffer[0]));
-    float delta_v = delta_s * (3.3f / 4095.0f);
-    float delta_time = (sz - 1)/(4160000.f);
-    return delta_v / delta_time;
-}
 #define CALCULATE_N(us)    ((((us) * 416) + 50) / 100)
 
-uint16_t enc_s = 0;
 void GitKop_Loop()
 {
-    if (dmaIndex != 0)
+    if (dmaIndex == 0)
+        return;
+
+    stabilizedCounter++;
+    dmaIndex = 0;
+
+    if (stabilizedCounter < 1000)
+        return;
+
+    #define HISTORY_LEN CALCULATE_N(10)
+    uint16_t linear_history[HISTORY_LEN];
+
+    uint16_t head_ptr = DMA_BUFFER_ENTRIES - dmaIndex;
+
+    Get_Last_N_Samples(value, linear_history, head_ptr, HISTORY_LEN, DMA_BUFFER_ENTRIES);
+
+    float time = timerIndex * 0.02f;
+
+    streamCtr++;
+    if (streamCtr < STREAM_THROTTLE_DIV)
+        return;
+    streamCtr = 0;
+
+    printf("DATA[");
+    for (int i = 0; i < HISTORY_LEN; i++)
     {
-        stabilizedCounter++;
-        if (stabilizedCounter < 1000)
-        {
-            goto end;
-        }
-
-        debugOutputCtr++;
-        #define HISTORY_LEN CALCULATE_N(10)
-        uint16_t linear_history[HISTORY_LEN];
-
-        uint16_t head_ptr = DMA_BUFFER_ENTRIES - dmaIndex;
-
-        Get_Last_N_Samples(value, linear_history, head_ptr, HISTORY_LEN, DMA_BUFFER_ENTRIES);
-
-        float time = timerIndex * 0.02f;
-        float val = Handle_Sample(time);
-        float delta = Calculate_Slope(linear_history, HISTORY_LEN);
-
-        if (debugOutputCtr > 100)
-        {
-            if (DEBUG_MODE)
-            {
-                printf("DATA[");
-                for (int i = 0; i < HISTORY_LEN; i++)
-                {
-                    printf("%d ", linear_history[i]);
-                }
-                printf("] %d %f %f %f %f %f$\r\n", 0, time, val, delta, fastFilter.out, slowFilter.out);
-            }
-            debugOutputCtr = 0;
-        }
-        end:
-        dmaIndex = 0;
+        printf("%d ", linear_history[i]);
     }
+    printf("] %d %f$\r\n", 0, time);
 }

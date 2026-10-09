@@ -14,13 +14,14 @@
 #define UART huart1
 #define ADC hadc1
 
-static const uint8_t DEBUG_MODE = 0;
-static const uint8_t ENABLE_BUZZER = 1;
+#define STREAM_THROTTLE_DIV 4
+#define BUZZ_COMMAND "BUZZ "
 
 void Buzzer_Set(uint16_t freq);
 int _write(int file, char* ptr, int len);
 void HAL_ADC_LevelOutOfWindowCallback(ADC_HandleTypeDef *hadc);
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim);
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart);
 
 void GitKop_Init();
 void GitKop_Loop();

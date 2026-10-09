@@ -7,6 +7,7 @@ import traceback
 
 from serial_manager import SerialManager
 from visualizers import AVAILABLE_VIEWS
+from detector import MetalDetector, BUZZER_COMMAND
 
 class GitKopDebugger:
     def __init__(self, root):
@@ -14,10 +15,11 @@ class GitKopDebugger:
         self.root.title("GitKop Debugging Tool")
 
         self.serial_mgr = SerialManager()
+        self.detector = MetalDetector()
         
         self.current_data = [] 
 
-        self.active_views : list[ViewClass] = {} 
+        self.active_views : list[ViewClass] = {}
         
         self._setup_top_controls()
         self._setup_main_area()
@@ -70,11 +72,13 @@ class GitKopDebugger:
             
             success, msg = self.serial_mgr.connect(port, baud)
             if success:
+                self.detector = MetalDetector()
                 self.btn_connect.config(text="Rozlacz")
                 self.log_message("INFO", msg)
             else:
                 messagebox.showerror("Connection Error", msg)
         else:
+            self.serial_mgr.send(BUZZER_COMMAND.format(hz=0))
             msg = self.serial_mgr.disconnect()
             self.btn_connect.config(text="Connect")
             self.log_message("INFO", msg)
@@ -98,6 +102,12 @@ class GitKopDebugger:
                 special_part = line[main_end+1:-1].split()
                 special_vals = [float(x) for x in special_part]
 
+                measurement = self.detector.process(values, special_vals[1])
+
+                command = self.detector.command_for(measurement)
+                if command is not None:
+                    self.serial_mgr.send(command)
+
                 self.current_data = values
                 self.btn_export.config(state=tk.NORMAL)
                 self.btn_png.config(state=tk.NORMAL)
@@ -105,9 +115,7 @@ class GitKopDebugger:
                 current_tab_id = self.notebook.select()
                 
                 if current_tab_id in self.active_views:
-                    self.active_views[current_tab_id].update_view(values, special_vals)
-
-                self.log_message("DATA", f"Packet: {len(values)} samples")
+                    self.active_views[current_tab_id].update_view(measurement)
 
             except Exception:
                 self.log_message("ERROR", f"Parse error: {traceback.format_exc()}")

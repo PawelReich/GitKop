@@ -45,6 +45,16 @@ class SerialManager:
                 pass
         return "Disconnected"
 
+    def send(self, data):
+        """Write a command to the board. Returns True on success."""
+        if not self.serial_port or not self.serial_port.is_open:
+            return False
+        try:
+            self.serial_port.write(data.encode('utf-8'))
+            return True
+        except Exception:
+            return False
+
     def _read_loop(self):
         """Internal loop running in background thread."""
         while not self.stop_event.is_set() and self.serial_port and self.serial_port.is_open:
