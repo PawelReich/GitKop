@@ -12,3 +12,6 @@
 *.net
 
 .cache
+
+#Nix artifact
+result
