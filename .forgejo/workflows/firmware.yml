@@ -1,0 +1,58 @@
+name: Build firmware
+
+on:
+  push:
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install prerequisites
+        run: |
+          if command -v sudo &> /dev/null && [ "$(id -u)" != "0" ]; then
+            sudo apt-get update
+            sudo apt-get install -y --no-install-recommends build-essential curl ca-certificates git xz-utils
+          else
+            apt-get update
+            apt-get install -y --no-install-recommends build-essential curl ca-certificates git xz-utils
+          fi
+
+      - name: Install Nix
+        run: |
+          set -euo pipefail
+
+          if command -v sudo &> /dev/null && [ "$(id -u)" != "0" ]; then
+            curl -sSf -L https://install.determinate.systems/nix | \
+              sudo sh -s -- install linux --no-confirm \
+                --extra-conf "sandbox = false" \
+                --extra-conf "accept-flake-config = true"
+          else
+            curl -sSf -L https://install.determinate.systems/nix | \
+              sh -s -- install linux --no-confirm --init none \
+                --extra-conf "sandbox = false" \
+                --extra-conf "accept-flake-config = true"
+          fi
+
+          echo "/nix/var/nix/profiles/default/bin" >> "$GITHUB_PATH"
+          echo "$HOME/.nix-profile/bin" >> "$GITHUB_PATH"
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            /nix/store
+            ~/.cache/nix
+          key: nix-${{ runner.os }}-${{ hashFiles('flake.lock') }}
+          restore-keys: |
+            nix-${{ runner.os }}-
+
+      - name: Build ELF
+        run: nix build
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: Firmware
+          path: 'result/*'

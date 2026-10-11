@@ -1,0 +1,22 @@
+name: Build presentation
+on: [push]
+jobs:
+  build_prez:
+    runs-on: ubuntu-latest
+    container:
+      image: texlive/texlive:latest-full
+    steps:
+      - name: Install prerequisites
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends inkscape nodejs
+      - name: Set up Git repository
+        uses: actions/checkout@v6
+      - name: Compile LaTeX document
+        working-directory: doc
+        run: latexmk -pdf -shell-escape -file-line-error -halt-on-error -interaction=nonstopmode prez.tex
+      - name: Upload PDF file
+        uses: actions/upload-artifact@v3
+        with:
+          name: Prezentacja
+          path: doc/prez.pdf
