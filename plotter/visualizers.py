@@ -5,10 +5,17 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 import numpy as np
 
-from detector import DETECTION_THRESHOLD
 from collections import deque
 
 AVAILABLE_VIEWS = []
+
+# Half-range of the alarm axis, in microseconds. Pinned rather than autoscaled so
+# the trip level keeps a fixed visual meaning between frames: the differences
+# cluster tightly around a few tens of us, and left to autoscale a 1.5 us
+# excursion fills the whole plot and reads as enormous. The axis only ever grows,
+# never shrinks, so a strong target stays visible instead of silently rescaling
+# back down.
+PLOT_Y_LIMIT_US = 5.0
 
 def register_view(cls):
     AVAILABLE_VIEWS.append(cls)
@@ -88,26 +95,43 @@ class EMASplitTab(BasePlotTab):
 
         self.ax2.set_title("Przefiltrowane dane")
         self.ax2.set_xlabel("Próbka")
-        self.ax2.set_ylabel("Wartość")
+        self.ax2.set_ylabel("Roznica [us]")
         self.ax2.grid(True, alpha=0.3)
         self.ema_line, = self.ax2.plot([], [], '-o',label='EMA', linewidth=2)
 
         self.raw = deque(maxlen=100) 
         self.filtered = deque(maxlen=100) 
+        # Threshold is adaptive, so each sample has to be judged against the bar
+        # that was in force when it arrived, not against whatever the latest one is.
+        self.thresholds = deque(maxlen=100)
+        self.threshold_line, = self.ax2.plot([], [], '--', color='darkred', linewidth=1, label='Próg')
         self.fill_collection = None
         self.vlines_collection = None
+        self.y_limit = PLOT_Y_LIMIT_US
+        self.ax2.set_ylim(-self.y_limit, self.y_limit)
+        self.ax2.legend(loc='upper right')
         self.figure.tight_layout()
 
     def update_view(self, measurement):
         self.raw.append(measurement.time)
         self.filtered.append(measurement.difference)
+        self.thresholds.append(measurement.threshold)
 
         arr_raw = np.array(self.raw)
         arr_filtered = np.array(self.filtered)
+        arr_thresholds = np.array(self.thresholds)
         x_axis = np.arange(len(arr_raw))
         
         self.raw_line.set_data(x_axis, arr_raw)
         self.ema_line.set_data(x_axis, arr_filtered)
+
+        # Both edges, because the detector compares the magnitude. A single line above
+        # zero would leave the lower trip invisible on the axis that matters most.
+        level = arr_thresholds[-1]
+        self.threshold_line.set_data(
+            [x_axis[0], x_axis[-1], np.nan, x_axis[0], x_axis[-1]],
+            [level, level, np.nan, -level, -level],
+        )
         
         if self.fill_collection:
             self.fill_collection.remove()
@@ -116,7 +140,9 @@ class EMASplitTab(BasePlotTab):
             self.vlines_collection.remove()
             self.vlines_collection = None
 
-        alarm_mask = np.abs(self.filtered) > DETECTION_THRESHOLD
+        # >= matches the detector's own comparison, so the shading and the buzzer
+        # agree on the boundary instead of differing by one exact hit.
+        alarm_mask = np.abs(arr_filtered) >= arr_thresholds
 
         self.fill_collection = self.ax2.fill_between(
             x_axis,
@@ -141,8 +167,19 @@ class EMASplitTab(BasePlotTab):
     def redraw(self):
         self.ax1.relim()
         self.ax1.autoscale_view()
-        
+
         self.ax2.relim()
         self.ax2.autoscale_view()
+
+        # Re-assert after autoscale: the alarm axis is pinned so the trip level
+        # reads at a consistent height, and only widens when a real excursion
+        # would otherwise fall off the top or bottom.
+        if self.filtered:
+            peak = float(np.max(np.abs(np.array(self.filtered))))
+            if peak > self.y_limit:
+                self.y_limit = peak * 1.1
+        self.ax2.set_ylim(-self.y_limit, self.y_limit)
+        self.ax2.set_ylabel(f"Roznica [us]")
+
         self.canvas.draw()
 

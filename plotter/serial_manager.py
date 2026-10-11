@@ -8,12 +8,16 @@ class SerialManager:
     """
     Handles serial communication in a separate thread to avoid freezing the GUI.
     """
-    def __init__(self):
+    def __init__(self, on_line=None):
         self.serial_port = None
         self.is_connected = False
         self.stop_event = threading.Event()
-        self.data_queue = queue.Queue()
+        # Bounded: the board streams a few hundred packets a second and the GUI
+        # draws far more slowly than that, so the queue is a handoff for display
+        # only. Detection happens in on_line, before anything lands here.
+        self.data_queue = queue.Queue(maxsize=1000)
         self.read_thread = None
+        self.on_line = on_line
 
     def list_ports(self):
         devices = [port.device for port in serial.tools.list_ports.comports()]
@@ -62,7 +66,18 @@ class SerialManager:
                 if self.serial_port.in_waiting:
                     line = self.serial_port.readline().decode('utf-8', errors='replace').strip()
                     if line:
-                        self.data_queue.put(line)
+                        # Handed off here, on the reader thread, so filtering and
+                        # the buzzer command never queue behind a GUI redraw.
+                        if self.on_line:
+                            self.on_line(line)
+                        try:
+                            self.data_queue.put_nowait(line)
+                        except queue.Full:
+                            # This runs on the reader thread, which is also what
+                            # decides the buzzer. Blocking here to make room would
+                            # stall the detector along with the display, so drop
+                            # the frame instead.
+                            pass
                 else:
                     time.sleep(0.005)
             except Exception:
