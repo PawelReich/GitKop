@@ -50,3 +50,9 @@ jobs:
 
       - name: Build ELF
         run: nix build
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v5
+        with:
+          name: Firmware
+          path: 'result/*'
