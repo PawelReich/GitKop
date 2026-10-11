@@ -3,16 +3,18 @@ on: [push]
 jobs:
   build_latex:
     runs-on: ubuntu-latest
+    container:
+      image: texlive/texlive:latest-full
     steps:
+      - name: Install prerequisites
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends inkscape nodejs
       - name: Set up Git repository
         uses: actions/checkout@v6
       - name: Compile LaTeX document
-        uses: xu-cheng/latex-action@v4
-        with:
-          working_directory: doc
-          latexmk_shell_escape: true
-          extra_system_packages: "inkscape"
-          root_file: PracaInz.tex
+        working-directory: doc
+        run: latexmk -pdf -shell-escape -file-line-error -halt-on-error -interaction=nonstopmode PracaInz.tex
       - name: Upload PDF file
         uses: actions/upload-artifact@v5
         with:
