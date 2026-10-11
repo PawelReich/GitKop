@@ -1,0 +1,46 @@
+\chapter{Budowa prototypu wykrywacza metalu}
+\begin{figure}[H]
+\centering
+    \begin{tikzpicture}[
+        node distance=1.5cm and 2cm,
+        probe/.style = {
+            base,
+            trapezium,
+            trapezium left angle=70,
+            trapezium right angle=70,
+        },
+        label_text/.style = {
+            font=\sffamily\footnotesize\bfseries,
+            fill=white,
+            inner sep=2pt
+        }
+    ]
+        \node[blok] (user) {Panel\\użytkownika};
+        \node[blok, below=1.5cm of user] (digital) {Sekcja\\cyfrowa};
+        \node[blok, below=2.5cm of digital, xshift=-3cm] (rx) {Sekcja\\odbiorcza};
+        \node[blok, below=2.5cm of digital, xshift=3cm] (tx) {Sekcja\\nadawcza};
+        \node[blok, below=2cm of $(rx.south)!0.5!(tx.south)$] (sonda) {Sonda};
+
+        \draw[arrow] ([xshift=-3mm]user.south) -- ([xshift=-3mm]digital.north);
+        \draw[arrow] ([xshift=3mm]digital.north) -- ([xshift=3mm]user.south);
+        \draw[arrow] ([xshift=3mm]digital.south) -- node[label_text, pos=0.6] {PULSE\_OUT} (tx.north);
+        \draw[arrow] (tx.south) -- ([xshift=3mm]sonda.north); 
+        \draw[arrow] ([xshift=-3mm]sonda.north) -- (rx.south);
+        \draw[arrow] (rx.north) -- node[label_text, pos=0.4] {SIGNAL\_OUT} ([xshift=-3mm]digital.south);
+
+    \end{tikzpicture}
+    \caption{Schemat blokowy działania prototypu wykrywacza}
+    \label{sch:budowa}
+\end{figure}
+Prototyp został wykonany z wykorzystaniem wiedzy zebranej w poprzednich rozdziałach.
+Urządzenie zostało zbudowane w oparciu o łatwo dostępne komponenty oraz wydruk 3D.
+Architektura wykonanego urządzenia podzielona jest na 5 części ukazanych na rysunku \ref{sch:budowa}.
+W niniejszym rozdziale zostaną omówione zastosowane rozwiązania tworzące poszczególne sekcje oraz technikalia ich działania.
+
+\input{budowa/Zasilanie}
+\input{budowa/SekcjaNadawcza}
+\input{budowa/Sonda}
+\input{budowa/SekcjaOdbiorcza}
+\input{budowa/SekcjaCyfrowa}
+\input{budowa/PCB}
+\input{budowa/Obudowa}

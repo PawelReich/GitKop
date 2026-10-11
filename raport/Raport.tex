@@ -1,0 +1,74 @@
+\documentclass{pginz}
+
+\usepackage{subcaption}
+
+\begin{document}
+
+\tikzset{
+    base/.style = {
+        font=\sffamily\footnotesize,
+        align=center,
+        thick
+    },
+    blok/.style={
+        draw,               % Rysuj obramowanie
+        rectangle,          % Kształt prostokąta
+        thick,
+        rounded corners=3pt,    % Lekko zaokrąglone rogi (opcjonalnie, wygląda estetyczniej)
+        align=center,       % Wyśrodkowanie tekstu
+        minimum width=3.5cm,  % Minimalna szerokość
+        minimum height=1.2cm, % Minimalna wysokość
+        inner sep=2mm       % Odstęp tekstu od ramki
+    },
+    startstop/.style = {
+        base,
+        rectangle,
+        rounded corners,
+        draw=black!80!black,
+        minimum width=3cm,
+        minimum height=1cm
+    },
+    decision/.style = {
+        base,
+        diamond,
+        aspect=2.5, % Rozciąga romb w poziomie
+        draw=black!80!black,
+        inner sep=0pt,
+        text width=3.5cm % Zawijanie tekstu wewnątrz
+    },
+    process/.style = {
+        base,
+        rectangle,
+        draw=black!80!black,
+        minimum width=3.5cm,
+        minimum height=1cm
+    },
+    connector/.style = {
+        thick,
+        draw=gray!80!black
+    },
+    arrow/.style = {
+        connector,
+        ->,
+        >=stealth,
+    },
+}
+
+\include{budowa}
+\include{testy}
+
+\listoffigures
+\addcontentsline{toc}{chapter}{Spis rysunków}
+\listoftables
+\addcontentsline{toc}{chapter}{Spis tabel}
+
+\begin{appendices}
+    \appendix
+    \include{pcb}
+    \chapter{Schemat gotowego wykrywacza metalu}
+    \begin{figure}[H]
+        \includegraphics[angle=90, width=\textwidth]{Schematic.pdf}
+    \end{figure}
+\end{appendices}
+
+\end{document}
