@@ -28,6 +28,44 @@ static char rxLine[RX_LINE_MAX];
 static uint8_t rxLineLen = 0;
 static uint8_t rxByte;
 
+uint32_t Pulse_Timer_Tick_Hz(void)
+{
+    RCC_ClkInitTypeDef clocks = {0};
+    uint32_t latency;
+
+    /* Both out-params are written unconditionally by the HAL, so neither may be
+     * NULL: passing NULL here faults before main() is ever reached. */
+    HAL_RCC_GetClockConfig(&clocks, &latency);
+
+    uint32_t timerClock = HAL_RCC_GetPCLK2Freq();
+
+    /* TIM1 sits on APB2. When the APB prescaler is not 1 the timer runs at
+     * twice PCLK2, which is the usual "timer clock doubles when the bus is
+     * divided" rule on this family. */
+    if (clocks.APB2CLKDivider != RCC_HCLK_DIV1)
+        timerClock *= 2;
+
+    return timerClock / (PULSE_TIMER.Instance->PSC + 1);
+}
+
+uint32_t Pulse_Timer_Tick_Ns(void)
+{
+    return 1000000000u / Pulse_Timer_Tick_Hz();
+}
+
+void Pulse_Set_Width_Us(uint32_t widthUs)
+{
+    uint32_t ticks = widthUs * 1000u / Pulse_Timer_Tick_Ns();
+
+    uint32_t period = PULSE_TIMER.Instance->ARR + 1;
+    if (ticks > period)
+        ticks = period;
+    if (ticks == 0)
+        ticks = 1;
+
+    __HAL_TIM_SET_COMPARE(&PULSE_TIMER, PULSE_CHANNEL, ticks);
+}
+
 int _write(int file, char* ptr, int len) {
     HAL_UART_Transmit(&UART, (uint8_t*) ptr, len, HAL_MAX_DELAY);
     return len;
@@ -84,8 +122,9 @@ void GitKop_Init()
 {
     printf("GitKop build %s %s\r\nCreated by Pawel Reich, https://gitmanik.dev\r\n", __TIME__, __DATE__);
 
-    HAL_TIM_PWM_Start(&PULSE_TIMER, TIM_CHANNEL_3);
+    HAL_TIM_PWM_Start(&PULSE_TIMER, PULSE_CHANNEL);
     HAL_TIM_Base_Start_IT(&PULSE_TIMER);
+    Pulse_Set_Width_Us(PULSE_WIDTH_US);
     HAL_TIM_Base_Start_IT(&BUZZ_TIMER);
 
     HAL_TIM_PWM_Start(&BUZZ_TIMER, BUZZ_CHANNEL);
@@ -162,7 +201,11 @@ void GitKop_Loop()
 
     Get_Last_N_Samples(value, linear_history, head_ptr, HISTORY_LEN, DMA_BUFFER_ENTRIES);
 
-    float time = timerIndex * 0.02f;
+    /* AWD exit time in nanoseconds, derived from the live prescaler rather
+     * than a hardcoded tick. Nanoseconds rather than microseconds because the
+     * tick is 20 ns and rounding here would quantise away the very resolution
+     * this measurement exists to capture. Python divides by 1e3 to get us. */
+    uint32_t timeNs = (uint32_t) timerIndex * Pulse_Timer_Tick_Ns();
 
     streamCtr++;
     if (streamCtr < STREAM_THROTTLE_DIV)
@@ -174,5 +217,5 @@ void GitKop_Loop()
     {
         printf("%d ", linear_history[i]);
     }
-    printf("] %d %f$\r\n", 0, time);
+    printf("] %d %lu$\r\n", 0, (unsigned long) timeNs);
 }
