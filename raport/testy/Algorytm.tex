@@ -1,0 +1,77 @@
+
+\section{Algorytm wyznaczania danych wejściowych}
+
+\begin{figure}
+    \centering
+    \begin{tikzpicture}[node distance=1cm, auto]
+
+        \node (start) [startstop] {Start};
+        \node (fast) [process, below=of start] {Wyznacz nową wartość \\szybkiego filtru};
+        \node (slow) [process, below=of fast] {Wyznacz nową wartość \\wolnego filtru};
+        \node (dec) [decision, below=of slow] {Czy\\$S_f - S_s > T_h$ ?};
+        \node (change) [process, below=of dec, node distance=2.5cm] {Wyznacz zmianę\\napięcia w\\czasie};
+        \node (signal) [process, below=of change] {Uruchom\\sygnalizację\\akustyczną};
+        \node (end) [startstop, below=of signal] {Koniec};
+
+        \draw [arrow] (start) -- (fast);
+        \draw [arrow] (fast) -- (slow);
+        \draw [arrow] (slow) -- (dec);
+        
+        \draw [arrow] (dec) -- node[anchor=east] {Tak} (change);
+        \draw [arrow] (change) -- (signal);
+        \draw [arrow] (signal) -- (end);
+        
+        \draw [arrow] (dec.east) -- ++(2.5,0) node[midway, above] {Nie} |- (end.east);
+
+    \end{tikzpicture}
+    \caption{Schemat blokowy działania algorytmu}\label{fig:diagram}
+\end{figure}
+
+\subsection{Filtracja sygnału pomiarowego i detekcja obiektu}
+
+Ze względu na charakter wzmocnionego sygnału wyjściowego z sekcji odbiorczej, który obarczony jest znacznym szumem o charakterze stochastycznym, a także szumom wynikającym z przetwornika analogowo-cyfrowego konieczne było zastosowanie odpowiednich metod cyfrowego przetwarzania sygnałów. Wstępna analiza widmowa z wykorzystaniem Szybkiej Transformaty Fouriera (FFT) wykazała, że zakłócenia mają charakter szerokopasmowy (szum biały), co uniemożliwia skuteczne odfiltrowanie ich poprzez proste wycięcie konkretnych częstotliwości bez utraty istotnych informacji o zmianach sygnału użytecznego. W związku z tym, do kondycjonowania sygnału wybrano filtr dolnoprzepustowy w dziedzinie czasu.
+
+\subsection{Charakterystyka filtru EMA}
+
+Wykładnicza średnia krocząca  (ang. \textit{Exponential Moving Average}, EMA) jest filtrem o nieskończonej odpowiedzi impulsowej (IIR), który przypisuje wagi do danych historycznych w sposób malejący wykładniczo. Jest to rozwiązanie szczególnie korzystne w systemach wbudowanych o ograniczonych zasobach obliczeniowych, ponieważ nie wymaga buforowania dużej liczby próbek, a jedynie przechowywania poprzedniej wartości przefiltrowanej.
+
+Równanie rekurencyjne filtru EMA opisuje wzór:
+
+\begin{equation}
+    S_t = \alpha \cdot Y_t + (1 - \alpha) \cdot S_{t-1}
+    \label{eq:ema}
+\end{equation}
+
+gdzie $S_t$ - aktualna wartość przefiltrowana, $Y_t$ - aktualna surowa wartość, $S_{t-1}$ - poprzednia wartość przefiltrowana, $\alpha$ - współczynnik wygładzania z przedziału $(0, 1)$.
+
+Współczynnik $\alpha$ decyduje o stałej czasowej filtru. Niska wartość $\alpha$ skutkuje silnym tłumieniem szumu, ale wprowadza większe opóźnienie w detekcji szybkich zmian sygnału. Wysoka wartość $\alpha$ zapewnia szybszą reakcję układu, lecz słabiej eliminuje zakłócenia o wysokiej częstotliwości.
+
+\subsection{Algorytm detekcji różnicowej}
+
+W celu eliminacji efektu pływania zera w algorytmie zastosowano dodatkowa średnią z filtrem EMA o niskiej wartości $\alpha$, reprezentującą tło.
+
+Warunek detekcji metalu opiera się na analizie różnicy między tymi dwoma sygnałami, co przedstawia nierówność (\ref{eq:trigger}):
+
+\begin{equation}
+    Diff=S_{fast} - S_{slow} > T_{h}
+    \label{eq:trigger}
+\end{equation}
+
+gdzie $Diff$ to wyznaczona różnica, $S_{fast}$ to aktualna wartość szybkiego filtra EMA, $S_{slow}$ to aktualna wartość wolnego filtra EMA, $T_{h}$ to próg detekcji.
+
+Zaletą zastosowania dwóch średnich jest automatyczna kalibracja układu. W stanie spoczynku różnica $Diff$ oscyluje wokół zera, niezależnie od bezwzględnej wartości odpowiedzi sygnału z cewki. W momencie pojawienia się obiektu metalowego, $S_{fast}$ narasta znacznie szybciej niż $S_{slow}$, powodując przekroczenie progu $T_{h}$.
+
+
+\subsection{Nachylenie odpowiedzi}
+
+Podczas wykonywania algorytmu wykrywania kopiowany jest segment bufora cyklicznego uzupełnianego przez DMA do bufora $x$ zawierajego ostatnie $N=42$ próbek. Dokonywany jest proces analizy nachylenia sygnału.
+
+\begin{equation}
+    N = \frac{T}{SPS}=\frac{10\mu s}{4,16\cdot10^6 \frac{S}{s}} \approx{42}
+\end{equation}
+
+Nachylenie sygnału wyznaczane jest za pomocą uproszczonego uśrednienia zmiany napięcia:
+\begin{equation}
+    Delta = \frac{x[N] - x[0]}{N}
+    \label{eq:nachyl}
+\end{equation}
