@@ -19,9 +19,8 @@
  * meaningful physically: the time the drive stage is on and current builds in
  * the coil. The CCR3 compare value is derived from it and the live prescaler,
  * so retuning the prescaler for resolution cannot silently desynchronise the
- * two. Everything here is integer: the tick is carried in nanoseconds, because
- * rounding the measurement timestamp to whole microseconds would throw away the
- * sub-microsecond resolution the AWD window is there to capture. */
+ * two. Everything here is integer, and the timestamp the board streams is in
+ * the same unit. */
 #define PULSE_WIDTH_US 30u
 
 #define STREAM_THROTTLE_DIV 4

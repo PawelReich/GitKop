@@ -86,6 +86,7 @@ void Buzzer_Set(uint16_t freqHz)
 
     __HAL_TIM_SET_AUTORELOAD(&BUZZ_TIMER, newAutoreload);
     __HAL_TIM_SET_COMPARE(&BUZZ_TIMER, BUZZ_CHANNEL, newAutoreload / 2);
+    BUZZ_TIMER.Instance->EGR = TIM_EGR_UG;
 }
 
 static void Execute_Command(void)
@@ -147,8 +148,13 @@ void HAL_ADC_LevelOutOfWindowCallback(ADC_HandleTypeDef *hadc)
     if (outOfWindowTriggered)
         return;
 
+    uint32_t now = __HAL_TIM_GET_COUNTER(&PULSE_TIMER);
+    uint32_t skip_ticks = 100000u / Pulse_Timer_Tick_Ns();
+    if (now < skip_ticks)
+        return;
+
     dmaIndex = __HAL_DMA_GET_COUNTER(ADC.DMA_Handle) / 2;
-    timerIndex = __HAL_TIM_GET_COUNTER(&PULSE_TIMER);
+    timerIndex = now;
     outOfWindowTriggered = 1;
 }
 
@@ -165,57 +171,28 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     }
 }
 
-void Get_Last_N_Samples(uint16_t *buffer, uint16_t *output, uint16_t head_idx, uint16_t n_samples, uint16_t buf_len)
-{
-    int16_t start_idx = (head_idx - n_samples + buf_len) % buf_len;
-
-    for (uint16_t i = 0; i < n_samples; i++)
-    {
-        output[i] = buffer[start_idx];
-
-        start_idx++;
-        if (start_idx >= buf_len)
-        {
-            start_idx = 0;
-        }
-    }
-}
-
-#define CALCULATE_N(us)    ((((us) * 416) + 50) / 100)
-
 void GitKop_Loop()
 {
     if (dmaIndex == 0)
         return;
 
     stabilizedCounter++;
+    uint16_t captured_dma_idx = dmaIndex;
     dmaIndex = 0;
 
     if (stabilizedCounter < 1000)
         return;
 
-    #define HISTORY_LEN CALCULATE_N(10)
-    uint16_t linear_history[HISTORY_LEN];
-
-    uint16_t head_ptr = DMA_BUFFER_ENTRIES - dmaIndex;
-
-    Get_Last_N_Samples(value, linear_history, head_ptr, HISTORY_LEN, DMA_BUFFER_ENTRIES);
-
-    /* AWD exit time in nanoseconds, derived from the live prescaler rather
-     * than a hardcoded tick. Nanoseconds rather than microseconds because the
-     * tick is 20 ns and rounding here would quantise away the very resolution
-     * this measurement exists to capture. Python divides by 1e3 to get us. */
-    uint32_t timeNs = (uint32_t) timerIndex * Pulse_Timer_Tick_Ns();
+    /* AWD exit time in microseconds, derived from the live prescaler rather
+     * than a hardcoded tick. The timestamp is the whole packet: the sample
+     * window is not streamed, so the DMA buffer only has to feed the analog
+     * watchdog. */
+    uint32_t timeUs = (uint32_t) timerIndex * Pulse_Timer_Tick_Ns() / 1000u;
 
     streamCtr++;
     if (streamCtr < STREAM_THROTTLE_DIV)
         return;
     streamCtr = 0;
 
-    printf("DATA[");
-    for (int i = 0; i < HISTORY_LEN; i++)
-    {
-        printf("%d ", linear_history[i]);
-    }
-    printf("] %d %lu$\r\n", 0, (unsigned long) timeNs);
+    printf("%lu\r\n", (unsigned long) timeUs);
 }
