@@ -75,10 +75,10 @@ Dla maksymalnego odciążenia mikrokontrolera wykorzystany został tryb DMA (bez
     \caption{Wykres odpowiedzi sondy \textit{PULSE\_OUT}}\label{fig:pulse_out}
 \end{figure}
 
-W celu dokładnego wyznaczenia trwania nasyconej odpowiedzi sondy wykorzystywany jest wbudowany w ADC sprzętowy komparator okienkowy (Analog Watchdog, AWD). To peryferium konwertera analogowo-cyfrowego pozwala na wyznaczenie zakresu wartości próbek, którego opuszczenie wywoła przerwanie mikrokontrolera. W prototypie moduł ten skonfigurowany jest na wykrywanie momentu przekroczenia przez sygnał wartości dolnej granicy wynoszącej 3000. Górna granica okna wynosi 4095, czyli maksymalną wartość próbki przy rozdzielczości 12-bitów, efektywnie eliminując możliwość wywołania przerwania.
+W celu dokładnego wyznaczenia trwania nasyconej odpowiedzi sondy wykorzystywany jest wbudowany w ADC sprzętowy komparator okienkowy (Analog Watchdog, AWD). To peryferium konwertera analogowo-cyfrowego pozwala na wyznaczenie zakresu wartości próbek, którego opuszczenie wywoła przerwanie mikrokontrolera. Moduł ten skonfigurowany jest na wykrywanie momentu przekroczenia przez sygnał wartości dolnej granicy wynoszącej 2500. Górna granica okna wynosi 4095, czyli maksymalną wartość próbki przy rozdzielczości 12-bitów, efektywnie eliminując możliwość wywołania przerwania.
 
 
-Algorytm napędzający prototyp wykrywacza metali wykorzystuje komparator okienkowy w celu wykrywania anomalii czasu trwania odpowiedzi sondy.
+Algorytm napędzający wykrywacz metali wykorzystuje komparator okienkowy w celu wykrywania anomalii czasu trwania odpowiedzi sondy.
 Jak można zauważyć na wykresie \ref{fig:pulse_out}, podczas przybliżenia metalowego obiektu zmienia się charakterystyka sygnału \textit{SIGNAL\_OUT}.
 Wykorzystanie sprzętowego rozwiązania pozwala na dokładne wyznaczenie momentu przekroczenia granicy 2,01V ($\frac{2500}{4095}\cdot 3,3V$). Kod przerwania wywołanego przez AWD zapisuje w pamięci mikrokontrolera aktualną wartość licznika \textit{TIM1}, co pozwala dokładnie odtworzyć względny czas wywołania przerwania po wyłączeniu sygnału \textit{PULSE\_OUT}. Przechwycona wartość mnożona jest przez czas pomiędzy inkrementacją licznika.
 
