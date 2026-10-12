@@ -70,9 +70,6 @@ class GitKopDebugger:
         self.btn_connect = ttk.Button(control_frame, text="Polacz", command=self.toggle_connection)
         self.btn_connect.pack(side=tk.LEFT, padx=10)
 
-        self.btn_png = ttk.Button(control_frame, text="SVG", command=self.export_png, state=tk.DISABLED)
-        self.btn_png.pack(side=tk.RIGHT, padx=10)
-
         self.refresh_ports()
 
     def _setup_readout(self):
@@ -153,8 +150,6 @@ class GitKopDebugger:
             now = time.monotonic()
             if now - self.last_draw >= VIEW_INTERVAL:
                 self.last_draw = now
-                self.btn_export.config(state=tk.NORMAL)
-                self.btn_png.config(state=tk.NORMAL)
 
                 self._update_readout(latest)
 
@@ -192,31 +187,6 @@ class GitKopDebugger:
 
     def log_message(self, tag, message):
         print(f"[{tag}] {message}")
-    
-    def export_csv(self):
-        if not self.current_data: return
-        path = filedialog.asksaveasfilename(defaultextension=".csv")
-        if path:
-            try:
-                with open(path, 'w', newline='') as f:
-                    writer = csv.writer(f)
-                    writer.writerow(["Index", "Value"])
-                    for i, val in enumerate(self.current_data):
-                        writer.writerow([i, val])
-                messagebox.showinfo("Success", "Saved CSV successfully.")
-            except Exception as e:
-                messagebox.showerror("Error", str(e))
-
-    def export_png(self):
-        current_tab_id = self.notebook.select()
-        t = time.localtime()
-        timestamp = time.strftime('%b-%d-%Y_%H%M%S', t)
-        if current_tab_id in self.active_views:
-            fig = self.active_views[current_tab_id].figure
-            sz = fig.get_size_inches()
-            fig.set_size_inches(8, 6)
-            fig.savefig(f"fig-{timestamp}.svg")
-            fig.set_size_inches(sz)
 
 if __name__ == "__main__":
     root = tk.Tk()
