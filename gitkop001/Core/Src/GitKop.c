@@ -71,13 +71,31 @@ int _write(int file, char* ptr, int len) {
     return len;
 }
 
+/* Whether CC2 is currently driven. HAL_TIM_PWM_Start refuses a channel that
+ * is already busy, so the flag keeps repeated pitch changes from calling it
+ * for nothing. */
+static uint8_t buzzerRunning = 0;
+
 void Buzzer_Set(uint16_t freqHz)
 {
     if (freqHz == 0)
     {
-        __HAL_TIM_SET_COMPARE(&BUZZ_TIMER, BUZZ_CHANNEL, 0);
+        /* Stop the channel rather than trimming CCR to zero. Zeroing the
+         * compare and waiting for the preload to transfer did not actually
+         * silence the tone, so gate the output instead: this clears CC2E and
+         * stops the counter, which parks the pin at its inactive level no
+         * matter what is left in the compare register. */
+        HAL_TIM_PWM_Stop(&BUZZ_TIMER, BUZZ_CHANNEL);
+        buzzerRunning = 0;
         return;
     }
+
+    /* The wire carries a bare integer with nothing to frame it, so clamp
+     * before it can reach the 16-bit autoreload and wrap. */
+    if (freqHz < BUZZ_MIN_HZ)
+        freqHz = BUZZ_MIN_HZ;
+    else if (freqHz > BUZZ_MAX_HZ)
+        freqHz = BUZZ_MAX_HZ;
 
     uint32_t apb1 = HAL_RCC_GetPCLK1Freq();
     uint32_t psc = BUZZ_TIMER.Instance->PSC;
@@ -87,14 +105,23 @@ void Buzzer_Set(uint16_t freqHz)
     __HAL_TIM_SET_AUTORELOAD(&BUZZ_TIMER, newAutoreload);
     __HAL_TIM_SET_COMPARE(&BUZZ_TIMER, BUZZ_CHANNEL, newAutoreload / 2);
     BUZZ_TIMER.Instance->EGR = TIM_EGR_UG;
+
+    if (!buzzerRunning)
+    {
+        HAL_TIM_PWM_Start(&BUZZ_TIMER, BUZZ_CHANNEL);
+        buzzerRunning = 1;
+    }
 }
 
+/* Every command is the buzzer frequency in hertz, bare. Anything unparseable
+ * comes back from atoi as 0, which is the off state. */
 static void Execute_Command(void)
 {
-    if (strncmp(rxLine, BUZZ_COMMAND, strlen(BUZZ_COMMAND)) != 0)
-        return;
-
-    Buzzer_Set((uint16_t) atoi(&rxLine[strlen(BUZZ_COMMAND)]));
+    /* No printf in here: this runs in the UART receive interrupt, and a
+     * blocking HAL_UART_Transmit of a whole echo line keeps the receiver
+     * unserviced long enough to overrun the next command. An echo added for
+     * debugging turned "132" into "1132" this way. */
+    Buzzer_Set((uint16_t) atoi(rxLine));
 }
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
@@ -126,13 +153,23 @@ void GitKop_Init()
     HAL_TIM_PWM_Start(&PULSE_TIMER, PULSE_CHANNEL);
     HAL_TIM_Base_Start_IT(&PULSE_TIMER);
     Pulse_Set_Width_Us(PULSE_WIDTH_US);
-    HAL_TIM_Base_Start_IT(&BUZZ_TIMER);
 
-    HAL_TIM_PWM_Start(&BUZZ_TIMER, BUZZ_CHANNEL);
+    /* TIM12 stays stopped until a frequency actually arrives; Buzzer_Set owns
+     * both edges of the enable now. No update interrupt either, as before:
+     * there is no TIM12 handler to service one. */
     Buzzer_Set(0);
 
     HAL_ADC_Start_DMA(&ADC, (uint32_t*)value, DMA_BUFFER_ENTRIES);
-    HAL_ADC_Start_IT(&ADC);
+
+    /* No HAL_ADC_Start_IT here. It enables ADC_IT_EOC, which at this
+     * conversion rate lands in ADC1_IRQHandler roughly 4.2 million times a
+     * second -- more often than the core has cycles to service one -- and
+     * ADC1_IRQn sits at priority 0 above USART1_IRQn. The result is that the
+     * UART receive interrupt is starved and the buzzer commands never land.
+     * Nothing wants the per-sample interrupt: there is no
+     * HAL_ADC_ConvCpltCallback, the DMA already moves the samples, and the
+     * analog watchdog interrupt is armed on its own by
+     * HAL_ADC_AnalogWDGConfig. */
     HAL_UART_Receive_IT(&UART, &rxByte, 1);
     HAL_GPIO_WritePin(USER_LED_GPIO_Port, USER_LED_Pin, 0);
 
@@ -177,7 +214,6 @@ void GitKop_Loop()
         return;
 
     stabilizedCounter++;
-    uint16_t captured_dma_idx = dmaIndex;
     dmaIndex = 0;
 
     if (stabilizedCounter < 1000)

@@ -24,7 +24,15 @@
 #define PULSE_WIDTH_US 30u
 
 #define STREAM_THROTTLE_DIV 4
-#define BUZZ_COMMAND "BUZZ "
+
+/* Buzzer pitch limits, in hertz, mirroring the Python side. The band sits high
+ * because the 12 mm magnetic buzzer on the board is resonant: 4 kHz is plainly
+ * audible, 1.3 kHz is not, so anything below roughly 3 kHz is wasted range. The
+ * floor is also not cosmetic -- the autoreload is 16-bit, so the divisor in
+ * Buzzer_Set wraps for anything under roughly 16 Hz and the tone goes silent
+ * instead of low. */
+#define BUZZ_MIN_HZ 3000
+#define BUZZ_MAX_HZ 6000
 
 void Buzzer_Set(uint16_t freq);
 uint32_t Pulse_Timer_Tick_Hz(void);
