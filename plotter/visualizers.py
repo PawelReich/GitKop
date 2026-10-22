@@ -75,37 +75,6 @@ class Slope(BasePlotTab):
         self.redraw()
 
 @register_view
-class FFTTab(BasePlotTab):
-    name = "FFT"
-
-    def __init__(self, parent):
-        super().__init__(parent)
-        self.ax.set_xlabel("Frequency")
-        self.ax.set_ylabel("Magnitude")
-        self.line_ref, = self.ax.plot([], [], color='#ff7f0e', linewidth=1)
-        self.fft_history_buffer = deque(maxlen=1000) 
-
-    def update_view(self, values, special):
-        smallest = special[1]
-
-        self.fft_history_buffer.append(smallest)
-        data_np = np.array(self.fft_history_buffer)
-        
-        data_np = data_np - np.mean(data_np) 
-        
-        windowing = np.hanning(len(data_np)) 
-        data_np = data_np * windowing
-
-        fft_vals = np.fft.rfft(data_np)
-        fft_mag = np.abs(fft_vals)
-        
-        freqs = np.linspace(0, len(data_np)/2, len(fft_mag))
-        
-        self.line_ref.set_xdata(freqs)
-        self.line_ref.set_ydata(fft_mag)
-        self.redraw()
-
-@register_view
 class EMATab(BasePlotTab):
     name = "EMA Filter"
 
