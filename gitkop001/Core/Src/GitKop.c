@@ -95,7 +95,6 @@ void GitKop_Init()
     Buzzer_Set(0);
 
     HAL_ADC_Start_DMA(&ADC, (uint32_t*)value, DMA_BUFFER_ENTRIES);
-    HAL_ADC_Start_IT(&ADC);
     HAL_GPIO_WritePin(USER_LED_GPIO_Port, USER_LED_Pin, 0);
 
     SSD1306_Init();
