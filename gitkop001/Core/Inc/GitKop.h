@@ -14,7 +14,7 @@
 #define UART huart1
 #define ADC hadc1
 
-static const uint8_t DEBUG_MODE = 0;
+static const uint8_t DEBUG_MODE = 1;
 static const uint8_t ENABLE_BUZZER = 0;
 
 void Buzzer_Set(uint16_t freq);
