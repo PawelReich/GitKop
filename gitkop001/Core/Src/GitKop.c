@@ -16,7 +16,7 @@ volatile static uint16_t dmaIndex = 0;
 volatile static uint16_t timerIndex = 0;
 volatile static uint8_t outOfWindowTriggered = 1;
 
-#define DMA_BUFFER_ENTRIES 2048
+#define DMA_BUFFER_ENTRIES 8192
 
 __attribute__((aligned(32))) volatile static uint16_t value[DMA_BUFFER_ENTRIES];
 
