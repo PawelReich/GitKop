@@ -25,7 +25,7 @@ class GitKopDebugger:
         self.root.after(50, self.process_queue)
 
     def _setup_top_controls(self):
-        control_frame = ttk.LabelFrame(self.root, text="Konfiguracja", padding=5)
+        control_frame = ttk.LabelFrame(self.root, text="Configuration", padding=5)
         control_frame.pack(side=tk.TOP, fill=tk.X, padx=5, pady=5)
 
         ttk.Label(control_frame, text="Port:").pack(side=tk.LEFT, padx=5)
@@ -37,7 +37,7 @@ class GitKopDebugger:
         self.baud_combobox.current(0)
         self.baud_combobox.pack(side=tk.LEFT, padx=5)
 
-        self.btn_connect = ttk.Button(control_frame, text="Polacz", command=self.toggle_connection)
+        self.btn_connect = ttk.Button(control_frame, text="Connect", command=self.toggle_connection)
         self.btn_connect.pack(side=tk.LEFT, padx=10)
 
         self.btn_export = ttk.Button(control_frame, text="CSV", command=self.export_csv, state=tk.DISABLED)
@@ -70,7 +70,7 @@ class GitKopDebugger:
             
             success, msg = self.serial_mgr.connect(port, baud)
             if success:
-                self.btn_connect.config(text="Rozlacz")
+                self.btn_connect.config(text="Disconnect")
                 self.log_message("INFO", msg)
             else:
                 messagebox.showerror("Connection Error", msg)

@@ -39,12 +39,12 @@ class BasePlotTab(ttk.Frame):
 
 @register_view
 class TimeDomainTab(BasePlotTab):
-    name = "Widok bufora"
+    name = "Buffer View"
 
     def __init__(self, parent):
         super().__init__(parent)
-        self.ax.set_xlabel("Próbka")
-        self.ax.set_ylabel("Wartość ADC")
+        self.ax.set_xlabel("Sample")
+        self.ax.set_ylabel("ADC Value")
         
         self.line_ref, = self.ax.plot([], [], 'o-', color='#1f77b4', linewidth=1, markersize=3)
 
@@ -57,12 +57,12 @@ class TimeDomainTab(BasePlotTab):
 
 @register_view
 class Slope(BasePlotTab):
-    name = "Nachylenie"
+    name = "Slope"
 
     def __init__(self, parent):
         super().__init__(parent)
-        self.ax.set_xlabel("Próbka")
-        self.ax.set_ylabel("Nachylenie (V/s)")
+        self.ax.set_xlabel("Sample")
+        self.ax.set_ylabel("Slope (V/s)")
         
         self.line_ref, = self.ax.plot([], [], 'o-', color='#1f77b4', linewidth=1, markersize=3)
         self.buffer = deque(maxlen=100) 
@@ -107,15 +107,15 @@ class FFTTab(BasePlotTab):
 
 @register_view
 class EMATab(BasePlotTab):
-    name = "Filtr EMA"
+    name = "EMA Filter"
 
     def __init__(self, parent):
         super().__init__(parent)
-        self.ax.set_xlabel("Próbka")
-        self.ax.set_ylabel("Wartość")
-        self.raw_line, = self.ax.plot([], [], '-o', color='#808080ff', label='Surowa wartość', linewidth=2)
-        self.slow_line, = self.ax.plot([], [],'-o', color='#d67728', label='Wartość wolnego filtru', linewidth=2)
-        self.fast_line, = self.ax.plot([], [], '-o',color='#d6FF28', label='Wartość szybkiego filtru', linewidth=2)
+        self.ax.set_xlabel("Sample")
+        self.ax.set_ylabel("Value")
+        self.raw_line, = self.ax.plot([], [], '-o', color='#808080ff', label='Raw value', linewidth=2)
+        self.slow_line, = self.ax.plot([], [],'-o', color='#d67728', label='Slow filter value', linewidth=2)
+        self.fast_line, = self.ax.plot([], [], '-o',color='#d6FF28', label='Fast filter value', linewidth=2)
         self.ax.legend(loc='upper right')
 
         max_len = 100
@@ -136,7 +136,7 @@ class EMATab(BasePlotTab):
 
 @register_view
 class EMASplitTab(BasePlotTab):
-    name = "Filtr EMA (Separowane)"
+    name = "EMA Filter (Separated)"
 
     def __init__(self, parent):
         super().__init__(parent)
@@ -146,15 +146,15 @@ class EMASplitTab(BasePlotTab):
         self.ax1 = self.figure.add_subplot(211) 
         self.ax2 = self.figure.add_subplot(212, sharex=self.ax1)
 
-        self.ax1.set_title("Surowe dane")
-        self.ax1.set_xlabel("Próbka")
-        self.ax1.set_ylabel("Wartość")
+        self.ax1.set_title("Raw data")
+        self.ax1.set_xlabel("Sample")
+        self.ax1.set_ylabel("Value")
         self.ax1.grid(True, alpha=0.3)
-        self.raw_line, = self.ax1.plot([], [], '-o',color='#808080', label='Surowa', linewidth=1)
+        self.raw_line, = self.ax1.plot([], [], '-o',color='#808080', label='Raw', linewidth=1)
 
-        self.ax2.set_title("Przefiltrowane dane")
-        self.ax2.set_xlabel("Próbka")
-        self.ax2.set_ylabel("Wartość")
+        self.ax2.set_title("Filtered data")
+        self.ax2.set_xlabel("Sample")
+        self.ax2.set_ylabel("Value")
         self.ax2.grid(True, alpha=0.3)
         self.ema_line, = self.ax2.plot([], [], '-o',label='EMA', linewidth=2)
 
