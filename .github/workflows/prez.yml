@@ -10,11 +10,14 @@ jobs:
         run: |
           apt-get update
           apt-get install -y --no-install-recommends inkscape nodejs
+
       - name: Set up Git repository
         uses: actions/checkout@v6
+
       - name: Compile LaTeX document
         working-directory: doc
         run: latexmk -pdf -shell-escape -file-line-error -halt-on-error -interaction=nonstopmode prez.tex
+
       - name: Upload PDF file
         uses: actions/upload-artifact@v5
         with:
